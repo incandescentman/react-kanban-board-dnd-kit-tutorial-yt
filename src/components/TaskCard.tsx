@@ -8,9 +8,11 @@ interface Props {
   task: Task;
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
+  focusedTaskId: Id | null;
+  setFocusedTaskId: (id: Id | null) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask }: Props) {
+function TaskCard({ task, deleteTask, updateTask, focusedTaskId, setFocusedTaskId }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
 
@@ -103,12 +105,17 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
         e.stopPropagation();
         toggleEditMode();
       }}
-      className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 cursor-grab relative task border border-gray-200"
+      data-task-id={task.id}
+      tabIndex={0}
+      className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 cursor-grab relative task border border-gray-200"
       onMouseEnter={() => {
         setMouseIsOver(true);
       }}
       onMouseLeave={() => {
         setMouseIsOver(false);
+      }}
+      onFocus={() => {
+        setFocusedTaskId(task.id);
       }}
     >
       <p className="my-auto h-[90%] w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap">

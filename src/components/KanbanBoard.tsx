@@ -139,12 +139,92 @@ function KanbanBoard() {
         e.preventDefault();
         setTasks(prev => [...prev, deletedTask]);
         setDeletedTask(null);
+        return;
+      }
+
+      if (e.altKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        handleKeyboardNavigation(e.key);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deletedTask]);
+  }, [deletedTask, focusedTaskId, tasks, columns]);
+
+  const handleKeyboardNavigation = (key: string) => {
+    if (tasks.length === 0) return;
+
+    // If no task is focused, focus the first task
+    if (!focusedTaskId) {
+      const firstTask = tasks[0];
+      if (firstTask) {
+        setFocusedTaskId(firstTask.id);
+        focusTask(firstTask.id);
+      }
+      return;
+    }
+
+    const currentTask = tasks.find(task => task.id === focusedTaskId);
+    if (!currentTask) return;
+
+    const currentColumn = columns.find(col => col.id === currentTask.columnId);
+    if (!currentColumn) return;
+
+    const tasksInCurrentColumn = tasks.filter(task => task.columnId === currentColumn.id);
+    const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
+
+    switch (key) {
+      case 'ArrowUp':
+        if (currentTaskIndex > 0) {
+          const prevTask = tasksInCurrentColumn[currentTaskIndex - 1];
+          setFocusedTaskId(prevTask.id);
+          focusTask(prevTask.id);
+        }
+        break;
+      
+      case 'ArrowDown':
+        if (currentTaskIndex < tasksInCurrentColumn.length - 1) {
+          const nextTask = tasksInCurrentColumn[currentTaskIndex + 1];
+          setFocusedTaskId(nextTask.id);
+          focusTask(nextTask.id);
+        }
+        break;
+      
+      case 'ArrowLeft':
+        const currentColumnIndex = columns.findIndex(col => col.id === currentColumn.id);
+        if (currentColumnIndex > 0) {
+          const prevColumn = columns[currentColumnIndex - 1];
+          const tasksInPrevColumn = tasks.filter(task => task.columnId === prevColumn.id);
+          if (tasksInPrevColumn.length > 0) {
+            const targetTask = tasksInPrevColumn[Math.min(currentTaskIndex, tasksInPrevColumn.length - 1)];
+            setFocusedTaskId(targetTask.id);
+            focusTask(targetTask.id);
+          }
+        }
+        break;
+      
+      case 'ArrowRight':
+        const currentColIndex = columns.findIndex(col => col.id === currentColumn.id);
+        if (currentColIndex < columns.length - 1) {
+          const nextColumn = columns[currentColIndex + 1];
+          const tasksInNextColumn = tasks.filter(task => task.columnId === nextColumn.id);
+          if (tasksInNextColumn.length > 0) {
+            const targetTask = tasksInNextColumn[Math.min(currentTaskIndex, tasksInNextColumn.length - 1)];
+            setFocusedTaskId(targetTask.id);
+            focusTask(targetTask.id);
+          }
+        }
+        break;
+    }
+  };
+
+  const focusTask = (taskId: Id) => {
+    const element = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
+    if (element) {
+      element.focus();
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -189,6 +269,8 @@ function KanbanBoard() {
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   tasks={tasks.filter((task) => task.columnId === col.id)}
+                  focusedTaskId={focusedTaskId}
+                  setFocusedTaskId={setFocusedTaskId}
                 />
               ))}
             </SortableContext>
@@ -232,6 +314,8 @@ function KanbanBoard() {
                 tasks={tasks.filter(
                   (task) => task.columnId === activeColumn.id
                 )}
+                focusedTaskId={focusedTaskId}
+                setFocusedTaskId={setFocusedTaskId}
               />
             )}
             {activeTask && (
@@ -239,6 +323,8 @@ function KanbanBoard() {
                 task={activeTask}
                 deleteTask={deleteTask}
                 updateTask={updateTask}
+                focusedTaskId={focusedTaskId}
+                setFocusedTaskId={setFocusedTaskId}
               />
             )}
           </DragOverlay>,
