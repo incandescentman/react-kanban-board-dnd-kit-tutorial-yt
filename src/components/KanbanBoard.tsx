@@ -127,6 +127,7 @@ function KanbanBoard() {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const [deletedTask, setDeletedTask] = useState<Task | null>(null);
+  const [redoTask, setRedoTask] = useState<Task | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
 
   useEffect(() => {
@@ -144,11 +145,13 @@ function KanbanBoard() {
 
       if (e.altKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
+        e.stopPropagation();
         handleKeyboardNavigation(e.key);
       }
 
       if (e.ctrlKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
+        e.stopPropagation();
         handleKeyboardDragDrop(e.key);
       }
     };
@@ -377,6 +380,37 @@ function KanbanBoard() {
             <PlusIcon />
             Add Column
           </button>
+          
+          {/* Keyboard Navigation Legend */}
+          <div className="ml-8 p-6 bg-gray-50 border border-gray-200 rounded-lg min-w-[300px] max-w-[350px] self-start">
+            <h3 className="text-lg font-semibold text-black mb-4">Keyboard Navigation</h3>
+            <div className="space-y-2 text-sm text-gray-700">
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Tab/Shift+Tab</span>
+                <span className="ml-2">Focus navigation</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Arrows</span>
+                <span className="ml-2">Navigate between tasks</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Ctrl+Arrows</span>
+                <span className="ml-2">Drag and drop task</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Z/Ctrl+Z</span>
+                <span className="ml-2">Undo deleted tasks</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Enter</span>
+                <span className="ml-2">Save task when editing</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
+                <span className="ml-2">Add line break</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {createPortal(
