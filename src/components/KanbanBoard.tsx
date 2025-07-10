@@ -126,9 +126,25 @@ function KanbanBoard() {
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
+  const [deletedTask, setDeletedTask] = useState<Task | null>(null);
+  const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
   }, [columns, tasks]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && deletedTask) {
+        e.preventDefault();
+        setTasks(prev => [...prev, deletedTask]);
+        setDeletedTask(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deletedTask]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -143,14 +159,17 @@ function KanbanBoard() {
       className="
         m-auto
         flex
+        flex-col
         min-h-screen
         w-full
         items-center
         overflow-x-auto
         overflow-y-hidden
         px-[40px]
+        py-8
     "
     >
+      <h1 className="text-4xl font-bold text-black mb-12">Sunjay's Post-OpenAI Plan</h1>
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
@@ -233,13 +252,17 @@ function KanbanBoard() {
     const newTask: Task = {
       id: generateId(),
       columnId,
-      content: `Task ${tasks.length + 1}`,
+      content: "",
     };
 
     setTasks([...tasks, newTask]);
   }
 
   function deleteTask(id: Id) {
+    const taskToDelete = tasks.find(task => task.id === id);
+    if (taskToDelete) {
+      setDeletedTask(taskToDelete);
+    }
     const newTasks = tasks.filter((task) => task.id !== id);
     setTasks(newTasks);
   }

@@ -12,7 +12,7 @@ interface Props {
 
 function TaskCard({ task, deleteTask, updateTask }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(task.content === "");
 
   const {
     setNodeRef,
@@ -36,8 +36,12 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
   };
 
   const toggleEditMode = () => {
-    setEditMode((prev) => !prev);
-    setMouseIsOver(false);
+    if (editMode && task.content.trim() === "") {
+      deleteTask(task.id);
+    } else {
+      setEditMode((prev) => !prev);
+      setMouseIsOver(false);
+    }
   };
 
   if (isDragging) {
@@ -60,6 +64,7 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
         style={style}
         {...attributes}
         {...listeners}
+        onClick={(e) => e.stopPropagation()}
         className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 cursor-grab relative border border-gray-200"
       >
         <textarea
@@ -71,8 +76,14 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
           autoFocus
           placeholder="Task content here"
           onBlur={toggleEditMode}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => {
+            const textarea = e.target as HTMLTextAreaElement;
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+          }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && e.shiftKey) {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
               toggleEditMode();
             }
           }}
@@ -88,7 +99,10 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
       style={style}
       {...attributes}
       {...listeners}
-      onClick={toggleEditMode}
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleEditMode();
+      }}
       className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 cursor-grab relative task border border-gray-200"
       onMouseEnter={() => {
         setMouseIsOver(true);
@@ -103,7 +117,8 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
 
       {mouseIsOver && (
         <button
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             deleteTask(task.id);
           }}
           className="stroke-black absolute right-4 top-1/2 -translate-y-1/2 bg-columnBackgroundColor p-2 rounded opacity-60 hover:opacity-100"
