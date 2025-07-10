@@ -173,12 +173,24 @@ function KanbanBoard() {
       }
 
       if (e.altKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        // Don't interfere with alt+arrow keys when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
         e.preventDefault();
         e.stopPropagation();
         handleKeyboardNavigation(e.key);
       }
 
       if (!e.altKey && !e.ctrlKey && !e.metaKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        // Don't interfere with arrow keys when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
         e.preventDefault();
         e.stopPropagation();
         handleKeyboardNavigation(e.key);
@@ -197,6 +209,12 @@ function KanbanBoard() {
       }
 
       if (e.ctrlKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        // Don't interfere with ctrl+arrow keys when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
         e.preventDefault();
         e.stopPropagation();
         handleKeyboardDragDrop(e.key);

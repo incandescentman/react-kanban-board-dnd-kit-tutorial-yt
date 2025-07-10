@@ -38,10 +38,10 @@ function ColumnContainer({
 
   const getColumnIcon = () => {
     const title = column.title.toLowerCase();
-    if (title.includes('idea')) return <span className="text-lg">🧠</span>;
-    if (title.includes('todo')) return <span className="text-lg">📝</span>;
-    if (title.includes('progress') || title.includes('doing')) return <span className="text-lg">🏃🏻‍♂️</span>;
-    if (title.includes('done') || title.includes('complete')) return <span className="text-lg">✅</span>;
+    if (title.includes('idea')) return <span className="text-3xl">🧠</span>;
+    if (title.includes('todo') || title.includes('to do')) return <span className="text-3xl">📝</span>;
+    if (title.includes('progress') || title.includes('doing')) return <span className="text-3xl">🏃🏻‍♂️</span>;
+    if (title.includes('done') || title.includes('complete')) return <span className="text-3xl">✅</span>;
     return null;
   };
 
@@ -110,7 +110,7 @@ function ColumnContainer({
         }}
         className="
       bg-mainBackgroundColor
-      text-md
+      text-3xl
       h-[60px]
       cursor-grab
       rounded-md
@@ -123,6 +123,7 @@ function ColumnContainer({
       items-center
       justify-between
       "
+      style={{ fontFamily: 'Inter Tight, sans-serif' }}
       >
         <div className="flex gap-2 items-center">
           {getColumnIcon()}
@@ -157,21 +158,6 @@ function ColumnContainer({
             />
           )}
         </div>
-        <button
-          onClick={() => {
-            deleteColumn(column.id);
-          }}
-          className="
-        stroke-gray-500
-        hover:stroke-black
-        hover:bg-columnBackgroundColor
-        rounded
-        px-1
-        py-2
-        "
-        >
-          <TrashIcon />
-        </button>
       </div>
 
       {/* Column task container */}
