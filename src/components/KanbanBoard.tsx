@@ -134,6 +134,11 @@ function KanbanBoard() {
     const stored = localStorage.getItem('kanban-legend-minimized');
     return stored ? JSON.parse(stored) : false;
   });
+  const [boardTitle, setBoardTitle] = useState(() => {
+    const stored = localStorage.getItem('kanban-board-title');
+    return stored || "Sunjay's Post-OpenAI Plan";
+  });
+  const [titleEditMode, setTitleEditMode] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
@@ -142,6 +147,10 @@ function KanbanBoard() {
   useEffect(() => {
     localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
   }, [legendMinimized]);
+
+  useEffect(() => {
+    localStorage.setItem('kanban-board-title', boardTitle);
+  }, [boardTitle]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -404,7 +413,28 @@ function KanbanBoard() {
         py-8
     "
     >
-      <h1 className="text-4xl font-bold text-black mb-12">Sunjay's Post-OpenAI Plan</h1>
+      {!titleEditMode ? (
+        <h1 
+          className="text-4xl font-bold text-black mb-12 cursor-pointer hover:text-gray-600 transition-colors"
+          onClick={() => setTitleEditMode(true)}
+          title="Click to edit title"
+        >
+          {boardTitle}
+        </h1>
+      ) : (
+        <input
+          className="text-4xl font-bold text-black mb-12 bg-transparent border-b-2 border-blue-500 outline-none text-center"
+          value={boardTitle}
+          onChange={(e) => setBoardTitle(e.target.value)}
+          onBlur={() => setTitleEditMode(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setTitleEditMode(false);
+            }
+          }}
+          autoFocus
+        />
+      )}
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
@@ -430,30 +460,6 @@ function KanbanBoard() {
               ))}
             </SortableContext>
           </div>
-          <button
-            onClick={() => {
-              createNewColumn();
-            }}
-            className="
-      h-[60px]
-      w-[350px]
-      min-w-[350px]
-      cursor-pointer
-      rounded-lg
-      bg-mainBackgroundColor
-      border-2
-      border-columnBackgroundColor
-      p-4
-      ring-blue-500
-      hover:ring-2
-      text-black
-      flex
-      gap-2
-      "
-          >
-            <PlusIcon />
-            Add Column
-          </button>
           
           {/* Keyboard Navigation Legend */}
           {!legendMinimized && (
@@ -536,16 +542,36 @@ function KanbanBoard() {
         )}
       </DndContext>
       
-      {/* Minimized Legend - Bottom Right Corner */}
-      {legendMinimized && (
-        <button
-          onClick={() => setLegendMinimized(false)}
-          className="fixed bottom-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg z-10"
-          title="Show keyboard navigation help"
-        >
-          ?
-        </button>
-      )}
+      {/* Bottom Right Corner Icons */}
+      <div className="fixed bottom-4 right-4 flex gap-2 z-10">
+        {/* Add Column Button */}
+        <div className="relative group">
+          <button
+            onClick={() => createNewColumn()}
+            className="w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg"
+          >
+            +
+          </button>
+          <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
+            Add Column
+          </div>
+        </div>
+        
+        {/* Minimized Legend */}
+        {legendMinimized && (
+          <div className="relative group">
+            <button
+              onClick={() => setLegendMinimized(false)}
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg"
+            >
+              ?
+            </button>
+            <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
+              Show Keyboard Shortcuts
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 
