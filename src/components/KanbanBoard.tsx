@@ -1,5 +1,5 @@
 import PlusIcon from "../icons/PlusIcon";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Column, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -100,15 +100,35 @@ const defaultTasks: Task[] = [
   },
 ];
 
+const STORAGE_KEY = 'kanban-board-state';
+
 function KanbanBoard() {
-  const [columns, setColumns] = useState<Column[]>(defaultCols);
+  const [columns, setColumns] = useState<Column[]>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.columns || defaultCols;
+    }
+    return defaultCols;
+  });
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
-  const [tasks, setTasks] = useState<Task[]>(defaultTasks);
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.tasks || defaultTasks;
+    }
+    return defaultTasks;
+  });
 
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
+  }, [columns, tasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
