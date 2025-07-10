@@ -219,6 +219,21 @@ function KanbanBoard() {
         e.stopPropagation();
         handleKeyboardDragDrop(e.key);
       }
+
+      if ((e.key === 'x' || (e.metaKey && e.key === 'd')) && !e.altKey && !e.ctrlKey) {
+        // Don't interfere when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
+        // Toggle completion if a task has focus
+        if (focusedTaskId) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTaskComplete(focusedTaskId);
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -530,6 +545,10 @@ function KanbanBoard() {
                 <div className="flex justify-between">
                   <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
                   <span className="ml-2">Add line break</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">X or Cmd+D</span>
+                  <span className="ml-2">Toggle task done</span>
                 </div>
               </div>
             </div>
