@@ -146,6 +146,11 @@ function KanbanBoard() {
         e.preventDefault();
         handleKeyboardNavigation(e.key);
       }
+
+      if (e.ctrlKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        handleKeyboardDragDrop(e.key);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -223,6 +228,79 @@ function KanbanBoard() {
     const element = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     if (element) {
       element.focus();
+    }
+  };
+
+  const handleKeyboardDragDrop = (key: string) => {
+    if (!focusedTaskId || tasks.length === 0) return;
+
+    const currentTask = tasks.find(task => task.id === focusedTaskId);
+    if (!currentTask) return;
+
+    const currentColumn = columns.find(col => col.id === currentTask.columnId);
+    if (!currentColumn) return;
+
+    const tasksInCurrentColumn = tasks.filter(task => task.columnId === currentColumn.id);
+    const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
+
+    switch (key) {
+      case 'ArrowUp':
+        if (currentTaskIndex > 0) {
+          // Move task up within the same column
+          const newTasks = [...tasks];
+          const taskIndex = newTasks.findIndex(task => task.id === focusedTaskId);
+          const targetTaskIndex = newTasks.findIndex(task => task.id === tasksInCurrentColumn[currentTaskIndex - 1].id);
+          
+          [newTasks[taskIndex], newTasks[targetTaskIndex]] = [newTasks[targetTaskIndex], newTasks[taskIndex]];
+          setTasks(newTasks);
+        }
+        break;
+      
+      case 'ArrowDown':
+        if (currentTaskIndex < tasksInCurrentColumn.length - 1) {
+          // Move task down within the same column
+          const newTasks = [...tasks];
+          const taskIndex = newTasks.findIndex(task => task.id === focusedTaskId);
+          const targetTaskIndex = newTasks.findIndex(task => task.id === tasksInCurrentColumn[currentTaskIndex + 1].id);
+          
+          [newTasks[taskIndex], newTasks[targetTaskIndex]] = [newTasks[targetTaskIndex], newTasks[taskIndex]];
+          setTasks(newTasks);
+        }
+        break;
+      
+      case 'ArrowLeft':
+        const currentColumnIndex = columns.findIndex(col => col.id === currentColumn.id);
+        if (currentColumnIndex > 0) {
+          // Move task to the previous column
+          const prevColumn = columns[currentColumnIndex - 1];
+          const newTasks = tasks.map(task => {
+            if (task.id === focusedTaskId) {
+              return { ...task, columnId: prevColumn.id };
+            }
+            return task;
+          });
+          setTasks(newTasks);
+          // Re-focus the task after moving to a new column
+          setTimeout(() => focusTask(focusedTaskId), 0);
+        }
+        break;
+      
+      case 'ArrowRight':
+        const currentColIndex = columns.findIndex(col => col.id === currentColumn.id);
+        if (currentColIndex < columns.length - 1) {
+          // Move task to the next column
+          const nextColumn = columns[currentColIndex + 1];
+          const newTasks = tasks.map(task => {
+            if (task.id === focusedTaskId) {
+              return { ...task, columnId: nextColumn.id };
+            }
+            return task;
+          });
+          setTasks(newTasks);
+          // Re-focus the task after moving to a new column
+          setTimeout(() => focusTask(focusedTaskId), 0);
+        }
+        break;
     }
   };
 
