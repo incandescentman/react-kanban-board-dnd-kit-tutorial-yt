@@ -185,6 +185,12 @@ function KanbanBoard() {
       }
 
       if (e.key === ' ' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        // Don't interfere with spacebar when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
         e.preventDefault();
         e.stopPropagation();
         toggleKeyboardFocus();

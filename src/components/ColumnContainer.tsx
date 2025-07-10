@@ -128,7 +128,7 @@ function ColumnContainer({
         rounded-full
         "
           >
-            0
+            {tasks.length}
           </div>
           {!editMode && column.title}
           {editMode && (
@@ -182,16 +182,6 @@ function ColumnContainer({
           ))}
         </SortableContext>
       </div>
-      {/* Column footer */}
-      <button
-        className="flex gap-2 items-center border-columnBackgroundColor border-2 rounded-md p-4 border-x-columnBackgroundColor hover:bg-mainBackgroundColor hover:text-blue-500 active:bg-gray-100 text-black"
-        onClick={() => {
-          createTask(column.id);
-        }}
-      >
-        <PlusIcon />
-        Add task
-      </button>
     </div>
   );
 }
