@@ -129,6 +129,7 @@ function KanbanBoard() {
   const [deletedTask, setDeletedTask] = useState<Task | null>(null);
   const [redoTask, setRedoTask] = useState<Task | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
+  const [legendMinimized, setLegendMinimized] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
@@ -393,39 +394,49 @@ function KanbanBoard() {
           </button>
           
           {/* Keyboard Navigation Legend */}
-          <div className="ml-8 p-6 bg-gray-50 border border-gray-200 rounded-lg min-w-[300px] max-w-[350px] self-start">
-            <h3 className="text-lg font-semibold text-black mb-4">Keyboard Navigation</h3>
-            <div className="space-y-2 text-sm text-gray-700">
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Tab/Shift+Tab</span>
-                <span className="ml-2">Focus navigation</span>
+          {!legendMinimized && (
+            <div className="ml-8 p-6 bg-gray-50 border border-gray-200 rounded-lg min-w-[300px] max-w-[350px] self-start">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-black">Keyboard Navigation</h3>
+                <button
+                  onClick={() => setLegendMinimized(true)}
+                  className="text-gray-500 hover:text-gray-700 text-sm font-mono bg-gray-200 px-2 py-1 rounded"
+                >
+                  ✕
+                </button>
               </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Arrows</span>
-                <span className="ml-2">Navigate between tasks</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Ctrl+Arrows</span>
-                <span className="ml-2">Drag and drop task</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Z/Ctrl+Z</span>
-                <span className="ml-2">Undo deleted tasks</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Y/Ctrl+Y</span>
-                <span className="ml-2">Redo deleted tasks</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Enter</span>
-                <span className="ml-2">Save task when editing</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
-                <span className="ml-2">Add line break</span>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Tab/Shift+Tab</span>
+                  <span className="ml-2">Focus navigation</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Arrows</span>
+                  <span className="ml-2">Navigate between tasks</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Ctrl+Arrows</span>
+                  <span className="ml-2">Drag and drop task</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Z/Ctrl+Z</span>
+                  <span className="ml-2">Undo deleted tasks</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Y/Ctrl+Y</span>
+                  <span className="ml-2">Redo deleted tasks</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Enter</span>
+                  <span className="ml-2">Save task when editing</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
+                  <span className="ml-2">Add line break</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {createPortal(
@@ -458,6 +469,17 @@ function KanbanBoard() {
           document.body
         )}
       </DndContext>
+      
+      {/* Minimized Legend - Bottom Right Corner */}
+      {legendMinimized && (
+        <button
+          onClick={() => setLegendMinimized(false)}
+          className="fixed bottom-4 right-4 w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg z-10"
+          title="Show keyboard navigation help"
+        >
+          ?
+        </button>
+      )}
     </div>
   );
 
