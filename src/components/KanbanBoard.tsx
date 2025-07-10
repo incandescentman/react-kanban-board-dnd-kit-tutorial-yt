@@ -129,11 +129,19 @@ function KanbanBoard() {
   const [deletedTask, setDeletedTask] = useState<Task | null>(null);
   const [redoTask, setRedoTask] = useState<Task | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
-  const [legendMinimized, setLegendMinimized] = useState(false);
+  const [lastModifiedTaskId, setLastModifiedTaskId] = useState<Id | null>(null);
+  const [legendMinimized, setLegendMinimized] = useState(() => {
+    const stored = localStorage.getItem('kanban-legend-minimized');
+    return stored ? JSON.parse(stored) : false;
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
   }, [columns, tasks]);
+
+  useEffect(() => {
+    localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
+  }, [legendMinimized]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -161,6 +169,18 @@ function KanbanBoard() {
         handleKeyboardNavigation(e.key);
       }
 
+      if (!e.altKey && !e.ctrlKey && !e.metaKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleKeyboardNavigation(e.key);
+      }
+
+      if (e.key === ' ' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleKeyboardFocus();
+      }
+
       if (e.ctrlKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         e.preventDefault();
         e.stopPropagation();
@@ -170,7 +190,7 @@ function KanbanBoard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deletedTask, redoTask, focusedTaskId, tasks, columns]);
+  }, [deletedTask, redoTask, focusedTaskId, lastModifiedTaskId, tasks, columns]);
 
   const handleKeyboardNavigation = (key: string) => {
     if (tasks.length === 0) return;
@@ -243,6 +263,48 @@ function KanbanBoard() {
     const element = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
     if (element) {
       element.focus();
+    }
+  };
+
+  const toggleKeyboardFocus = () => {
+    if (tasks.length === 0) return;
+
+    // If a task is currently focused, remove focus
+    if (focusedTaskId && tasks.find(task => task.id === focusedTaskId)) {
+      setFocusedTaskId(null);
+      // Remove focus from the currently focused element
+      const focusedElement = document.activeElement as HTMLElement;
+      if (focusedElement && focusedElement.blur) {
+        focusedElement.blur();
+      }
+      return;
+    }
+
+    // Otherwise, initiate focus using priority system
+    initiateKeyboardFocus();
+  };
+
+  const initiateKeyboardFocus = () => {
+    if (tasks.length === 0) return;
+
+    // Priority 1: Use the most recently focused task if it still exists
+    if (focusedTaskId && tasks.find(task => task.id === focusedTaskId)) {
+      focusTask(focusedTaskId);
+      return;
+    }
+
+    // Priority 2: Use the most recently modified task if it exists
+    if (lastModifiedTaskId && tasks.find(task => task.id === lastModifiedTaskId)) {
+      setFocusedTaskId(lastModifiedTaskId);
+      focusTask(lastModifiedTaskId);
+      return;
+    }
+
+    // Priority 3: Focus the first task as fallback
+    const firstTask = tasks[0];
+    if (firstTask) {
+      setFocusedTaskId(firstTask.id);
+      focusTask(firstTask.id);
     }
   };
 
@@ -411,7 +473,11 @@ function KanbanBoard() {
                   <span className="ml-2">Focus navigation</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Arrows</span>
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Spacebar</span>
+                  <span className="ml-2">Toggle task focus</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Arrow Keys</span>
                   <span className="ml-2">Navigate between tasks</span>
                 </div>
                 <div className="flex justify-between">
@@ -491,6 +557,7 @@ function KanbanBoard() {
     };
 
     setTasks([...tasks, newTask]);
+    setLastModifiedTaskId(newTask.id);
   }
 
   function deleteTask(id: Id) {
@@ -510,6 +577,7 @@ function KanbanBoard() {
     });
 
     setTasks(newTasks);
+    setLastModifiedTaskId(id);
   }
 
   function createNewColumn() {
