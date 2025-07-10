@@ -477,6 +477,7 @@ function KanbanBoard() {
                   createTask={createTask}
                   deleteTask={deleteTask}
                   updateTask={updateTask}
+                  toggleTaskComplete={toggleTaskComplete}
                   tasks={tasks.filter((task) => task.columnId === col.id)}
                   focusedTaskId={focusedTaskId}
                   setFocusedTaskId={setFocusedTaskId}
@@ -545,6 +546,7 @@ function KanbanBoard() {
                 createTask={createTask}
                 deleteTask={deleteTask}
                 updateTask={updateTask}
+                toggleTaskComplete={toggleTaskComplete}
                 tasks={tasks.filter(
                   (task) => task.columnId === activeColumn.id
                 )}
@@ -557,6 +559,7 @@ function KanbanBoard() {
                 task={activeTask}
                 deleteTask={deleteTask}
                 updateTask={updateTask}
+                toggleTaskComplete={toggleTaskComplete}
                 focusedTaskId={focusedTaskId}
                 setFocusedTaskId={setFocusedTaskId}
               />
@@ -628,6 +631,15 @@ function KanbanBoard() {
 
     setTasks(newTasks);
     setLastModifiedTaskId(id);
+  }
+
+  function toggleTaskComplete(id: Id) {
+    const newTasks = tasks.map((task) => {
+      if (task.id !== id) return task;
+      return { ...task, completed: !task.completed };
+    });
+
+    setTasks(newTasks);
   }
 
   function createNewColumn() {

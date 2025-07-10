@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TrashIcon from "../icons/TrashIcon";
+import SquareCheckIcon from "../icons/SquareCheckIcon";
 import { Id, Task } from "../types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -8,11 +9,12 @@ interface Props {
   task: Task;
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
+  toggleTaskComplete: (id: Id) => void;
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask, focusedTaskId, setFocusedTaskId }: Props) {
+function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTaskId, setFocusedTaskId }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
 
@@ -118,20 +120,31 @@ function TaskCard({ task, deleteTask, updateTask, focusedTaskId, setFocusedTaskI
         setFocusedTaskId(task.id);
       }}
     >
-      <p className="my-auto h-[90%] w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap">
+      <p className={`my-auto h-[90%] w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap ${task.completed ? 'line-through text-gray-500' : ''}`}>
         {task.content}
       </p>
 
       {mouseIsOver && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteTask(task.id);
-          }}
-          className="stroke-black absolute right-4 top-1/2 -translate-y-1/2 bg-columnBackgroundColor p-2 rounded opacity-60 hover:opacity-100"
-        >
-          <TrashIcon />
-        </button>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleTaskComplete(task.id);
+            }}
+            className="stroke-black bg-columnBackgroundColor p-2 rounded opacity-60 hover:opacity-100 hover:bg-green-200 hover:stroke-green-700 transition-all duration-150"
+          >
+            <SquareCheckIcon />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteTask(task.id);
+            }}
+            className="stroke-black bg-columnBackgroundColor p-2 rounded opacity-60 hover:opacity-100 hover:bg-red-200 hover:stroke-red-700 transition-all duration-150"
+          >
+            <TrashIcon />
+          </button>
+        </div>
       )}
     </div>
   );

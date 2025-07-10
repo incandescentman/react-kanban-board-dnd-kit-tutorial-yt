@@ -14,6 +14,7 @@ interface Props {
   createTask: (columnId: Id) => void;
   updateTask: (id: Id, content: string) => void;
   deleteTask: (id: Id) => void;
+  toggleTaskComplete: (id: Id) => void;
   tasks: Task[];
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
@@ -27,6 +28,7 @@ function ColumnContainer({
   tasks,
   deleteTask,
   updateTask,
+  toggleTaskComplete,
   focusedTaskId,
   setFocusedTaskId,
 }: Props) {
@@ -172,6 +174,7 @@ function ColumnContainer({
               task={task}
               deleteTask={deleteTask}
               updateTask={updateTask}
+              toggleTaskComplete={toggleTaskComplete}
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
             />
