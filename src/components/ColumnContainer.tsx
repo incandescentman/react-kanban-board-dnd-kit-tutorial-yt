@@ -36,6 +36,15 @@ function ColumnContainer({
     return tasks.map((task) => task.id);
   }, [tasks]);
 
+  const getColumnIcon = () => {
+    const title = column.title.toLowerCase();
+    if (title.includes('idea')) return <span className="text-lg">🧠</span>;
+    if (title.includes('todo')) return <span className="text-lg">📝</span>;
+    if (title.includes('progress') || title.includes('doing')) return <span className="text-lg">🏃🏻‍♂️</span>;
+    if (title.includes('done') || title.includes('complete')) return <span className="text-lg">✅</span>;
+    return null;
+  };
+
   const {
     setNodeRef,
     attributes,
@@ -115,7 +124,9 @@ function ColumnContainer({
       justify-between
       "
       >
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {getColumnIcon()}
+          {!editMode && column.title}
           <div
             className="
         flex
@@ -130,7 +141,6 @@ function ColumnContainer({
           >
             {tasks.length}
           </div>
-          {!editMode && column.title}
           {editMode && (
             <input
               className="bg-white focus:border-blue-500 border border-gray-300 rounded outline-none px-2 text-black"
