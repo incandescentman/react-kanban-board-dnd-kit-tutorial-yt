@@ -139,6 +139,10 @@ function KanbanBoard() {
     return stored || "Sunjay's Post-OpenAI Plan";
   });
   const [titleEditMode, setTitleEditMode] = useState(false);
+  const [notes, setNotes] = useState(() => {
+    const stored = localStorage.getItem('kanban-notes');
+    return stored || '';
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
@@ -151,6 +155,10 @@ function KanbanBoard() {
   useEffect(() => {
     localStorage.setItem('kanban-board-title', boardTitle);
   }, [boardTitle]);
+
+  useEffect(() => {
+    localStorage.setItem('kanban-notes', notes);
+  }, [notes]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -553,6 +561,19 @@ function KanbanBoard() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Notes Section */}
+        <div className="mt-8 mx-auto w-full max-w-[76.5%] px-8">
+          <h2 className="text-2xl font-bold text-black mb-4" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+            Advice / Notes / Comments
+          </h2>
+          <textarea
+            className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none bg-white text-black focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Add your notes, advice, or comments here..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
         </div>
 
         {createPortal(
