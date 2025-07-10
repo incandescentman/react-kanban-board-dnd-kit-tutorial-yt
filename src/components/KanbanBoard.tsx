@@ -139,7 +139,18 @@ function KanbanBoard() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z' && deletedTask) {
         e.preventDefault();
         setTasks(prev => [...prev, deletedTask]);
+        setRedoTask(deletedTask);
         setDeletedTask(null);
+        return;
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 'y' && redoTask) {
+        e.preventDefault();
+        const taskToRedo = redoTask;
+        setDeletedTask(taskToRedo);
+        setRedoTask(null);
+        const newTasks = tasks.filter(task => task.id !== taskToRedo.id);
+        setTasks(newTasks);
         return;
       }
 
@@ -158,7 +169,7 @@ function KanbanBoard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deletedTask, focusedTaskId, tasks, columns]);
+  }, [deletedTask, redoTask, focusedTaskId, tasks, columns]);
 
   const handleKeyboardNavigation = (key: string) => {
     if (tasks.length === 0) return;
@@ -402,6 +413,10 @@ function KanbanBoard() {
                 <span className="ml-2">Undo deleted tasks</span>
               </div>
               <div className="flex justify-between">
+                <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Y/Ctrl+Y</span>
+                <span className="ml-2">Redo deleted tasks</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="font-mono bg-gray-200 px-2 py-1 rounded">Enter</span>
                 <span className="ml-2">Save task when editing</span>
               </div>
@@ -460,6 +475,7 @@ function KanbanBoard() {
     const taskToDelete = tasks.find(task => task.id === id);
     if (taskToDelete) {
       setDeletedTask(taskToDelete);
+      setRedoTask(null); // Clear redo when a new deletion happens
     }
     const newTasks = tasks.filter((task) => task.id !== id);
     setTasks(newTasks);
