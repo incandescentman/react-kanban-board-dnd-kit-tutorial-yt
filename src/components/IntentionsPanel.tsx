@@ -8,6 +8,8 @@ interface Props {
 function IntentionsPanel({ intentions, setIntentions }: Props) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
+  const [editingFooter, setEditingFooter] = useState(false);
+  const [footerText, setFooterText] = useState("Stay focused! 💫");
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
@@ -33,6 +35,14 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
     setIntentions([...intentions, "New intention"]);
     setEditingIndex(intentions.length);
     setEditingText("New intention");
+  };
+
+  const handleFooterEdit = () => {
+    setEditingFooter(true);
+  };
+
+  const handleFooterSave = () => {
+    setEditingFooter(false);
   };
 
   return (
@@ -103,7 +113,30 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
 
       {/* Cute Footer */}
       <div className="mt-4 text-center">
-        <span className="text-xs text-blue-600/70">Stay focused! 💫</span>
+        {editingFooter ? (
+          <input
+            type="text"
+            value={footerText}
+            onChange={(e) => setFooterText(e.target.value)}
+            className="text-xs text-blue-600/70 bg-transparent border-none outline-none text-center w-full placeholder-blue-400"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleFooterSave();
+              } else if (e.key === 'Escape') {
+                setEditingFooter(false);
+              }
+            }}
+            onBlur={handleFooterSave}
+            autoFocus
+          />
+        ) : (
+          <span 
+            className="text-xs text-blue-600/70 cursor-pointer hover:text-blue-600"
+            onClick={handleFooterEdit}
+          >
+            {footerText}
+          </span>
+        )}
       </div>
     </div>
   );

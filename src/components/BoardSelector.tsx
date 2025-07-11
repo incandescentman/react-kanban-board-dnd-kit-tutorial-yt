@@ -90,12 +90,14 @@ function BoardSelector({ currentBoard, onBoardChange }: Props) {
           </div>
         </div>
       ) : (
-        <button
+        <div
           onClick={() => setIsCreating(true)}
-          className="w-full bg-purple-200 hover:bg-purple-300 text-purple-900 text-sm font-medium py-2 px-3 rounded-xl transition-colors border border-purple-300 hover:border-purple-400"
+          className="w-full py-3 cursor-pointer group flex items-center justify-center"
         >
-          + New Board
-        </button>
+          <span className="text-purple-400 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            +
+          </span>
+        </div>
       )}
 
       {/* Cute Footer */}
