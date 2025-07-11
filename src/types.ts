@@ -4,12 +4,14 @@ export type Task = {
   id: Id;
   content: string;
   status: "TODO" | "DONE" | "STARTED" | "NEXT" | "HABIT" | string;
+  completed?: boolean;
 };
 
 export type Group = {
   id: string;
   title: string;
   tasks: Task[];
+  completed?: boolean;
 };
 
 export type Column = {

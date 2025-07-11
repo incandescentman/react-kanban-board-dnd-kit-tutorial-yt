@@ -17,6 +17,7 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 import IntentionsPanel from "./IntentionsPanel";
 import BoardSelector from "./BoardSelector";
+import CommandPalette from "./CommandPalette";
 
 const defaultIntentions = [
   "Track calories daily",
@@ -230,15 +231,63 @@ function KanbanBoard() {
     }
     return defaultIntentions;
   });
+
+  const [columnMoveMode, setColumnMoveMode] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  const commands = useMemo(() => [
+    {
+      id: 'toggle-column-move',
+      label: 'Toggle Column Move Mode',
+      description: 'Enable or disable column drag and drop',
+      action: () => setColumnMoveMode(prev => !prev),
+      shortcut: 'Option+Shift+C'
+    },
+    {
+      id: 'add-column',
+      label: 'Add New Column',
+      description: 'Create a new column',
+      action: () => createNewColumn(),
+    },
+    {
+      id: 'minimize-legend',
+      label: 'Toggle Keyboard Shortcuts',
+      description: 'Show or hide the keyboard shortcuts legend',
+      action: () => setLegendMinimized(prev => !prev),
+    },
+    {
+      id: 'minimize-board-selector',
+      label: 'Toggle Board Selector',
+      description: 'Show or hide the board selector',
+      action: () => setBoardSelectorMinimized(prev => !prev),
+    },
+    {
+      id: 'clear-notes',
+      label: 'Clear Notes',
+      description: 'Clear all notes in the notes section',
+      action: () => setNotes(''),
+    }
+  ], []);
   const columnsId = useMemo(() => board.columns?.map((col) => col.id) || [], [board.columns]);
   
   const allTasks = useMemo(() => {
     const tasksWithColumnId: (Task & { columnId: Id })[] = [];
     if (board.columns) {
       board.columns.forEach(col => {
+        // Tasks directly in the column
         if (col.tasks) {
           col.tasks.forEach(task => {
             tasksWithColumnId.push({ ...task, columnId: col.id });
+          });
+        }
+        // Tasks in groups within the column
+        if (col.groups) {
+          col.groups.forEach(group => {
+            if (group.tasks) {
+              group.tasks.forEach(task => {
+                tasksWithColumnId.push({ ...task, columnId: col.id });
+              });
+            }
           });
         }
       });
@@ -440,6 +489,32 @@ function KanbanBoard() {
           e.stopPropagation();
           createTaskBelow(focusedTaskId);
         }
+      }
+
+      if (e.key === 'c' && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        // Don't interfere when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
+        // Toggle column move mode
+        e.preventDefault();
+        e.stopPropagation();
+        setColumnMoveMode(prev => !prev);
+      }
+
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+        // Don't interfere when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
+        // Open command palette
+        e.preventDefault();
+        e.stopPropagation();
+        setCommandPaletteOpen(true);
       }
     };
 
@@ -747,9 +822,14 @@ function KanbanBoard() {
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   toggleTaskComplete={toggleTaskComplete}
+                  toggleGroupComplete={toggleGroupComplete}
+                  updateGroup={updateGroup}
+                  deleteGroup={deleteGroup}
+                  convertTaskToHeading={convertTaskToHeading}
                   tasks={col.tasks}
                   focusedTaskId={focusedTaskId}
                   setFocusedTaskId={setFocusedTaskId}
+                  columnMoveMode={columnMoveMode}
                 />
               ))}
             </SortableContext>
@@ -812,10 +892,29 @@ function KanbanBoard() {
                   <span className="font-mono bg-gray-200 px-2 py-1 rounded">X or Cmd+D</span>
                   <span className="ml-2">Toggle task done</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Shift+C</span>
+                  <span className="ml-2">Toggle column move mode</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+K</span>
+                  <span className="ml-2">Open command palette</span>
+                </div>
               </div>
             </div>
           )}
         </div>
+
+        {/* Column Move Mode Indicator */}
+        {columnMoveMode && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🔄</span>
+              <span className="font-semibold">Column Move Mode Active</span>
+              <span className="text-sm opacity-80">(Drag columns to reorder)</span>
+            </div>
+          </div>
+        )}
 
         {/* Notes Section */}
         <div className="mt-8 mx-auto w-full max-w-[76.5%] px-8">
@@ -841,9 +940,14 @@ function KanbanBoard() {
                 deleteTask={deleteTask}
                 updateTask={updateTask}
                 toggleTaskComplete={toggleTaskComplete}
+                toggleGroupComplete={toggleGroupComplete}
+                updateGroup={updateGroup}
+                deleteGroup={deleteGroup}
+                convertTaskToHeading={convertTaskToHeading}
                 tasks={activeColumn.tasks}
                 focusedTaskId={focusedTaskId}
                 setFocusedTaskId={setFocusedTaskId}
+                columnMoveMode={columnMoveMode}
               />
             )}
             {activeTask && (
@@ -906,6 +1010,13 @@ function KanbanBoard() {
           </div>
         )}
       </div>
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        commands={commands}
+      />
     </div>
   );
 
@@ -941,11 +1052,27 @@ function KanbanBoard() {
       ...prev,
       columns: prev.columns?.map(col => {
         if (col.id === currentTask.columnId) {
+          // First check if task is in column.tasks
           const taskIndex = col.tasks?.findIndex(task => task.id === taskId) ?? -1;
           if (taskIndex >= 0) {
             const newTasks = [...(col.tasks || [])];
             newTasks.splice(taskIndex + 1, 0, newTask);
             return { ...col, tasks: newTasks };
+          }
+          
+          // If not found in column.tasks, check in groups
+          const updatedGroups = col.groups?.map(group => {
+            const groupTaskIndex = group.tasks?.findIndex(task => task.id === taskId) ?? -1;
+            if (groupTaskIndex >= 0) {
+              const newGroupTasks = [...(group.tasks || [])];
+              newGroupTasks.splice(groupTaskIndex + 1, 0, newTask);
+              return { ...group, tasks: newGroupTasks };
+            }
+            return group;
+          });
+          
+          if (updatedGroups !== col.groups) {
+            return { ...col, groups: updatedGroups || [] };
           }
         }
         return col;
@@ -990,16 +1117,58 @@ function KanbanBoard() {
   }
 
   function updateTask(id: Id, content: string) {
+    // Regular task update - no heading parsing here
     setBoard(prev => ({
       ...prev,
       columns: prev.columns?.map(col => ({
         ...col,
         tasks: col.tasks?.map(task => 
           task.id === id ? { ...task, content } : task
-        ) || []
+        ) || [],
+        groups: col.groups?.map(group => ({
+          ...group,
+          tasks: group.tasks?.map(task => 
+            task.id === id ? { ...task, content } : task
+          ) || []
+        })) || []
       })) || []
     }));
     setLastModifiedTaskId(id);
+  }
+
+  function convertTaskToHeading(id: Id, content: string) {
+    // Check if content contains heading syntax
+    const parsed = parseHeadingAndTasks(content);
+    
+    if (parsed.isHeading && parsed.title) {
+      // Convert task to heading (group)
+      const currentTask = allTasks.find(task => task.id === id);
+      if (!currentTask) return;
+      
+      const columnId = currentTask.columnId;
+      const { group } = createGroupWithTasks(parsed.title, parsed.tasks || [], columnId);
+      
+      setBoard(prev => ({
+        ...prev,
+        columns: prev.columns?.map(col => {
+          if (col.id === columnId) {
+            return {
+              ...col,
+              // Remove the original task
+              tasks: col.tasks?.filter(task => task.id !== id) || [],
+              // Add the new group
+              groups: [...(col.groups || []), group]
+            };
+          }
+          return col;
+        }) || []
+      }));
+      
+      setLastModifiedTaskId(null);
+      return true; // Indicates conversion happened
+    }
+    
+    return false; // No conversion
   }
 
   function toggleTaskComplete(id: Id) {
@@ -1009,7 +1178,47 @@ function KanbanBoard() {
         ...col,
         tasks: col.tasks?.map(task => 
           task.id === id ? { ...task, completed: !task.completed } : task
+        ) || [],
+        groups: col.groups?.map(group => ({
+          ...group,
+          tasks: group.tasks?.map(task => 
+            task.id === id ? { ...task, completed: !task.completed } : task
+          ) || []
+        })) || []
+      })) || []
+    }));
+  }
+
+  function toggleGroupComplete(id: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.map(group => 
+          group.id === id ? { ...group, completed: !group.completed } : group
         ) || []
+      })) || []
+    }));
+  }
+
+  function updateGroup(id: string, title: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.map(group => 
+          group.id === id ? { ...group, title } : group
+        ) || []
+      })) || []
+    }));
+  }
+
+  function deleteGroup(id: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.filter(group => group.id !== id) || []
       })) || []
     }));
   }
@@ -1187,6 +1396,49 @@ function KanbanBoard() {
 function generateId() {
   /* Generate a random number between 0 and 10000 */
   return Math.floor(Math.random() * 10001);
+}
+
+function parseHeadingAndTasks(content: string): { isHeading: boolean; title?: string; tasks?: string[] } {
+  const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+  
+  if (lines.length === 0) {
+    return { isHeading: false };
+  }
+  
+  // Check if first line is a heading
+  if (lines[0].startsWith('# ')) {
+    const title = lines[0].substring(2).trim();
+    const tasks = lines.slice(1)
+      .filter(line => line.startsWith('- '))
+      .map(line => line.substring(2).trim());
+    
+    return {
+      isHeading: true,
+      title,
+      tasks: tasks.length > 0 ? tasks : undefined
+    };
+  }
+  
+  return { isHeading: false };
+}
+
+function createGroupWithTasks(title: string, taskContents: string[], columnId: Id): { group: Group; tasks: Task[] } {
+  const groupId = `group-${generateId()}`;
+  const tasks: Task[] = taskContents.map(content => ({
+    id: generateId(),
+    content,
+    status: "TODO",
+    completed: false
+  }));
+
+  const group: Group = {
+    id: groupId,
+    title,
+    tasks,
+    completed: false
+  };
+
+  return { group, tasks };
 }
 
 export default KanbanBoard;

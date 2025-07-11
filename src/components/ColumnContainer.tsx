@@ -1,10 +1,11 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import TrashIcon from "../icons/TrashIcon";
-import { Column, Id, Task } from "../types";
+import { Column, Id, Task, Group } from "../types";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState } from "react";
 import PlusIcon from "../icons/PlusIcon";
 import TaskCard from "./TaskCard";
+import GroupContainer from "./GroupContainer";
 
 interface Props {
   column: Column;
@@ -15,9 +16,14 @@ interface Props {
   updateTask: (id: Id, content: string) => void;
   deleteTask: (id: Id) => void;
   toggleTaskComplete: (id: Id) => void;
+  toggleGroupComplete?: (id: Id) => void;
+  updateGroup?: (id: string, title: string) => void;
+  deleteGroup?: (id: string) => void;
+  convertTaskToHeading?: (id: Id, content: string) => boolean;
   tasks: Task[];
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
+  columnMoveMode?: boolean;
 }
 
 function ColumnContainer({
@@ -29,12 +35,18 @@ function ColumnContainer({
   deleteTask,
   updateTask,
   toggleTaskComplete,
+  toggleGroupComplete,
+  updateGroup,
+  deleteGroup,
+  convertTaskToHeading,
   focusedTaskId,
   setFocusedTaskId,
+  columnMoveMode,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
 
   const tasksIds = useMemo(() => {
+    // Only include direct tasks in column, not group tasks
     return tasks?.map((task) => task.id) || [];
   }, [tasks]);
 
@@ -60,7 +72,7 @@ function ColumnContainer({
       type: "Column",
       column,
     },
-    disabled: editMode,
+    disabled: editMode || !columnMoveMode,
   });
 
   const style = {
@@ -142,7 +154,7 @@ function ColumnContainer({
         rounded-full
         "
           >
-            {tasks?.length || 0}
+{((tasks?.length || 0) + (column.groups?.reduce((acc, group) => acc + (group.tasks?.length || 0), 0) || 0))}
           </div>
           {editMode && (
             <input
@@ -168,6 +180,24 @@ function ColumnContainer({
         onClick={() => createTask(column.id)}
       >
         <SortableContext items={tasksIds}>
+          {/* Render groups first */}
+          {column.groups?.map((group) => (
+            <GroupContainer
+              key={group.id}
+              group={group}
+              updateTask={updateTask}
+              deleteTask={deleteTask}
+              toggleTaskComplete={toggleTaskComplete}
+              toggleGroupComplete={toggleGroupComplete}
+              updateGroup={updateGroup}
+              deleteGroup={deleteGroup}
+              convertTaskToHeading={convertTaskToHeading}
+              focusedTaskId={focusedTaskId}
+              setFocusedTaskId={setFocusedTaskId}
+            />
+          ))}
+          
+          {/* Then render tasks directly in the column */}
           {tasks?.map((task) => (
             <TaskCard
               key={task.id}
@@ -175,6 +205,7 @@ function ColumnContainer({
               deleteTask={deleteTask}
               updateTask={updateTask}
               toggleTaskComplete={toggleTaskComplete}
+              convertTaskToHeading={convertTaskToHeading}
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
             />

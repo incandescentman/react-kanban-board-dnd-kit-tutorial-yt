@@ -9,11 +9,12 @@ interface Props {
   deleteTask: (id: Id) => void;
   updateTask: (id: Id, content: string) => void;
   toggleTaskComplete: (id: Id) => void;
+  convertTaskToHeading?: (id: Id, content: string) => boolean;
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTaskId, setFocusedTaskId }: Props) {
+function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
   const [originalContent, setOriginalContent] = useState(task.content);
@@ -46,6 +47,12 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTas
       if (!editMode) {
         // Entering edit mode - save original content
         setOriginalContent(task.content);
+      } else {
+        // Exiting edit mode - check for heading conversion
+        if (convertTaskToHeading && convertTaskToHeading(task.id, task.content)) {
+          // Task was converted to heading, don't change edit mode
+          return;
+        }
       }
       setEditMode((prev) => !prev);
       setMouseIsOver(false);
