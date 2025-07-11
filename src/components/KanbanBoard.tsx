@@ -131,12 +131,86 @@ const defaultBoard: Board = {
 };
 
 const STORAGE_KEY = 'kanban-board-state';
+const CURRENT_BOARD_KEY = 'kanban-current-board';
+
+const defaultBoardTemplates = {
+  "Rising Action": {
+    title: "Rising Action",
+    columns: [
+      {
+        id: "ideas",
+        title: "Ideas",
+        groups: [],
+        tasks: [
+          { id: "idea1", content: "Write job descriptions", status: "TODO" },
+        ],
+      },
+      {
+        id: "todo",
+        title: "To Do",
+        groups: [],
+        tasks: [
+          { id: "1", content: "List admin APIs for dashboard", status: "TODO" },
+          { id: "2", content: "Develop user registration functionality", status: "TODO" },
+        ],
+      },
+      {
+        id: "doing",
+        title: "In Progress",
+        groups: [],
+        tasks: [
+          { id: "3", content: "Conduct security testing", status: "STARTED" },
+        ],
+      },
+      {
+        id: "done",
+        title: "Done",
+        groups: [],
+        tasks: [
+          { id: "5", content: "Create UI kit documentation", status: "DONE" },
+        ],
+      },
+    ],
+  },
+  "Creative": {
+    title: "Creative",
+    columns: [
+      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
+      { id: "todo", title: "To Do", groups: [], tasks: [] },
+      { id: "doing", title: "In Progress", groups: [], tasks: [] },
+      { id: "done", title: "Done", groups: [], tasks: [] },
+    ],
+  },
+  "Writing Projects": {
+    title: "Writing Projects",
+    columns: [
+      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
+      { id: "todo", title: "To Do", groups: [], tasks: [] },
+      { id: "doing", title: "In Progress", groups: [], tasks: [] },
+      { id: "done", title: "Done", groups: [], tasks: [] },
+    ],
+  },
+  "Finances": {
+    title: "Finances",
+    columns: [
+      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
+      { id: "todo", title: "To Do", groups: [], tasks: [] },
+      { id: "doing", title: "In Progress", groups: [], tasks: [] },
+      { id: "done", title: "Done", groups: [], tasks: [] },
+    ],
+  },
+};
 
 function KanbanBoard() {
+  const [currentBoardName, setCurrentBoardName] = useState<string>(() => {
+    const stored = localStorage.getItem(CURRENT_BOARD_KEY);
+    return stored || "Rising Action";
+  });
+
   const [board, setBoard] = useState<Board>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
+    const storedBoard = localStorage.getItem(`${STORAGE_KEY}-${currentBoardName}`);
+    if (storedBoard) {
+      const parsed = JSON.parse(storedBoard);
       // Remove the "delete" column if it exists
       if (parsed.columns) {
         parsed.columns = parsed.columns.filter((col: any) => 
@@ -146,7 +220,7 @@ function KanbanBoard() {
       }
       return parsed;
     }
-    return defaultBoard;
+    return defaultBoardTemplates[currentBoardName as keyof typeof defaultBoardTemplates] || defaultBoard;
   });
 
   const [intentions, setIntentions] = useState<string[]>(() => {
@@ -190,9 +264,52 @@ function KanbanBoard() {
     return stored || '';
   });
 
+  const switchToBoard = (boardName: string) => {
+    // Save current board state before switching
+    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(board));
+    
+    // Update current board name
+    setCurrentBoardName(boardName);
+    
+    // Load the new board
+    const storedBoard = localStorage.getItem(`${STORAGE_KEY}-${boardName}`);
+    if (storedBoard) {
+      const parsed = JSON.parse(storedBoard);
+      // Remove the "delete" column if it exists
+      if (parsed.columns) {
+        parsed.columns = parsed.columns.filter((col: any) => 
+          col.id !== 'delete' && 
+          col.title?.toLowerCase() !== 'delete'
+        );
+      }
+      setBoard(parsed);
+    } else {
+      // Create new board from template
+      const template = defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates];
+      if (template) {
+        setBoard(template);
+      } else {
+        // Create a new empty board
+        setBoard({
+          title: boardName,
+          columns: [
+            { id: "ideas", title: "Ideas", groups: [], tasks: [] },
+            { id: "todo", title: "To Do", groups: [], tasks: [] },
+            { id: "doing", title: "In Progress", groups: [], tasks: [] },
+            { id: "done", title: "Done", groups: [], tasks: [] },
+          ],
+        });
+      }
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
-  }, [board]);
+    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(board));
+  }, [board, currentBoardName]);
+
+  useEffect(() => {
+    localStorage.setItem(CURRENT_BOARD_KEY, currentBoardName);
+  }, [currentBoardName]);
 
   useEffect(() => {
     localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
@@ -579,8 +696,8 @@ function KanbanBoard() {
           <div className="flex flex-col gap-4">
             {/* Board Selector */}
             <BoardSelector 
-              currentBoard={board.title}
-              onBoardChange={(boardName) => setBoard(prev => ({ ...prev, title: boardName }))}
+              currentBoard={currentBoardName}
+              onBoardChange={switchToBoard}
             />
             
             {/* Intentions Panel */}

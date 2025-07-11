@@ -9,12 +9,12 @@ function BoardSelector({ currentBoard, onBoardChange }: Props) {
   const [isCreating, setIsCreating] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
 
-  // Mock board list - in the future this could come from localStorage or API
+  // Default board list
   const boards = [
-    "Rising Action Board",
-    "Personal Goals",
-    "Work Projects",
-    "Side Hustles"
+    "Rising Action",
+    "Creative", 
+    "Writing Projects",
+    "Finances"
   ];
 
   const handleCreateBoard = () => {
