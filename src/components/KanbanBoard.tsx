@@ -1,6 +1,6 @@
 import PlusIcon from "../icons/PlusIcon";
 import { useMemo, useState, useEffect } from "react";
-import { Column, Id, Task } from "../types";
+import { Board, Column, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
   DndContext,
@@ -16,111 +16,183 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
-const defaultCols: Column[] = [
-  {
-    id: "todo",
-    title: "Todo",
-  },
-  {
-    id: "doing",
-    title: "Work in progress",
-  },
-  {
-    id: "done",
-    title: "Done",
-  },
-];
-
-const defaultTasks: Task[] = [
-  {
-    id: "1",
-    columnId: "todo",
-    content: "List admin APIs for dashboard",
-  },
-  {
-    id: "2",
-    columnId: "todo",
-    content:
-      "Develop user registration functionality with OTP delivered on SMS after email confirmation and phone number confirmation",
-  },
-  {
-    id: "3",
-    columnId: "doing",
-    content: "Conduct security testing",
-  },
-  {
-    id: "4",
-    columnId: "doing",
-    content: "Analyze competitors",
-  },
-  {
-    id: "5",
-    columnId: "done",
-    content: "Create UI kit documentation",
-  },
-  {
-    id: "6",
-    columnId: "done",
-    content: "Dev meeting",
-  },
-  {
-    id: "7",
-    columnId: "done",
-    content: "Deliver dashboard prototype",
-  },
-  {
-    id: "8",
-    columnId: "todo",
-    content: "Optimize application performance",
-  },
-  {
-    id: "9",
-    columnId: "todo",
-    content: "Implement data validation",
-  },
-  {
-    id: "10",
-    columnId: "todo",
-    content: "Design database schema",
-  },
-  {
-    id: "11",
-    columnId: "todo",
-    content: "Integrate SSL web certificates into workflow",
-  },
-  {
-    id: "12",
-    columnId: "doing",
-    content: "Implement error logging and monitoring",
-  },
-  {
-    id: "13",
-    columnId: "doing",
-    content: "Design and implement responsive UI",
-  },
-];
+const defaultBoard: Board = {
+  title: "Rising Action Board",
+  columns: [
+    {
+      id: "intentions",
+      title: "Current Intentions",
+      groups: [],
+      tasks: [
+        {
+          id: "int1",
+          content: "Track calories daily",
+          status: "HABIT",
+        },
+        {
+          id: "int2",
+          content: "In bed by midnight",
+          status: "HABIT",
+        },
+        {
+          id: "int3",
+          content: "Gym every day",
+          status: "HABIT",
+        },
+        {
+          id: "int4",
+          content: "Read for 30 minutes",
+          status: "HABIT",
+        },
+      ],
+    },
+    {
+      id: "todo",
+      title: "Todo",
+      groups: [],
+      tasks: [
+        {
+          id: "1",
+          content: "List admin APIs for dashboard",
+          status: "TODO",
+        },
+        {
+          id: "2",
+          content: "Develop user registration functionality with OTP delivered on SMS after email confirmation and phone number confirmation",
+          status: "TODO",
+        },
+        {
+          id: "8",
+          content: "Optimize application performance",
+          status: "TODO",
+        },
+        {
+          id: "9",
+          content: "Implement data validation",
+          status: "TODO",
+        },
+        {
+          id: "10",
+          content: "Design database schema",
+          status: "TODO",
+        },
+        {
+          id: "11",
+          content: "Integrate SSL web certificates into workflow",
+          status: "TODO",
+        },
+      ],
+    },
+    {
+      id: "doing",
+      title: "Work in progress",
+      groups: [],
+      tasks: [
+        {
+          id: "3",
+          content: "Conduct security testing",
+          status: "STARTED",
+        },
+        {
+          id: "4",
+          content: "Analyze competitors",
+          status: "STARTED",
+        },
+        {
+          id: "12",
+          content: "Implement error logging and monitoring",
+          status: "STARTED",
+        },
+        {
+          id: "13",
+          content: "Design and implement responsive UI",
+          status: "STARTED",
+        },
+      ],
+    },
+    {
+      id: "done",
+      title: "Done",
+      groups: [],
+      tasks: [
+        {
+          id: "5",
+          content: "Create UI kit documentation",
+          status: "DONE",
+        },
+        {
+          id: "6",
+          content: "Dev meeting",
+          status: "DONE",
+        },
+        {
+          id: "7",
+          content: "Deliver dashboard prototype",
+          status: "DONE",
+        },
+      ],
+    },
+  ],
+};
 
 const STORAGE_KEY = 'kanban-board-state';
 
 function KanbanBoard() {
-  const [columns, setColumns] = useState<Column[]>(() => {
+  const [board, setBoard] = useState<Board>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      return parsed.columns || defaultCols;
+      // Check if the stored data has the new Current Intentions column
+      if (parsed.columns && !parsed.columns.find((col: Column) => col.id === 'intentions')) {
+        // Migration: Add the Current Intentions column as the first column
+        const intentionsColumn = {
+          id: "intentions",
+          title: "Current Intentions",
+          groups: [],
+          tasks: [
+            {
+              id: "int1",
+              content: "Track calories daily",
+              status: "HABIT",
+            },
+            {
+              id: "int2",
+              content: "In bed by midnight",
+              status: "HABIT",
+            },
+            {
+              id: "int3",
+              content: "Gym every day",
+              status: "HABIT",
+            },
+            {
+              id: "int4",
+              content: "Read for 30 minutes",
+              status: "HABIT",
+            },
+          ],
+        };
+        parsed.columns = [intentionsColumn, ...parsed.columns];
+      }
+      return parsed;
     }
-    return defaultCols;
+    return defaultBoard;
   });
-  const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
-
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return parsed.tasks || defaultTasks;
+  const columnsId = useMemo(() => board.columns?.map((col) => col.id) || [], [board.columns]);
+  
+  const allTasks = useMemo(() => {
+    const tasksWithColumnId: (Task & { columnId: Id })[] = [];
+    if (board.columns) {
+      board.columns.forEach(col => {
+        if (col.tasks) {
+          col.tasks.forEach(task => {
+            tasksWithColumnId.push({ ...task, columnId: col.id });
+          });
+        }
+      });
     }
-    return defaultTasks;
-  });
+    return tasksWithColumnId;
+  }, [board.columns]);
 
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 
@@ -134,10 +206,6 @@ function KanbanBoard() {
     const stored = localStorage.getItem('kanban-legend-minimized');
     return stored ? JSON.parse(stored) : false;
   });
-  const [boardTitle, setBoardTitle] = useState(() => {
-    const stored = localStorage.getItem('kanban-board-title');
-    return stored || "Sunjay's Post-OpenAI Plan";
-  });
   const [titleEditMode, setTitleEditMode] = useState(false);
   const [notes, setNotes] = useState(() => {
     const stored = localStorage.getItem('kanban-notes');
@@ -145,16 +213,13 @@ function KanbanBoard() {
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, tasks }));
-  }, [columns, tasks]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+  }, [board]);
 
   useEffect(() => {
     localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
   }, [legendMinimized]);
 
-  useEffect(() => {
-    localStorage.setItem('kanban-board-title', boardTitle);
-  }, [boardTitle]);
 
   useEffect(() => {
     localStorage.setItem('kanban-notes', notes);
@@ -164,7 +229,14 @@ function KanbanBoard() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z' && deletedTask) {
         e.preventDefault();
-        setTasks(prev => [...prev, deletedTask]);
+        setBoard(prev => {
+          const newBoard = { ...prev };
+          const targetColumn = newBoard.columns.find(col => col.id === deletedTask.columnId);
+          if (targetColumn) {
+            targetColumn.tasks = [...targetColumn.tasks, deletedTask];
+          }
+          return newBoard;
+        });
         setRedoTask(deletedTask);
         setDeletedTask(null);
         return;
@@ -175,8 +247,14 @@ function KanbanBoard() {
         const taskToRedo = redoTask;
         setDeletedTask(taskToRedo);
         setRedoTask(null);
-        const newTasks = tasks.filter(task => task.id !== taskToRedo.id);
-        setTasks(newTasks);
+        setBoard(prev => {
+          const newBoard = { ...prev };
+          newBoard.columns = newBoard.columns.map(col => ({
+            ...col,
+            tasks: col.tasks.filter(task => task.id !== taskToRedo.id)
+          }));
+          return newBoard;
+        });
         return;
       }
 
@@ -246,10 +324,10 @@ function KanbanBoard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deletedTask, redoTask, focusedTaskId, lastModifiedTaskId, tasks, columns]);
+  }, [deletedTask, redoTask, focusedTaskId, lastModifiedTaskId, board.columns]);
 
   const handleKeyboardNavigation = (key: string) => {
-    if (tasks.length === 0) return;
+    if (allTasks.length === 0) return;
 
     // If no task is focused, focus the first task
     if (!focusedTaskId) {
@@ -261,13 +339,13 @@ function KanbanBoard() {
       return;
     }
 
-    const currentTask = tasks.find(task => task.id === focusedTaskId);
+    const currentTask = allTasks.find(task => task.id === focusedTaskId);
     if (!currentTask) return;
 
     const currentColumn = columns.find(col => col.id === currentTask.columnId);
     if (!currentColumn) return;
 
-    const tasksInCurrentColumn = tasks.filter(task => task.columnId === currentColumn.id);
+    const tasksInCurrentColumn = allTasks.filter(task => task.columnId === currentColumn.id);
     const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
 
     switch (key) {
@@ -288,10 +366,10 @@ function KanbanBoard() {
         break;
       
       case 'ArrowLeft':
-        const currentColumnIndex = columns.findIndex(col => col.id === currentColumn.id);
+        const currentColumnIndex = board.columns.findIndex(col => col.id === currentColumn.id);
         if (currentColumnIndex > 0) {
-          const prevColumn = columns[currentColumnIndex - 1];
-          const tasksInPrevColumn = tasks.filter(task => task.columnId === prevColumn.id);
+          const prevColumn = board.columns[currentColumnIndex - 1];
+          const tasksInPrevColumn = allTasks.filter(task => task.columnId === prevColumn.id);
           if (tasksInPrevColumn.length > 0) {
             const targetTask = tasksInPrevColumn[Math.min(currentTaskIndex, tasksInPrevColumn.length - 1)];
             setFocusedTaskId(targetTask.id);
@@ -303,8 +381,8 @@ function KanbanBoard() {
       case 'ArrowRight':
         const currentColIndex = columns.findIndex(col => col.id === currentColumn.id);
         if (currentColIndex < columns.length - 1) {
-          const nextColumn = columns[currentColIndex + 1];
-          const tasksInNextColumn = tasks.filter(task => task.columnId === nextColumn.id);
+          const nextColumn = board.columns[currentColIndex + 1];
+          const tasksInNextColumn = allTasks.filter(task => task.columnId === nextColumn.id);
           if (tasksInNextColumn.length > 0) {
             const targetTask = tasksInNextColumn[Math.min(currentTaskIndex, tasksInNextColumn.length - 1)];
             setFocusedTaskId(targetTask.id);
@@ -323,10 +401,10 @@ function KanbanBoard() {
   };
 
   const toggleKeyboardFocus = () => {
-    if (tasks.length === 0) return;
+    if (allTasks.length === 0) return;
 
     // If a task is currently focused, remove focus
-    if (focusedTaskId && tasks.find(task => task.id === focusedTaskId)) {
+    if (focusedTaskId && allTasks.find(task => task.id === focusedTaskId)) {
       setFocusedTaskId(null);
       // Remove focus from the currently focused element
       const focusedElement = document.activeElement as HTMLElement;
@@ -341,16 +419,16 @@ function KanbanBoard() {
   };
 
   const initiateKeyboardFocus = () => {
-    if (tasks.length === 0) return;
+    if (allTasks.length === 0) return;
 
     // Priority 1: Use the most recently focused task if it still exists
-    if (focusedTaskId && tasks.find(task => task.id === focusedTaskId)) {
+    if (focusedTaskId && allTasks.find(task => task.id === focusedTaskId)) {
       focusTask(focusedTaskId);
       return;
     }
 
     // Priority 2: Use the most recently modified task if it exists
-    if (lastModifiedTaskId && tasks.find(task => task.id === lastModifiedTaskId)) {
+    if (lastModifiedTaskId && allTasks.find(task => task.id === lastModifiedTaskId)) {
       setFocusedTaskId(lastModifiedTaskId);
       focusTask(lastModifiedTaskId);
       return;
@@ -367,69 +445,95 @@ function KanbanBoard() {
   const handleKeyboardDragDrop = (key: string) => {
     if (!focusedTaskId || tasks.length === 0) return;
 
-    const currentTask = tasks.find(task => task.id === focusedTaskId);
+    const currentTask = allTasks.find(task => task.id === focusedTaskId);
     if (!currentTask) return;
 
     const currentColumn = columns.find(col => col.id === currentTask.columnId);
     if (!currentColumn) return;
 
-    const tasksInCurrentColumn = tasks.filter(task => task.columnId === currentColumn.id);
+    const tasksInCurrentColumn = allTasks.filter(task => task.columnId === currentColumn.id);
     const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
 
     switch (key) {
       case 'ArrowUp':
         if (currentTaskIndex > 0) {
           // Move task up within the same column
-          const newTasks = [...tasks];
-          const taskIndex = newTasks.findIndex(task => task.id === focusedTaskId);
-          const targetTaskIndex = newTasks.findIndex(task => task.id === tasksInCurrentColumn[currentTaskIndex - 1].id);
-          
-          [newTasks[taskIndex], newTasks[targetTaskIndex]] = [newTasks[targetTaskIndex], newTasks[taskIndex]];
-          setTasks(newTasks);
+          setBoard(prev => ({
+            ...prev,
+            columns: prev.columns.map(col => 
+              col.id === currentColumn.id 
+                ? { ...col, tasks: arrayMove(col.tasks, currentTaskIndex, currentTaskIndex - 1) }
+                : col
+            )
+          }));
         }
         break;
       
       case 'ArrowDown':
         if (currentTaskIndex < tasksInCurrentColumn.length - 1) {
           // Move task down within the same column
-          const newTasks = [...tasks];
-          const taskIndex = newTasks.findIndex(task => task.id === focusedTaskId);
-          const targetTaskIndex = newTasks.findIndex(task => task.id === tasksInCurrentColumn[currentTaskIndex + 1].id);
-          
-          [newTasks[taskIndex], newTasks[targetTaskIndex]] = [newTasks[targetTaskIndex], newTasks[taskIndex]];
-          setTasks(newTasks);
+          setBoard(prev => ({
+            ...prev,
+            columns: prev.columns.map(col => 
+              col.id === currentColumn.id 
+                ? { ...col, tasks: arrayMove(col.tasks, currentTaskIndex, currentTaskIndex + 1) }
+                : col
+            )
+          }));
         }
         break;
       
       case 'ArrowLeft':
-        const currentColumnIndex = columns.findIndex(col => col.id === currentColumn.id);
+        const currentColumnIndex = board.columns?.findIndex(col => col.id === currentColumn.id) || -1;
         if (currentColumnIndex > 0) {
           // Move task to the previous column
-          const prevColumn = columns[currentColumnIndex - 1];
-          const newTasks = tasks.map(task => {
-            if (task.id === focusedTaskId) {
-              return { ...task, columnId: prevColumn.id };
-            }
-            return task;
+          const prevColumn = board.columns?.[currentColumnIndex - 1];
+          if (!prevColumn) break;
+          
+          setBoard(prev => {
+            const taskToMove = prev.columns?.find(col => col.id === currentColumn.id)?.tasks?.find(task => task.id === focusedTaskId);
+            if (!taskToMove) return prev;
+            
+            return {
+              ...prev,
+              columns: prev.columns?.map(col => {
+                if (col.id === currentColumn.id) {
+                  return { ...col, tasks: col.tasks?.filter(task => task.id !== focusedTaskId) || [] };
+                } else if (col.id === prevColumn.id) {
+                  return { ...col, tasks: [...(col.tasks || []), taskToMove] };
+                }
+                return col;
+              }) || []
+            };
           });
-          setTasks(newTasks);
           // Re-focus the task after moving to a new column
           setTimeout(() => focusTask(focusedTaskId), 0);
         }
         break;
       
       case 'ArrowRight':
-        const currentColIndex = columns.findIndex(col => col.id === currentColumn.id);
-        if (currentColIndex < columns.length - 1) {
+        const currentColIndex = board.columns?.findIndex(col => col.id === currentColumn.id) || -1;
+        if (currentColIndex >= 0 && currentColIndex < (board.columns?.length || 0) - 1) {
           // Move task to the next column
-          const nextColumn = columns[currentColIndex + 1];
-          const newTasks = tasks.map(task => {
-            if (task.id === focusedTaskId) {
-              return { ...task, columnId: nextColumn.id };
-            }
-            return task;
+          const nextColumn = board.columns?.[currentColIndex + 1];
+          if (!nextColumn) break;
+          
+          setBoard(prev => {
+            const taskToMove = prev.columns?.find(col => col.id === currentColumn.id)?.tasks?.find(task => task.id === focusedTaskId);
+            if (!taskToMove) return prev;
+            
+            return {
+              ...prev,
+              columns: prev.columns?.map(col => {
+                if (col.id === currentColumn.id) {
+                  return { ...col, tasks: col.tasks?.filter(task => task.id !== focusedTaskId) || [] };
+                } else if (col.id === nextColumn.id) {
+                  return { ...col, tasks: [...(col.tasks || []), taskToMove] };
+                }
+                return col;
+              }) || []
+            };
           });
-          setTasks(newTasks);
           // Re-focus the task after moving to a new column
           setTimeout(() => focusTask(focusedTaskId), 0);
         }
@@ -466,13 +570,13 @@ function KanbanBoard() {
           onClick={() => setTitleEditMode(true)}
           title="Click to edit title"
         >
-          {boardTitle}
+          {board.title}
         </h1>
       ) : (
         <input
           className="text-4xl font-bold text-black mb-12 bg-transparent border-b-2 border-blue-500 outline-none text-center"
-          value={boardTitle}
-          onChange={(e) => setBoardTitle(e.target.value)}
+          value={board.title}
+          onChange={(e) => setBoard(prev => ({ ...prev, title: e.target.value }))}
           onBlur={() => setTitleEditMode(false)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -491,7 +595,7 @@ function KanbanBoard() {
         <div className="m-auto flex gap-4">
           <div className="flex gap-4">
             <SortableContext items={columnsId}>
-              {columns.map((col) => (
+              {board.columns?.map((col) => (
                 <ColumnContainer
                   key={col.id}
                   column={col}
@@ -501,7 +605,7 @@ function KanbanBoard() {
                   deleteTask={deleteTask}
                   updateTask={updateTask}
                   toggleTaskComplete={toggleTaskComplete}
-                  tasks={tasks.filter((task) => task.columnId === col.id)}
+                  tasks={col.tasks}
                   focusedTaskId={focusedTaskId}
                   setFocusedTaskId={setFocusedTaskId}
                 />
@@ -587,9 +691,7 @@ function KanbanBoard() {
                 deleteTask={deleteTask}
                 updateTask={updateTask}
                 toggleTaskComplete={toggleTaskComplete}
-                tasks={tasks.filter(
-                  (task) => task.columnId === activeColumn.id
-                )}
+                tasks={activeColumn.tasks}
                 focusedTaskId={focusedTaskId}
                 setFocusedTaskId={setFocusedTaskId}
               />
@@ -645,67 +747,102 @@ function KanbanBoard() {
   function createTask(columnId: Id) {
     const newTask: Task = {
       id: generateId(),
-      columnId,
       content: "",
+      status: "TODO",
     };
 
-    setTasks([...tasks, newTask]);
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => 
+        col.id === columnId 
+          ? { ...col, tasks: [...(col.tasks || []), newTask] }
+          : col
+      ) || []
+    }));
     setLastModifiedTaskId(newTask.id);
   }
 
   function deleteTask(id: Id) {
-    const taskToDelete = tasks.find(task => task.id === id);
-    if (taskToDelete) {
-      setDeletedTask(taskToDelete);
-      setRedoTask(null); // Clear redo when a new deletion happens
+    let taskToDelete: Task | null = null;
+    let sourceColumnId: Id | null = null;
+    
+    if (board.columns) {
+      board.columns.forEach(col => {
+        const task = col.tasks?.find(task => task.id === id);
+        if (task) {
+          taskToDelete = task;
+          sourceColumnId = col.id;
+        }
+      });
     }
-    const newTasks = tasks.filter((task) => task.id !== id);
-    setTasks(newTasks);
+    
+    if (taskToDelete && sourceColumnId) {
+      setDeletedTask({ ...taskToDelete, columnId: sourceColumnId });
+      setRedoTask(null);
+    }
+    
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.filter(task => task.id !== id) || []
+      })) || []
+    }));
   }
 
   function updateTask(id: Id, content: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== id) return task;
-      return { ...task, content };
-    });
-
-    setTasks(newTasks);
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.map(task => 
+          task.id === id ? { ...task, content } : task
+        ) || []
+      })) || []
+    }));
     setLastModifiedTaskId(id);
   }
 
   function toggleTaskComplete(id: Id) {
-    const newTasks = tasks.map((task) => {
-      if (task.id !== id) return task;
-      return { ...task, completed: !task.completed };
-    });
-
-    setTasks(newTasks);
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.map(task => 
+          task.id === id ? { ...task, completed: !task.completed } : task
+        ) || []
+      })) || []
+    }));
   }
 
   function createNewColumn() {
     const columnToAdd: Column = {
       id: generateId(),
-      title: `Column ${columns.length + 1}`,
+      title: `Column ${(board.columns?.length || 0) + 1}`,
+      groups: [],
+      tasks: [],
     };
 
-    setColumns([...columns, columnToAdd]);
+    setBoard(prev => ({
+      ...prev,
+      columns: [...(prev.columns || []), columnToAdd]
+    }));
   }
 
   function deleteColumn(id: Id) {
-    const filteredColumns = columns.filter((col) => col.id !== id);
-    setColumns(filteredColumns);
-
-    const newTasks = tasks.filter((t) => t.columnId !== id);
-    setTasks(newTasks);
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.filter(col => col.id !== id) || []
+    }));
   }
 
   function updateColumn(id: Id, title: string) {
-    const newColumns = columns.map((col) => {
-      if (col.id !== id) return col;
-      return { ...col, title };
-    });
-
-    setColumns(newColumns);
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => 
+        col.id === id ? { ...col, title } : col
+      ) || []
+    }));
   }
 
   function onDragStart(event: DragStartEvent) {
@@ -732,12 +869,15 @@ function KanbanBoard() {
 
     if (activeId === overId) return;
 
-    setColumns((columns) => {
+    setBoard(prev => {
+      const columns = prev.columns || [];
       const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
-
       const overColumnIndex = columns.findIndex((col) => col.id === overId);
-
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
+      
+      return {
+        ...prev,
+        columns: arrayMove(columns, activeColumnIndex, overColumnIndex)
+      };
     });
   }
 
@@ -757,13 +897,51 @@ function KanbanBoard() {
 
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
-        const overIndex = tasks.findIndex((t) => t.id === overId);
-
-        tasks[activeIndex].columnId = tasks[overIndex].columnId;
-
-        return arrayMove(tasks, activeIndex, overIndex);
+      setBoard(prev => {
+        let activeTask: Task | null = null;
+        let overTask: Task | null = null;
+        let activeColumnId: Id | null = null;
+        let overColumnId: Id | null = null;
+        
+        // Find the active and over tasks
+        if (prev.columns) {
+          for (const col of prev.columns) {
+            const activeFound = col.tasks?.find(t => t.id === activeId);
+            const overFound = col.tasks?.find(t => t.id === overId);
+            if (activeFound) {
+              activeTask = activeFound;
+              activeColumnId = col.id;
+            }
+            if (overFound) {
+              overTask = overFound;
+              overColumnId = col.id;
+            }
+          }
+        }
+        
+        if (!activeTask || !overTask || !activeColumnId || !overColumnId) return prev;
+        
+        return {
+          ...prev,
+          columns: prev.columns?.map(col => {
+            if (col.id === activeColumnId && col.id === overColumnId) {
+              // Same column - reorder tasks
+              const activeIndex = col.tasks?.findIndex(t => t.id === activeId) || 0;
+              const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
+              return { ...col, tasks: arrayMove(col.tasks || [], activeIndex, overIndex) };
+            } else if (col.id === activeColumnId) {
+              // Remove from active column
+              return { ...col, tasks: col.tasks?.filter(t => t.id !== activeId) || [] };
+            } else if (col.id === overColumnId) {
+              // Add to over column at the right position
+              const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
+              const newTasks = [...(col.tasks || [])];
+              newTasks.splice(overIndex, 0, activeTask);
+              return { ...col, tasks: newTasks };
+            }
+            return col;
+          }) || []
+        };
       });
     }
 
@@ -771,12 +949,37 @@ function KanbanBoard() {
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      setTasks((tasks) => {
-        const activeIndex = tasks.findIndex((t) => t.id === activeId);
-
-        tasks[activeIndex].columnId = overId;
-
-        return arrayMove(tasks, activeIndex, activeIndex);
+      setBoard(prev => {
+        let activeTask: Task | null = null;
+        let activeColumnId: Id | null = null;
+        
+        // Find the active task
+        if (prev.columns) {
+          for (const col of prev.columns) {
+            const found = col.tasks?.find(t => t.id === activeId);
+            if (found) {
+              activeTask = found;
+              activeColumnId = col.id;
+              break;
+            }
+          }
+        }
+        
+        if (!activeTask || !activeColumnId) return prev;
+        
+        return {
+          ...prev,
+          columns: prev.columns?.map(col => {
+            if (col.id === activeColumnId) {
+              // Remove from active column
+              return { ...col, tasks: col.tasks?.filter(t => t.id !== activeId) || [] };
+            } else if (col.id === overId) {
+              // Add to target column
+              return { ...col, tasks: [...(col.tasks || []), activeTask] };
+            }
+            return col;
+          }) || []
+        };
       });
     }
   }
