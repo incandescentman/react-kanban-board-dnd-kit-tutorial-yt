@@ -15,37 +15,20 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
+import IntentionsPanel from "./IntentionsPanel";
+import BoardSelector from "./BoardSelector";
+
+const defaultIntentions = [
+  "Track calories daily",
+  "In bed by midnight",
+  "Gym every day",
+  "Read for 30 minutes",
+  "Drink 8 glasses of water"
+];
 
 const defaultBoard: Board = {
   title: "Rising Action Board",
   columns: [
-    {
-      id: "intentions",
-      title: "Current Intentions",
-      groups: [],
-      tasks: [
-        {
-          id: "int1",
-          content: "Track calories daily",
-          status: "HABIT",
-        },
-        {
-          id: "int2",
-          content: "In bed by midnight",
-          status: "HABIT",
-        },
-        {
-          id: "int3",
-          content: "Gym every day",
-          status: "HABIT",
-        },
-        {
-          id: "int4",
-          content: "Read for 30 minutes",
-          status: "HABIT",
-        },
-      ],
-    },
     {
       id: "todo",
       title: "Todo",
@@ -142,41 +125,17 @@ function KanbanBoard() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Check if the stored data has the new Current Intentions column
-      if (parsed.columns && !parsed.columns.find((col: Column) => col.id === 'intentions')) {
-        // Migration: Add the Current Intentions column as the first column
-        const intentionsColumn = {
-          id: "intentions",
-          title: "Current Intentions",
-          groups: [],
-          tasks: [
-            {
-              id: "int1",
-              content: "Track calories daily",
-              status: "HABIT",
-            },
-            {
-              id: "int2",
-              content: "In bed by midnight",
-              status: "HABIT",
-            },
-            {
-              id: "int3",
-              content: "Gym every day",
-              status: "HABIT",
-            },
-            {
-              id: "int4",
-              content: "Read for 30 minutes",
-              status: "HABIT",
-            },
-          ],
-        };
-        parsed.columns = [intentionsColumn, ...parsed.columns];
-      }
       return parsed;
     }
     return defaultBoard;
+  });
+
+  const [intentions, setIntentions] = useState<string[]>(() => {
+    const stored = localStorage.getItem('kanban-intentions');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    return defaultIntentions;
   });
   const columnsId = useMemo(() => board.columns?.map((col) => col.id) || [], [board.columns]);
   
@@ -224,6 +183,10 @@ function KanbanBoard() {
   useEffect(() => {
     localStorage.setItem('kanban-notes', notes);
   }, [notes]);
+
+  useEffect(() => {
+    localStorage.setItem('kanban-intentions', JSON.stringify(intentions));
+  }, [intentions]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -592,7 +555,22 @@ function KanbanBoard() {
         onDragEnd={onDragEnd}
         onDragOver={onDragOver}
       >
-        <div className="m-auto flex gap-4">
+        <div className="m-auto flex gap-6">
+          {/* Sidebar */}
+          <div className="flex flex-col gap-4">
+            {/* Board Selector */}
+            <BoardSelector 
+              currentBoard={board.title}
+              onBoardChange={(boardName) => setBoard(prev => ({ ...prev, title: boardName }))}
+            />
+            
+            {/* Intentions Panel */}
+            <IntentionsPanel 
+              intentions={intentions} 
+              setIntentions={setIntentions}
+            />
+          </div>
+          
           <div className="flex gap-4">
             <SortableContext items={columnsId}>
               {board.columns?.map((col) => (

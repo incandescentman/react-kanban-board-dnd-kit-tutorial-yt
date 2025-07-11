@@ -40,7 +40,6 @@ function ColumnContainer({
 
   const getColumnIcon = () => {
     const title = column.title.toLowerCase();
-    if (title.includes('intention')) return <span className="text-3xl">🎯</span>;
     if (title.includes('idea')) return <span className="text-3xl">🧠</span>;
     if (title.includes('todo') || title.includes('to do')) return <span className="text-3xl">📝</span>;
     if (title.includes('progress') || title.includes('doing')) return <span className="text-3xl">🏃🏻‍♂️</span>;
@@ -90,22 +89,19 @@ function ColumnContainer({
     );
   }
 
-  const isIntentionsColumn = column.title.toLowerCase().includes('intention');
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`
+      className="
   bg-columnBackgroundColor
-  ${isIntentionsColumn ? 'w-[280px]' : 'w-[350px]'}
+  w-[350px]
   h-[90vh]
   max-h-[90vh]
   rounded-md
   flex
   flex-col
-  ${isIntentionsColumn ? 'border-2 border-blue-200' : ''}
-  `}
+  "
     >
       {/* Column title */}
       <div
