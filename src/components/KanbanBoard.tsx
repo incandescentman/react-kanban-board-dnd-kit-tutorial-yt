@@ -258,6 +258,10 @@ function KanbanBoard() {
     const stored = localStorage.getItem('kanban-legend-minimized');
     return stored ? JSON.parse(stored) : false;
   });
+  const [boardSelectorMinimized, setBoardSelectorMinimized] = useState(() => {
+    const stored = localStorage.getItem('kanban-board-selector-minimized');
+    return stored ? JSON.parse(stored) : false;
+  });
   const [titleEditMode, setTitleEditMode] = useState(false);
   const [notes, setNotes] = useState(() => {
     const stored = localStorage.getItem('kanban-notes');
@@ -315,6 +319,9 @@ function KanbanBoard() {
     localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
   }, [legendMinimized]);
 
+  useEffect(() => {
+    localStorage.setItem('kanban-board-selector-minimized', JSON.stringify(boardSelectorMinimized));
+  }, [boardSelectorMinimized]);
 
   useEffect(() => {
     localStorage.setItem('kanban-notes', notes);
@@ -693,18 +700,24 @@ function KanbanBoard() {
       >
         <div className="m-auto flex gap-6">
           {/* Sidebar */}
-          <div className="flex flex-col gap-4">
+          <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>
             {/* Board Selector */}
-            <BoardSelector 
-              currentBoard={currentBoardName}
-              onBoardChange={switchToBoard}
-            />
+            {!boardSelectorMinimized && (
+              <BoardSelector 
+                currentBoard={currentBoardName}
+                onBoardChange={switchToBoard}
+                minimized={boardSelectorMinimized}
+                onMinimize={() => setBoardSelectorMinimized(true)}
+              />
+            )}
             
-            {/* Intentions Panel */}
-            <IntentionsPanel 
-              intentions={intentions} 
-              setIntentions={setIntentions}
-            />
+            {/* Intentions Panel - slides up when board selector is minimized */}
+            <div className={`transition-all duration-300 ${boardSelectorMinimized ? 'transform -translate-y-0' : ''}`}>
+              <IntentionsPanel 
+                intentions={intentions} 
+                setIntentions={setIntentions}
+              />
+            </div>
           </div>
           
           <div className="flex gap-4">
@@ -827,6 +840,21 @@ function KanbanBoard() {
       
       {/* Bottom Right Corner Icons */}
       <div className="fixed bottom-4 right-4 flex gap-2 z-10">
+        {/* Minimized Board Selector */}
+        {boardSelectorMinimized && (
+          <div className="relative group">
+            <button
+              onClick={() => setBoardSelectorMinimized(false)}
+              className="w-10 h-10 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-full flex items-center justify-center text-purple-600 hover:text-purple-800 shadow-lg"
+            >
+              📋
+            </button>
+            <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
+              Show Boards
+            </div>
+          </div>
+        )}
+        
         {/* Add Column Button */}
         <div className="relative group">
           <button

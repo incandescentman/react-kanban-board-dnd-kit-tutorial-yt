@@ -3,9 +3,11 @@ import { useState } from "react";
 interface Props {
   currentBoard: string;
   onBoardChange: (boardName: string) => void;
+  minimized: boolean;
+  onMinimize: () => void;
 }
 
-function BoardSelector({ currentBoard, onBoardChange }: Props) {
+function BoardSelector({ currentBoard, onBoardChange, minimized, onMinimize }: Props) {
   const [isCreating, setIsCreating] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
 
@@ -28,11 +30,19 @@ function BoardSelector({ currentBoard, onBoardChange }: Props) {
   return (
     <div className="w-64 bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-2xl p-4 shadow-lg">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-2xl">📋</span>
-        <h3 className="text-lg font-bold text-purple-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
-          Boards
-        </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">📋</span>
+          <h3 className="text-lg font-bold text-purple-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+            Boards
+          </h3>
+        </div>
+        <button
+          onClick={onMinimize}
+          className="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors"
+        >
+          −
+        </button>
       </div>
 
       {/* Board List */}
