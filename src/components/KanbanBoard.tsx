@@ -426,6 +426,21 @@ function KanbanBoard() {
           toggleTaskComplete(focusedTaskId);
         }
       }
+
+      if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && e.metaKey) {
+        // Don't interfere when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
+        // Create new task below focused task
+        if (focusedTaskId) {
+          e.preventDefault();
+          e.stopPropagation();
+          createTaskBelow(focusedTaskId);
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -782,8 +797,16 @@ function KanbanBoard() {
                   <span className="ml-2">Save task when editing</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Enter</span>
+                  <span className="ml-2">Create new card below</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
                   <span className="ml-2">Add line break</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Escape</span>
+                  <span className="ml-2">Cancel editing</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-mono bg-gray-200 px-2 py-1 rounded">X or Cmd+D</span>
@@ -902,6 +925,40 @@ function KanbanBoard() {
       ) || []
     }));
     setLastModifiedTaskId(newTask.id);
+  }
+
+  function createTaskBelow(taskId: Id) {
+    const currentTask = allTasks.find(task => task.id === taskId);
+    if (!currentTask) return;
+
+    const newTask: Task = {
+      id: generateId(),
+      content: "",
+      status: "TODO",
+    };
+
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => {
+        if (col.id === currentTask.columnId) {
+          const taskIndex = col.tasks?.findIndex(task => task.id === taskId) ?? -1;
+          if (taskIndex >= 0) {
+            const newTasks = [...(col.tasks || [])];
+            newTasks.splice(taskIndex + 1, 0, newTask);
+            return { ...col, tasks: newTasks };
+          }
+        }
+        return col;
+      }) || []
+    }));
+    
+    setLastModifiedTaskId(newTask.id);
+    setFocusedTaskId(newTask.id);
+    
+    // Focus the new task after it's created
+    setTimeout(() => {
+      focusTask(newTask.id);
+    }, 0);
   }
 
   function deleteTask(id: Id) {

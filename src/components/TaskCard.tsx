@@ -16,6 +16,7 @@ interface Props {
 function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTaskId, setFocusedTaskId }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
+  const [originalContent, setOriginalContent] = useState(task.content);
 
   const {
     setNodeRef,
@@ -42,9 +43,20 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTas
     if (editMode && task.content.trim() === "") {
       deleteTask(task.id);
     } else {
+      if (!editMode) {
+        // Entering edit mode - save original content
+        setOriginalContent(task.content);
+      }
       setEditMode((prev) => !prev);
       setMouseIsOver(false);
     }
+  };
+
+  const cancelEdit = () => {
+    // Restore original content and exit edit mode
+    updateTask(task.id, originalContent);
+    setEditMode(false);
+    setMouseIsOver(false);
   };
 
   if (isDragging) {
@@ -88,6 +100,9 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, focusedTas
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               toggleEditMode();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancelEdit();
             }
           }}
           onChange={(e) => updateTask(task.id, e.target.value)}
