@@ -91,13 +91,15 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
         ))}
       </div>
 
-      {/* Add Button */}
-      <button
+      {/* Add Area */}
+      <div
         onClick={handleAdd}
-        className="w-full bg-blue-200 hover:bg-blue-300 text-blue-900 text-sm font-medium py-2 px-3 rounded-xl transition-colors border border-blue-300 hover:border-blue-400"
+        className="w-full py-3 cursor-pointer group flex items-center justify-center"
       >
-        + Add Intention
-      </button>
+        <span className="text-blue-400 text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          +
+        </span>
+      </div>
 
       {/* Cute Footer */}
       <div className="mt-4 text-center">
