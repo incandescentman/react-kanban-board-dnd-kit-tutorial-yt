@@ -30,8 +30,20 @@ const defaultBoard: Board = {
   title: "Rising Action Board",
   columns: [
     {
+      id: "ideas",
+      title: "Ideas",
+      groups: [],
+      tasks: [
+        {
+          id: "idea1",
+          content: "Write job descriptions",
+          status: "TODO",
+        },
+      ],
+    },
+    {
       id: "todo",
-      title: "Todo",
+      title: "To Do",
       groups: [],
       tasks: [
         {
@@ -68,7 +80,7 @@ const defaultBoard: Board = {
     },
     {
       id: "doing",
-      title: "Work in progress",
+      title: "In Progress",
       groups: [],
       tasks: [
         {
@@ -125,6 +137,13 @@ function KanbanBoard() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
+      // Remove the "delete" column if it exists
+      if (parsed.columns) {
+        parsed.columns = parsed.columns.filter((col: any) => 
+          col.id !== 'delete' && 
+          col.title?.toLowerCase() !== 'delete'
+        );
+      }
       return parsed;
     }
     return defaultBoard;
