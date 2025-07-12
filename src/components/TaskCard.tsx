@@ -106,9 +106,15 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             textarea.setSelectionRange(textarea.value.length, textarea.value.length);
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              toggleEditMode();
+            if (e.key === "Enter") {
+              if (e.shiftKey) {
+                // Allow Shift+Enter for line breaks (don't prevent default)
+                return;
+              } else {
+                // Save on Enter without Shift
+                e.preventDefault();
+                toggleEditMode();
+              }
             } else if (e.key === "Escape") {
               e.preventDefault();
               cancelEdit();

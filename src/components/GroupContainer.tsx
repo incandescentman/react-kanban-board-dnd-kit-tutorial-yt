@@ -84,7 +84,10 @@ function GroupContainer({
         ) : (
           <h3 
             className={`text-lg font-semibold cursor-pointer flex-1 ${group.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}
-            onClick={() => setEditMode(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditMode(true);
+            }}
           >
             {group.title}
           </h3>
