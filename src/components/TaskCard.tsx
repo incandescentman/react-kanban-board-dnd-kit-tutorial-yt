@@ -3,6 +3,7 @@ import TrashIcon from "../icons/TrashIcon";
 import { Id, Task } from "../types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { renderContentWithTags } from "../utils/tags";
 
 interface Props {
   task: Task;
@@ -12,9 +13,10 @@ interface Props {
   convertTaskToHeading?: (id: Id, content: string) => boolean;
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
+  onTagClick?: (tag: string) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId }: Props) {
+function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId, onTagClick }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
   const [originalContent, setOriginalContent] = useState(task.content);
@@ -159,9 +161,9 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             <div className="w-4 h-4 border border-gray-400 rounded bg-white hover:bg-gray-100 hover:border-gray-500 transition-colors duration-150"></div>
           )}
         </div>
-        <p className={`overflow-y-auto overflow-x-hidden whitespace-pre-wrap flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-          {task.content}
-        </p>
+        <div className={`overflow-y-auto overflow-x-hidden whitespace-pre-wrap flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
+          {onTagClick ? renderContentWithTags(task.content, onTagClick) : task.content}
+        </div>
       </div>
 
       {mouseIsOver && (

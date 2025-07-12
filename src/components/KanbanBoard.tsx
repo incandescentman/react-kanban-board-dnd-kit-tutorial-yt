@@ -18,6 +18,8 @@ import TaskCard from "./TaskCard";
 import IntentionsPanel from "./IntentionsPanel";
 import BoardSelector from "./BoardSelector";
 import CommandPalette from "./CommandPalette";
+import TagView from "./TagView";
+import { extractTags } from "../utils/tags";
 
 const defaultIntentions = [
   "Track calories daily",
@@ -234,6 +236,8 @@ function KanbanBoard() {
 
   const [columnMoveMode, setColumnMoveMode] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [tagViewOpen, setTagViewOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string>('');
 
   const commands = useMemo(() => [
     {
@@ -266,6 +270,29 @@ function KanbanBoard() {
       label: 'Clear Notes',
       description: 'Clear all notes in the notes section',
       action: () => setNotes(''),
+    },
+    {
+      id: 'view-all-tags',
+      label: 'View All Tags',
+      description: 'Show a list of all tags used in cards',
+      action: () => {
+        // Get all unique tags
+        const allTags = new Set<string>();
+        if (board.columns) {
+          board.columns.forEach(col => {
+            col.tasks?.forEach(task => {
+              extractTags(task.content).forEach(tag => allTags.add(tag));
+            });
+            col.groups?.forEach(group => {
+              group.tasks?.forEach(task => {
+                extractTags(task.content).forEach(tag => allTags.add(tag));
+              });
+            });
+          });
+        }
+        console.log('All tags:', Array.from(allTags));
+        // For now just log them, could create a tags overview modal later
+      },
     }
   ], []);
   const columnsId = useMemo(() => board.columns?.map((col) => col.id) || [], [board.columns]);
@@ -294,6 +321,54 @@ function KanbanBoard() {
     }
     return tasksWithColumnId;
   }, [board.columns]);
+
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag);
+    setTagViewOpen(true);
+  };
+
+  const getTasksWithTag = (tag: string) => {
+    const tasksWithTag: Array<Task & { columnId: Id; columnTitle: string; groupTitle?: string }> = [];
+    
+    if (board.columns) {
+      board.columns.forEach(col => {
+        // Check direct column tasks
+        if (col.tasks) {
+          col.tasks.forEach(task => {
+            const tags = extractTags(task.content);
+            if (tags.includes(tag)) {
+              tasksWithTag.push({
+                ...task,
+                columnId: col.id,
+                columnTitle: col.title
+              });
+            }
+          });
+        }
+        
+        // Check tasks in groups
+        if (col.groups) {
+          col.groups.forEach(group => {
+            if (group.tasks) {
+              group.tasks.forEach(task => {
+                const tags = extractTags(task.content);
+                if (tags.includes(tag)) {
+                  tasksWithTag.push({
+                    ...task,
+                    columnId: col.id,
+                    columnTitle: col.title,
+                    groupTitle: group.title
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+    
+    return tasksWithTag;
+  };
 
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
 
@@ -515,6 +590,24 @@ function KanbanBoard() {
         e.preventDefault();
         e.stopPropagation();
         setCommandPaletteOpen(true);
+      }
+
+      if (e.key === 'Escape' && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        // Close tag view if open
+        if (tagViewOpen) {
+          e.preventDefault();
+          e.stopPropagation();
+          setTagViewOpen(false);
+          return;
+        }
+        
+        // Close command palette if open
+        if (commandPaletteOpen) {
+          e.preventDefault();
+          e.stopPropagation();
+          setCommandPaletteOpen(false);
+          return;
+        }
       }
     };
 
@@ -830,6 +923,7 @@ function KanbanBoard() {
                   focusedTaskId={focusedTaskId}
                   setFocusedTaskId={setFocusedTaskId}
                   columnMoveMode={columnMoveMode}
+                  onTagClick={handleTagClick}
                 />
               ))}
             </SortableContext>
@@ -948,6 +1042,7 @@ function KanbanBoard() {
                 focusedTaskId={focusedTaskId}
                 setFocusedTaskId={setFocusedTaskId}
                 columnMoveMode={columnMoveMode}
+                onTagClick={handleTagClick}
               />
             )}
             {activeTask && (
@@ -1016,6 +1111,22 @@ function KanbanBoard() {
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         commands={commands}
+      />
+
+      {/* Tag View */}
+      <TagView
+        isOpen={tagViewOpen}
+        onClose={() => setTagViewOpen(false)}
+        tag={selectedTag}
+        tasks={getTasksWithTag(selectedTag)}
+        onTaskClick={(taskId) => {
+          // Focus the task when clicked in tag view
+          setFocusedTaskId(taskId);
+          setTagViewOpen(false);
+          setTimeout(() => {
+            focusTask(taskId);
+          }, 100);
+        }}
       />
     </div>
   );

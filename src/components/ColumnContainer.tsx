@@ -24,6 +24,7 @@ interface Props {
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
   columnMoveMode?: boolean;
+  onTagClick?: (tag: string) => void;
 }
 
 function ColumnContainer({
@@ -42,6 +43,7 @@ function ColumnContainer({
   focusedTaskId,
   setFocusedTaskId,
   columnMoveMode,
+  onTagClick,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
 
@@ -194,6 +196,7 @@ function ColumnContainer({
               convertTaskToHeading={convertTaskToHeading}
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
+              onTagClick={onTagClick}
             />
           ))}
           
@@ -208,6 +211,7 @@ function ColumnContainer({
               convertTaskToHeading={convertTaskToHeading}
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
+              onTagClick={onTagClick}
             />
           ))}
         </SortableContext>

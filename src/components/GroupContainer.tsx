@@ -15,6 +15,7 @@ interface Props {
   convertTaskToHeading?: (id: Id, content: string) => boolean;
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
+  onTagClick?: (tag: string) => void;
 }
 
 function GroupContainer({
@@ -28,6 +29,7 @@ function GroupContainer({
   convertTaskToHeading,
   focusedTaskId,
   setFocusedTaskId,
+  onTagClick,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
   const [mouseIsOver, setMouseIsOver] = useState(false);
@@ -116,6 +118,7 @@ function GroupContainer({
               convertTaskToHeading={convertTaskToHeading}
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
+              onTagClick={onTagClick}
             />
           ))}
         </SortableContext>
