@@ -608,6 +608,14 @@ function KanbanBoard() {
           setCommandPaletteOpen(false);
           return;
         }
+        
+        // Cancel column move mode if active
+        if (columnMoveMode) {
+          e.preventDefault();
+          e.stopPropagation();
+          setColumnMoveMode(false);
+          return;
+        }
       }
     };
 

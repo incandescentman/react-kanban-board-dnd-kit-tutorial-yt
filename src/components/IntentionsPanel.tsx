@@ -19,7 +19,14 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
   const handleSave = () => {
     if (editingIndex !== null) {
       const newIntentions = [...intentions];
-      newIntentions[editingIndex] = editingText;
+      
+      // If the text is empty, remove the intention instead of saving it
+      if (editingText.trim() === "") {
+        newIntentions.splice(editingIndex, 1);
+      } else {
+        newIntentions[editingIndex] = editingText.trim();
+      }
+      
       setIntentions(newIntentions);
       setEditingIndex(null);
       setEditingText("");
@@ -32,9 +39,9 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
   };
 
   const handleAdd = () => {
-    setIntentions([...intentions, "New intention"]);
+    setIntentions([...intentions, ""]);
     setEditingIndex(intentions.length);
-    setEditingText("New intention");
+    setEditingText("");
   };
 
   const handleFooterEdit = () => {

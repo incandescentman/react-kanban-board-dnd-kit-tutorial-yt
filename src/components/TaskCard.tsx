@@ -161,8 +161,22 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             <div className="w-4 h-4 border border-gray-400 rounded bg-white hover:bg-gray-100 hover:border-gray-500 transition-colors duration-150"></div>
           )}
         </div>
-        <div className={`overflow-y-auto overflow-x-hidden whitespace-pre-wrap flex-1 ${task.completed ? 'line-through text-gray-500' : ''}`}>
-          {onTagClick ? renderContentWithTags(task.content, onTagClick) : task.content}
+        <div className="flex-1 flex flex-col gap-1">
+          <div className={`overflow-y-auto overflow-x-hidden whitespace-pre-wrap ${task.completed ? 'line-through text-gray-500' : ''}`}>
+            {onTagClick ? (() => {
+              const { content, tags } = renderContentWithTags(task.content, onTagClick);
+              return (
+                <>
+                  <div>{content}</div>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {tags}
+                    </div>
+                  )}
+                </>
+              );
+            })() : task.content}
+          </div>
         </div>
       </div>
 

@@ -38,26 +38,35 @@ export function getTagColor(tag: string): { bg: string; text: string; border: st
 export function renderContentWithTags(
   content: string, 
   onTagClick: (tag: string) => void
-): React.ReactNode[] {
+): { content: React.ReactNode; tags: React.ReactNode[] } {
   const tagRegex = /#([a-zA-Z0-9_]+)/g;
-  const parts: React.ReactNode[] = [];
-  let lastIndex = 0;
+  const tags: React.ReactNode[] = [];
+  let cleanContent = content;
   let match;
 
+  // Extract all tags
+  const matches: Array<{ tag: string; index: number; length: number }> = [];
   while ((match = tagRegex.exec(content)) !== null) {
-    // Add text before the tag
-    if (match.index > lastIndex) {
-      parts.push(content.slice(lastIndex, match.index));
-    }
+    matches.push({
+      tag: match[0].toLowerCase(),
+      index: match.index,
+      length: match[0].length
+    });
+  }
 
-    // Add the tag as a clickable element
-    const tag = match[0].toLowerCase();
+  // Remove tags from content (working backwards to maintain indices)
+  matches.reverse().forEach(({ index, length }) => {
+    cleanContent = cleanContent.slice(0, index) + cleanContent.slice(index + length);
+  });
+
+  // Create tag elements
+  matches.forEach(({ tag }, i) => {
     const colors = getTagColor(tag);
     
-    parts.push(
+    tags.push(
       <span
-        key={`${tag}-${match.index}`}
-        className={`inline-block px-2 py-1 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity mr-1 ${colors.bg} ${colors.text} ${colors.border} border`}
+        key={`${tag}-${i}`}
+        className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity mr-1 ${colors.bg} ${colors.text} ${colors.border} border`}
         onClick={(e) => {
           e.stopPropagation();
           onTagClick(tag);
@@ -66,14 +75,10 @@ export function renderContentWithTags(
         {tag}
       </span>
     );
+  });
 
-    lastIndex = match.index + match[0].length;
-  }
-
-  // Add remaining text
-  if (lastIndex < content.length) {
-    parts.push(content.slice(lastIndex));
-  }
-
-  return parts.length > 0 ? parts : [content];
+  return {
+    content: cleanContent.trim(),
+    tags
+  };
 }

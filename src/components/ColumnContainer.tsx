@@ -168,8 +168,11 @@ function ColumnContainer({
                 setEditMode(false);
               }}
               onKeyDown={(e) => {
-                if (e.key !== "Enter") return;
-                setEditMode(false);
+                if (e.key === "Enter") {
+                  setEditMode(false);
+                } else if (e.key === "Escape") {
+                  setEditMode(false);
+                }
               }}
             />
           )}

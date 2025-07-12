@@ -1,5 +1,6 @@
 import { Task, Id } from "../types";
 import { getTagColor } from "../utils/tags";
+import { useEffect } from "react";
 
 interface TaskWithLocation extends Task {
   columnId: Id;
@@ -16,6 +17,21 @@ interface Props {
 }
 
 function TagView({ isOpen, onClose, tag, tasks, onTaskClick }: Props) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const colors = getTagColor(tag);
