@@ -20,6 +20,7 @@ import BoardSelector from "./BoardSelector";
 import CommandPalette from "./CommandPalette";
 import TagView from "./TagView";
 import { extractTags } from "../utils/tags";
+import { recoverAllBoardData, exportBoardData, findAllBoardData } from "../utils/dataRecovery";
 
 const defaultIntentions = [
   "Track calories daily",
@@ -135,6 +136,7 @@ const defaultBoard: Board = {
 
 const STORAGE_KEY = 'kanban-board-state';
 const CURRENT_BOARD_KEY = 'kanban-current-board';
+const DATA_VERSION = 2; // Increment this when making breaking changes
 
 const defaultBoardTemplates = {
   "Rising Action": {
@@ -204,6 +206,28 @@ const defaultBoardTemplates = {
   },
 };
 
+function migrateBoard(boardData: any): Board {
+  // Ensure board has correct structure for current version
+  const migrated = {
+    ...boardData,
+    dataVersion: DATA_VERSION
+  };
+  
+  // Add any migration logic here for future versions
+  if (!migrated.columns) {
+    migrated.columns = [];
+  }
+  
+  // Ensure each column has groups array (added in version 2)
+  migrated.columns = migrated.columns.map((col: any) => ({
+    ...col,
+    groups: col.groups || [],
+    tasks: col.tasks || []
+  }));
+  
+  return migrated;
+}
+
 function KanbanBoard() {
   const [currentBoardName, setCurrentBoardName] = useState<string>(() => {
     const stored = localStorage.getItem(CURRENT_BOARD_KEY);
@@ -213,17 +237,38 @@ function KanbanBoard() {
   const [board, setBoard] = useState<Board>(() => {
     const storedBoard = localStorage.getItem(`${STORAGE_KEY}-${currentBoardName}`);
     if (storedBoard) {
-      const parsed = JSON.parse(storedBoard);
-      // Remove the "delete" column if it exists
-      if (parsed.columns) {
-        parsed.columns = parsed.columns.filter((col: any) => 
-          col.id !== 'delete' && 
-          col.title?.toLowerCase() !== 'delete'
-        );
+      try {
+        const parsed = JSON.parse(storedBoard);
+        
+        // Remove the "delete" column if it exists
+        if (parsed.columns) {
+          parsed.columns = parsed.columns.filter((col: any) => 
+            col.id !== 'delete' && 
+            col.title?.toLowerCase() !== 'delete'
+          );
+        }
+        
+        // Check if data needs migration
+        if (!parsed.dataVersion || parsed.dataVersion < DATA_VERSION) {
+          console.log(`Migrating board data from version ${parsed.dataVersion || 1} to ${DATA_VERSION}`);
+          const migrated = migrateBoard(parsed);
+          // Save migrated version immediately
+          localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(migrated));
+          return migrated;
+        }
+        
+        return parsed;
+      } catch (e) {
+        console.error('Failed to parse stored board:', e);
       }
-      return parsed;
     }
-    return defaultBoardTemplates[currentBoardName as keyof typeof defaultBoardTemplates] || defaultBoard;
+    
+    // Fall back to default board from templates with version
+    const defaultBoardWithVersion = {
+      ...defaultBoardTemplates[currentBoardName as keyof typeof defaultBoardTemplates] || defaultBoard,
+      dataVersion: DATA_VERSION
+    };
+    return defaultBoardWithVersion;
   });
 
   const [intentions, setIntentions] = useState<string[]>(() => {
@@ -238,6 +283,7 @@ function KanbanBoard() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const [boardsUpdateTrigger, setBoardsUpdateTrigger] = useState(0);
 
   const commands = useMemo(() => [
     {
@@ -292,6 +338,65 @@ function KanbanBoard() {
         }
         console.log('All tags:', Array.from(allTags));
         // For now just log them, could create a tags overview modal later
+      },
+    },
+    {
+      id: 'recover-data',
+      label: 'Recover Lost Data',
+      description: 'Scan localStorage for any lost board data and recover it',
+      action: () => {
+        const recoveredBoards = recoverAllBoardData();
+        console.log('Found recoverable boards:', recoveredBoards);
+        
+        if (recoveredBoards.length > 0) {
+          // Save each recovered board
+          recoveredBoards.forEach((recoveredBoard, index) => {
+            const boardName = recoveredBoard.title || `Recovered Board ${index + 1}`;
+            localStorage.setItem(`${STORAGE_KEY}-${boardName}`, JSON.stringify(recoveredBoard));
+          });
+          
+          alert(`Recovered ${recoveredBoards.length} board(s)! Check the board selector to access them.`);
+          setBoardsUpdateTrigger(prev => prev + 1);
+        } else {
+          alert('No recoverable board data found in localStorage.');
+        }
+      },
+    },
+    {
+      id: 'export-data',
+      label: 'Export All Data',
+      description: 'Export all board data to JSON for backup',
+      action: () => {
+        const exportData = exportBoardData();
+        const blob = new Blob([exportData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `kanban-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+    },
+    {
+      id: 'inspect-storage',
+      label: 'Inspect Storage',
+      description: 'Log all localStorage data to console for debugging',
+      action: () => {
+        const allData = findAllBoardData();
+        console.group('📊 localStorage Data Inspection');
+        console.log('All board-related data found:', allData);
+        console.log('Raw localStorage keys:', Object.keys(localStorage).filter(k => 
+          k.includes('kanban') || k.includes('board') || k.includes('task')
+        ));
+        allData.forEach(({ key, data, isValid }) => {
+          console.group(`🔑 ${key} (${isValid ? 'Valid' : 'Invalid'})`);
+          console.log(data);
+          console.groupEnd();
+        });
+        console.groupEnd();
+        alert('Storage data logged to console. Open DevTools to see details.');
       },
     }
   ], []);
@@ -431,8 +536,142 @@ function KanbanBoard() {
     }
   };
 
+  const isBlankBoard = (boardData: any): boolean => {
+    if (!boardData || !boardData.columns) return true;
+    
+    for (const column of boardData.columns) {
+      // Check if column has any tasks
+      if (column.tasks && column.tasks.length > 0) {
+        return false;
+      }
+      
+      // Check if column has any groups with tasks
+      if (column.groups && column.groups.length > 0) {
+        for (const group of column.groups) {
+          if (group.tasks && group.tasks.length > 0) {
+            return false;
+          }
+        }
+      }
+    }
+    
+    return true;
+  };
+
+  const deleteOrArchiveBoard = (boardName: string) => {
+    const boardKey = `${STORAGE_KEY}-${boardName}`;
+    const boardData = localStorage.getItem(boardKey);
+    
+    if (!boardData) {
+      return;
+    }
+    
+    try {
+      const parsedBoard = JSON.parse(boardData);
+      const isEmpty = isBlankBoard(parsedBoard);
+      
+      if (isEmpty) {
+        // Delete blank boards completely
+        localStorage.removeItem(boardKey);
+      } else {
+        // Archive non-blank boards by adding archived flag
+        const archivedBoard = {
+          ...parsedBoard,
+          archived: true,
+          archivedDate: new Date().toISOString()
+        };
+        localStorage.setItem(boardKey, JSON.stringify(archivedBoard));
+      }
+      
+      // If we're deleting/archiving the current board, switch to a default board
+      if (boardName === currentBoardName) {
+        // Update trigger first, then switch to another board
+        setBoardsUpdateTrigger(prev => prev + 1);
+        
+        // Use setTimeout to ensure the boards list is refreshed
+        setTimeout(() => {
+          const allBoards = availableBoards.filter(b => b.name !== boardName);
+          
+          if (allBoards.length > 0) {
+            switchToBoard(allBoards[0].name);
+          } else {
+            // Create a new default board
+            switchToBoard("Rising Action");
+          }
+        }, 0);
+      } else {
+        // Force a re-render by updating the boards trigger
+        setBoardsUpdateTrigger(prev => prev + 1);
+      }
+    } catch (e) {
+      console.error(`Failed to delete/archive board ${boardName}:`, e);
+    }
+  };
+
+  const isArchivedBoard = (boardName: string): boolean => {
+    try {
+      const boardData = localStorage.getItem(`${STORAGE_KEY}-${boardName}`);
+      if (boardData) {
+        const parsedBoard = JSON.parse(boardData);
+        return parsedBoard.archived === true;
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+    return false;
+  };
+
+  const availableBoards = useMemo((): { name: string; title: string }[] => {
+    const boards: { name: string; title: string }[] = [];
+    
+    // Add default boards
+    Object.keys(defaultBoardTemplates).forEach(boardName => {
+      const template = defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates];
+      boards.push({ name: boardName, title: template.title });
+    });
+    
+    // Add custom boards from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_KEY + '-')) {
+        const boardName = key.substring((STORAGE_KEY + '-').length);
+        
+        // Skip if already added as default board
+        if (defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates]) {
+          continue;
+        }
+        
+        try {
+          const boardData = localStorage.getItem(key);
+          if (boardData) {
+            const parsedBoard = JSON.parse(boardData);
+            
+            // Skip archived boards
+            if (parsedBoard.archived === true) {
+              continue;
+            }
+            
+            boards.push({ 
+              name: boardName, 
+              title: parsedBoard.title || boardName 
+            });
+          }
+        } catch (e) {
+          // Skip invalid board data
+          console.warn(`Failed to parse board data for ${boardName}:`, e);
+        }
+      }
+    }
+    
+    return boards;
+  }, [boardsUpdateTrigger]);
+
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(board));
+    const boardToSave = {
+      ...board,
+      dataVersion: DATA_VERSION
+    };
+    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(boardToSave));
   }, [board, currentBoardName]);
 
   useEffect(() => {
@@ -874,10 +1113,40 @@ function KanbanBoard() {
           className="text-4xl font-bold text-black mb-12 bg-transparent border-b-2 border-blue-500 outline-none text-center"
           value={board.title}
           onChange={(e) => setBoard(prev => ({ ...prev, title: e.target.value }))}
-          onBlur={() => setTitleEditMode(false)}
+          onBlur={() => {
+            setTitleEditMode(false);
+            // Update currentBoardName to match the new title if it changed
+            if (board.title !== currentBoardName) {
+              const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
+              const newKey = `${STORAGE_KEY}-${board.title}`;
+              
+              // Move data from old key to new key in localStorage
+              const boardData = localStorage.getItem(oldKey);
+              if (boardData) {
+                localStorage.setItem(newKey, boardData);
+                localStorage.removeItem(oldKey);
+              }
+              
+              setCurrentBoardName(board.title);
+            }
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               setTitleEditMode(false);
+              // Update currentBoardName to match the new title if it changed
+              if (board.title !== currentBoardName) {
+                const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
+                const newKey = `${STORAGE_KEY}-${board.title}`;
+                
+                // Move data from old key to new key in localStorage
+                const boardData = localStorage.getItem(oldKey);
+                if (boardData) {
+                  localStorage.setItem(newKey, boardData);
+                  localStorage.removeItem(oldKey);
+                }
+                
+                setCurrentBoardName(board.title);
+              }
             }
           }}
           autoFocus
@@ -896,7 +1165,10 @@ function KanbanBoard() {
             {!boardSelectorMinimized && (
               <BoardSelector 
                 currentBoard={currentBoardName}
+                currentBoardTitle={board.title}
+                availableBoards={availableBoards}
                 onBoardChange={switchToBoard}
+                onBoardDelete={deleteOrArchiveBoard}
                 minimized={boardSelectorMinimized}
                 onMinimize={() => setBoardSelectorMinimized(true)}
               />

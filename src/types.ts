@@ -24,4 +24,5 @@ export type Column = {
 export type Board = {
   title: string;
   columns: Column[];
+  dataVersion?: number;
 };

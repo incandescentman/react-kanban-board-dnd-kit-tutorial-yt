@@ -1,23 +1,25 @@
 import { useState } from "react";
 
+interface Board {
+  name: string;
+  title: string;
+}
+
 interface Props {
   currentBoard: string;
+  currentBoardTitle: string;
+  availableBoards: Board[];
   onBoardChange: (boardName: string) => void;
+  onBoardDelete: (boardName: string) => void;
   minimized: boolean;
   onMinimize: () => void;
 }
 
-function BoardSelector({ currentBoard, onBoardChange, minimized, onMinimize }: Props) {
+function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoardChange, onBoardDelete, minimized, onMinimize }: Props) {
   const [isCreating, setIsCreating] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
-
-  // Default board list
-  const boards = [
-    "Rising Action",
-    "Creative", 
-    "Writing Projects",
-    "Finances"
-  ];
+  const [editingBoard, setEditingBoard] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
 
   const handleCreateBoard = () => {
     if (newBoardName.trim()) {
@@ -25,6 +27,27 @@ function BoardSelector({ currentBoard, onBoardChange, minimized, onMinimize }: P
       setNewBoardName("");
       setIsCreating(false);
     }
+  };
+
+  const handleEditBoard = (boardName: string, boardTitle: string) => {
+    setEditingBoard(boardName);
+    setEditingTitle(boardTitle);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingBoard && editingTitle.trim()) {
+      // If editing the current board, switch to the new title
+      if (editingBoard === currentBoard) {
+        onBoardChange(editingTitle.trim());
+      }
+      setEditingBoard(null);
+      setEditingTitle("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBoard(null);
+    setEditingTitle("");
   };
 
   return (
@@ -47,18 +70,57 @@ function BoardSelector({ currentBoard, onBoardChange, minimized, onMinimize }: P
 
       {/* Board List */}
       <div className="space-y-2 mb-4">
-        {boards.map((board) => (
-          <button
-            key={board}
-            onClick={() => onBoardChange(board)}
-            className={`w-full text-left p-3 rounded-xl text-sm font-medium transition-all border ${
-              currentBoard === board
+        {availableBoards.map((board) => (
+          <div
+            key={board.name}
+            className={`w-full p-3 rounded-xl text-sm font-medium transition-all border group ${
+              currentBoard === board.name
                 ? 'bg-purple-200 border-purple-300 text-purple-900 shadow-sm'
                 : 'bg-white/70 border-purple-200 text-purple-700 hover:bg-white/90 hover:border-purple-300'
             }`}
           >
-            {board}
-          </button>
+            {editingBoard === board.name ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  className="w-full text-sm border border-purple-300 rounded-lg px-2 py-1 bg-white text-purple-900 focus:outline-none focus:border-purple-500"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSaveEdit();
+                    } else if (e.key === 'Escape') {
+                      handleCancelEdit();
+                    }
+                  }}
+                  onBlur={handleSaveEdit}
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => onBoardChange(board.name)}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    handleEditBoard(board.name, board.title);
+                  }}
+                  className="flex-1 text-left"
+                >
+                  {board.title}
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onBoardDelete(board.name);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 text-xs ml-2"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
         ))}
       </div>
 
