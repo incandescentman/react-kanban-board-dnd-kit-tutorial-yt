@@ -1668,16 +1668,29 @@ function KanbanBoard() {
 
     if (activeId === overId) return;
 
-    setBoard(prev => {
-      const columns = prev.columns || [];
-      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
-      const overColumnIndex = columns.findIndex((col) => col.id === overId);
-      
-      return {
-        ...prev,
-        columns: arrayMove(columns, activeColumnIndex, overColumnIndex)
-      };
-    });
+    const isActiveAColumn = active.data.current?.type === "Column";
+    const isActiveATask = active.data.current?.type === "Task";
+
+    // Only handle column reordering if we're in column move mode AND dragging a column
+    if (isActiveAColumn && columnMoveMode) {
+      setBoard(prev => {
+        const columns = prev.columns || [];
+        const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
+        const overColumnIndex = columns.findIndex((col) => col.id === overId);
+        
+        if (activeColumnIndex !== -1 && overColumnIndex !== -1) {
+          return {
+            ...prev,
+            columns: arrayMove(columns, activeColumnIndex, overColumnIndex)
+          };
+        }
+        
+        return prev;
+      });
+    }
+    
+    // Task dragging is handled in onDragOver, so we don't need to do anything here for tasks
+    // This prevents accidental column reordering when dragging tasks
   }
 
   function onDragOver(event: DragOverEvent) {
@@ -1691,20 +1704,122 @@ function KanbanBoard() {
 
     const isActiveATask = active.data.current?.type === "Task";
     const isOverATask = over.data.current?.type === "Task";
+    const isOverAColumn = over.data.current?.type === "Column";
+    const isOverAGroup = over.data.current?.type === "Group";
 
     if (!isActiveATask) return;
 
-    // Im dropping a Task over another Task
+    console.log('🔍 Drop detection:', {
+      isActiveATask,
+      isOverATask,
+      isOverAColumn,
+      isOverAGroup,
+      overType: over.data.current?.type,
+      activeType: active.data.current?.type
+    });
+
+    // Priority order: Group > Task > Column
+    // This prevents multiple handlers from running for the same drop
+
+    // Im dropping a Task over a group (highest priority)
+    if (isActiveATask && isOverAGroup) {
+      console.log('🎯 Dropping task over group:', { activeId, overId });
+      setBoard(prev => {
+        let activeTask: Task | null = null;
+        let activeColumnId: Id | null = null;
+        let activeGroupId: string | null = null;
+        
+        // Find the active task (could be in column tasks or group tasks)
+        if (prev.columns) {
+          for (const col of prev.columns) {
+            // Check column tasks
+            const found = col.tasks?.find(t => t.id === activeId);
+            if (found) {
+              activeTask = found;
+              activeColumnId = col.id;
+              break;
+            }
+            
+            // Check group tasks
+            if (col.groups) {
+              for (const group of col.groups) {
+                const groupFound = group.tasks?.find(t => t.id === activeId);
+                if (groupFound) {
+                  activeTask = groupFound;
+                  activeColumnId = col.id;
+                  activeGroupId = group.id;
+                  break;
+                }
+              }
+              if (activeTask) break;
+            }
+          }
+        }
+        
+        if (!activeTask || !activeColumnId) {
+          console.log('❌ Could not find active task:', { activeTask, activeColumnId });
+          return prev;
+        }
+        
+        console.log('✅ Found active task:', { activeTask: activeTask.content, activeColumnId, activeGroupId });
+        
+        return {
+          ...prev,
+          columns: prev.columns?.map(col => {
+            let newCol = { ...col };
+            
+            // ALWAYS remove from source first (regardless of which column we're processing)
+            if (col.id === activeColumnId) {
+              if (!activeGroupId) {
+                // Remove from column tasks
+                console.log('🗑️ Removing from column tasks in:', col.title);
+                newCol.tasks = col.tasks?.filter(t => t.id !== activeId) || [];
+              } else {
+                // Remove from group tasks
+                console.log('🗑️ Removing from group tasks in:', col.title);
+                newCol.groups = col.groups?.map(group => 
+                  group.id === activeGroupId 
+                    ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
+                    : group
+                ) || [];
+              }
+            }
+            
+            // THEN check if this column contains the target group and add the task
+            if (col.groups) {
+              const targetGroup = col.groups.find(group => group.id === overId);
+              if (targetGroup) {
+                console.log('✅ Adding to target group:', targetGroup.title, 'in column:', col.title);
+                newCol.groups = newCol.groups?.map(group => 
+                  group.id === overId 
+                    ? { ...group, tasks: [...(group.tasks || []), activeTask] }
+                    : group
+                ) || [];
+              }
+            }
+            
+            return newCol;
+          }) || []
+        };
+      });
+      return; // Exit early to prevent other handlers from running
+    }
+
+    // Im dropping a Task over another Task (second priority)
     if (isActiveATask && isOverATask) {
+      console.log('🎯 Dropping task over task:', { activeId, overId });
       setBoard(prev => {
         let activeTask: Task | null = null;
         let overTask: Task | null = null;
         let activeColumnId: Id | null = null;
         let overColumnId: Id | null = null;
+        let activeGroupId: string | null = null;
+        let overGroupId: string | null = null;
         
-        // Find the active and over tasks
+        // Find the active and over tasks (search both column tasks and group tasks)
         if (prev.columns) {
           for (const col of prev.columns) {
+            // Check column tasks
             const activeFound = col.tasks?.find(t => t.id === activeId);
             const overFound = col.tasks?.find(t => t.id === overId);
             if (activeFound) {
@@ -1715,6 +1830,24 @@ function KanbanBoard() {
               overTask = overFound;
               overColumnId = col.id;
             }
+            
+            // Check group tasks
+            if (col.groups) {
+              for (const group of col.groups) {
+                const activeGroupFound = group.tasks?.find(t => t.id === activeId);
+                const overGroupFound = group.tasks?.find(t => t.id === overId);
+                if (activeGroupFound) {
+                  activeTask = activeGroupFound;
+                  activeColumnId = col.id;
+                  activeGroupId = group.id;
+                }
+                if (overGroupFound) {
+                  overTask = overGroupFound;
+                  overColumnId = col.id;
+                  overGroupId = group.id;
+                }
+              }
+            }
           }
         }
         
@@ -1723,43 +1856,103 @@ function KanbanBoard() {
         return {
           ...prev,
           columns: prev.columns?.map(col => {
-            if (col.id === activeColumnId && col.id === overColumnId) {
-              // Same column - reorder tasks
+            let newCol = { ...col };
+            
+            // Same column and same group - reorder within group
+            if (col.id === activeColumnId && col.id === overColumnId && activeGroupId && overGroupId && activeGroupId === overGroupId) {
+              newCol.groups = col.groups?.map(group => {
+                if (group.id === activeGroupId) {
+                  const activeIndex = group.tasks?.findIndex(t => t.id === activeId) || 0;
+                  const overIndex = group.tasks?.findIndex(t => t.id === overId) || 0;
+                  return { ...group, tasks: arrayMove(group.tasks || [], activeIndex, overIndex) };
+                }
+                return group;
+              }) || [];
+            }
+            // Same column, both in column tasks - reorder column tasks
+            else if (col.id === activeColumnId && col.id === overColumnId && !activeGroupId && !overGroupId) {
               const activeIndex = col.tasks?.findIndex(t => t.id === activeId) || 0;
               const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
-              return { ...col, tasks: arrayMove(col.tasks || [], activeIndex, overIndex) };
-            } else if (col.id === activeColumnId) {
-              // Remove from active column
-              return { ...col, tasks: col.tasks?.filter(t => t.id !== activeId) || [] };
-            } else if (col.id === overColumnId) {
-              // Add to over column at the right position
-              const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
-              const newTasks = [...(col.tasks || [])];
-              newTasks.splice(overIndex, 0, activeTask);
-              return { ...col, tasks: newTasks };
+              newCol.tasks = arrayMove(col.tasks || [], activeIndex, overIndex);
             }
-            return col;
+            // Cross-container movement
+            else {
+              // Remove from source
+              if (col.id === activeColumnId) {
+                if (activeGroupId) {
+                  // Remove from group
+                  newCol.groups = col.groups?.map(group => 
+                    group.id === activeGroupId 
+                      ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
+                      : group
+                  ) || [];
+                } else {
+                  // Remove from column tasks
+                  newCol.tasks = col.tasks?.filter(t => t.id !== activeId) || [];
+                }
+              }
+              
+              // Add to target
+              if (col.id === overColumnId) {
+                if (overGroupId) {
+                  // Add to group at position
+                  newCol.groups = col.groups?.map(group => {
+                    if (group.id === overGroupId) {
+                      const overIndex = group.tasks?.findIndex(t => t.id === overId) || 0;
+                      const newTasks = [...(group.tasks || [])];
+                      newTasks.splice(overIndex, 0, activeTask);
+                      return { ...group, tasks: newTasks };
+                    }
+                    return group;
+                  }) || [];
+                } else {
+                  // Add to column tasks at position
+                  const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
+                  const newTasks = [...(col.tasks || [])];
+                  newTasks.splice(overIndex, 0, activeTask);
+                  newCol.tasks = newTasks;
+                }
+              }
+            }
+            
+            return newCol;
           }) || []
         };
       });
+      return; // Exit early to prevent other handlers from running
     }
-
-    const isOverAColumn = over.data.current?.type === "Column";
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
+      console.log('🎯 Dropping task over column:', { activeId, overId });
       setBoard(prev => {
         let activeTask: Task | null = null;
         let activeColumnId: Id | null = null;
+        let activeGroupId: string | null = null;
         
-        // Find the active task
+        // Find the active task (could be in column tasks or group tasks)
         if (prev.columns) {
           for (const col of prev.columns) {
+            // Check column tasks
             const found = col.tasks?.find(t => t.id === activeId);
             if (found) {
               activeTask = found;
               activeColumnId = col.id;
               break;
+            }
+            
+            // Check group tasks
+            if (col.groups) {
+              for (const group of col.groups) {
+                const groupFound = group.tasks?.find(t => t.id === activeId);
+                if (groupFound) {
+                  activeTask = groupFound;
+                  activeColumnId = col.id;
+                  activeGroupId = group.id;
+                  break;
+                }
+              }
+              if (activeTask) break;
             }
           }
         }
@@ -1769,9 +1962,19 @@ function KanbanBoard() {
         return {
           ...prev,
           columns: prev.columns?.map(col => {
-            if (col.id === activeColumnId) {
-              // Remove from active column
+            if (col.id === activeColumnId && !activeGroupId) {
+              // Remove from active column tasks
               return { ...col, tasks: col.tasks?.filter(t => t.id !== activeId) || [] };
+            } else if (col.id === activeColumnId && activeGroupId) {
+              // Remove from active group tasks
+              return {
+                ...col,
+                groups: col.groups?.map(group => 
+                  group.id === activeGroupId 
+                    ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
+                    : group
+                ) || []
+              };
             } else if (col.id === overId) {
               // Add to target column
               return { ...col, tasks: [...(col.tasks || []), activeTask] };

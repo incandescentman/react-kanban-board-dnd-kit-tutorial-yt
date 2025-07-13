@@ -2,7 +2,9 @@ import { Group, Id, Task } from "../types";
 import TaskCard from "./TaskCard";
 import { useState, useMemo } from "react";
 import TrashIcon from "../icons/TrashIcon";
-import { SortableContext } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Props {
   group: Group;
@@ -38,11 +40,22 @@ function GroupContainer({
     return group.tasks?.map((task) => task.id) || [];
   }, [group.tasks]);
 
+  const { isOver, setNodeRef } = useDroppable({
+    id: group.id,
+    data: {
+      type: "Group",
+      group,
+    },
+  });
+
   return (
     <div className="mb-4">
       {/* Group heading */}
       <div 
-        className="flex items-center gap-3 mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors relative"
+        ref={setNodeRef}
+        className={`flex items-center gap-3 mb-3 p-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors relative ${
+          isOver ? 'border-blue-500 bg-blue-50' : ''
+        }`}
         onMouseEnter={() => setMouseIsOver(true)}
         onMouseLeave={() => setMouseIsOver(false)}
       >
