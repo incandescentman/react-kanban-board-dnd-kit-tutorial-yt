@@ -142,7 +142,6 @@ function ColumnContainer({
       items-center
       justify-between
       "
-      style={{ fontFamily: 'Inter Tight, sans-serif' }}
       >
         <div className="flex gap-2 items-center">
           {getColumnIcon()}

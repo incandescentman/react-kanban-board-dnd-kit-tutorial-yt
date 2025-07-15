@@ -634,7 +634,7 @@ function KanbanBoard() {
         return;
       }
 
-      // Arrow key navigation
+      // Arrow key navigation (only when a task is focused)
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         // Don't interfere with arrow keys when editing text
         const activeElement = document.activeElement;
@@ -642,9 +642,12 @@ function KanbanBoard() {
           return;
         }
         
-        e.preventDefault();
-        e.stopPropagation();
-        handleKeyboardNavigation(e.key);
+        // Only handle arrow keys if a task is focused, otherwise let browser handle default scrolling
+        if (focusedTaskId) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleKeyboardNavigation(e.key);
+        }
       }
 
       if (e.key === ' ' && !e.altKey && !e.ctrlKey && !e.metaKey) {
@@ -1327,7 +1330,6 @@ function KanbanBoard() {
                   value={board.title}
                   onChange={(e) => updateBoardTitle(e.target.value)}
                   className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
-                  style={{ fontFamily: 'Inter Tight, sans-serif' }}
                 />
                 {columnMoveMode && (
                   <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -1367,7 +1369,7 @@ function KanbanBoard() {
 
               {/* Notes Section - positioned below all columns */}
               <div className="mt-6 w-full">
-                <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+                <h3 className="text-lg font-bold text-gray-900">
                   Notes
                 </h3>
                 <Textarea

@@ -204,7 +204,7 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-2xl">📋</span>
-          <h3 className="text-lg font-bold text-purple-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+          <h3 className="text-lg font-bold text-purple-900">
             Boards
           </h3>
         </div>

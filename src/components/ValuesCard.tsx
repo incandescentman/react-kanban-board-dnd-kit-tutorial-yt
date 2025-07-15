@@ -27,7 +27,7 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
             <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center">
               <Compass className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+            <h1 className="text-3xl font-bold text-gray-900">
               Urge vs. Values Pocket Card
             </h1>
           </div>
@@ -199,7 +199,6 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
             onChange={(e) => setValues(e.target.value)}
             placeholder="Add your personal values, principles, or customize the content above to make it your own..."
             className="min-h-[200px] resize-none border-gray-300 bg-gray-50 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 w-full text-sm leading-relaxed"
-            style={{ fontFamily: 'Inter, sans-serif' }}
           />
         </div>
       </div>

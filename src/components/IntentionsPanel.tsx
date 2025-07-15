@@ -57,7 +57,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-xl">🎯</span>
-        <h3 className="text-base font-bold text-blue-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+        <h3 className="text-base font-bold text-blue-900">
           Current Intentions
         </h3>
       </div>
