@@ -1728,6 +1728,7 @@ function KanbanBoard() {
         let activeTask: Task | null = null;
         let activeColumnId: Id | null = null;
         let activeGroupId: string | null = null;
+        let targetColumnId: Id | null = null;
         
         // Find the active task (could be in column tasks or group tasks)
         if (prev.columns) {
@@ -1754,21 +1755,29 @@ function KanbanBoard() {
               if (activeTask) break;
             }
           }
+          
+          // Find the target column (column that contains the target group)
+          for (const col of prev.columns) {
+            if (col.groups?.some(group => group.id === overId)) {
+              targetColumnId = col.id;
+              break;
+            }
+          }
         }
         
-        if (!activeTask || !activeColumnId) {
-          console.log('❌ Could not find active task:', { activeTask, activeColumnId });
+        if (!activeTask || !activeColumnId || !targetColumnId) {
+          console.log('❌ Could not find active task or target group:', { activeTask, activeColumnId, targetColumnId });
           return prev;
         }
         
-        console.log('✅ Found active task:', { activeTask: activeTask.content, activeColumnId, activeGroupId });
+        console.log('✅ Found active task:', { activeTask: activeTask.content, activeColumnId, activeGroupId, targetColumnId });
         
         return {
           ...prev,
           columns: prev.columns?.map(col => {
             let newCol = { ...col };
             
-            // ALWAYS remove from source first (regardless of which column we're processing)
+            // Remove from source
             if (col.id === activeColumnId) {
               if (!activeGroupId) {
                 // Remove from column tasks
@@ -1785,17 +1794,14 @@ function KanbanBoard() {
               }
             }
             
-            // THEN check if this column contains the target group and add the task
-            if (col.groups) {
-              const targetGroup = col.groups.find(group => group.id === overId);
-              if (targetGroup) {
-                console.log('✅ Adding to target group:', targetGroup.title, 'in column:', col.title);
-                newCol.groups = newCol.groups?.map(group => 
-                  group.id === overId 
-                    ? { ...group, tasks: [...(group.tasks || []), activeTask] }
-                    : group
-                ) || [];
-              }
+            // Add to target group (only if this is the target column)
+            if (col.id === targetColumnId) {
+              console.log('✅ Adding to target group in column:', col.title);
+              newCol.groups = newCol.groups?.map(group => 
+                group.id === overId 
+                  ? { ...group, tasks: [...(group.tasks || []), activeTask] }
+                  : group
+              ) || [];
             }
             
             return newCol;
@@ -1962,24 +1968,32 @@ function KanbanBoard() {
         return {
           ...prev,
           columns: prev.columns?.map(col => {
-            if (col.id === activeColumnId && !activeGroupId) {
-              // Remove from active column tasks
-              return { ...col, tasks: col.tasks?.filter(t => t.id !== activeId) || [] };
-            } else if (col.id === activeColumnId && activeGroupId) {
-              // Remove from active group tasks
-              return {
-                ...col,
-                groups: col.groups?.map(group => 
+            let newCol = { ...col };
+            
+            // ALWAYS remove from source first (if this is the source column)
+            if (col.id === activeColumnId) {
+              if (!activeGroupId) {
+                // Remove from column tasks
+                console.log('🗑️ Removing task from column tasks in:', col.title);
+                newCol.tasks = col.tasks?.filter(t => t.id !== activeId) || [];
+              } else {
+                // Remove from group tasks
+                console.log('🗑️ Removing task from group to make standalone in:', col.title);
+                newCol.groups = col.groups?.map(group => 
                   group.id === activeGroupId 
                     ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
                     : group
-                ) || []
-              };
-            } else if (col.id === overId) {
-              // Add to target column
-              return { ...col, tasks: [...(col.tasks || []), activeTask] };
+                ) || [];
+              }
             }
-            return col;
+            
+            // THEN add to target column (if this is the target column)
+            if (col.id === overId) {
+              console.log('✅ Adding task to column tasks in:', col.title);
+              newCol.tasks = [...(newCol.tasks || []), activeTask];
+            }
+            
+            return newCol;
           }) || []
         };
       });
