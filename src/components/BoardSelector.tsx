@@ -1,4 +1,24 @@
 import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { createPortal } from "react-dom";
 
 interface Board {
   name: string;
@@ -11,15 +31,124 @@ interface Props {
   availableBoards: Board[];
   onBoardChange: (boardName: string) => void;
   onBoardDelete: (boardName: string) => void;
+  onBoardReorder: (reorderedBoards: Board[]) => void;
   minimized: boolean;
   onMinimize: () => void;
 }
 
-function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoardChange, onBoardDelete, minimized, onMinimize }: Props) {
+// Sortable Board Item Component
+function SortableBoardItem({ 
+  board, 
+  currentBoard, 
+  editingBoard, 
+  editingTitle, 
+  setEditingTitle, 
+  onBoardChange, 
+  onBoardDelete, 
+  handleEditBoard, 
+  handleSaveEdit, 
+  handleCancelEdit 
+}: {
+  board: Board;
+  currentBoard: string;
+  editingBoard: string | null;
+  editingTitle: string;
+  setEditingTitle: (title: string) => void;
+  onBoardChange: (boardName: string) => void;
+  onBoardDelete: (boardName: string) => void;
+  handleEditBoard: (boardName: string, boardTitle: string) => void;
+  handleSaveEdit: () => void;
+  handleCancelEdit: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: board.name });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className={`w-full p-3 rounded-xl text-sm font-medium transition-all border group cursor-grab active:cursor-grabbing ${
+        currentBoard === board.name
+          ? 'bg-purple-200 border-purple-300 text-purple-900 shadow-sm'
+          : 'bg-white/70 border-purple-200 text-purple-700 hover:bg-white/90 hover:border-purple-300'
+      } ${isDragging ? 'opacity-50' : ''}`}
+    >
+      {editingBoard === board.name ? (
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={editingTitle}
+            onChange={(e) => setEditingTitle(e.target.value)}
+            className="w-full text-sm border border-purple-300 rounded-lg px-2 py-1 bg-white text-purple-900 focus:outline-none focus:border-purple-500"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSaveEdit();
+              } else if (e.key === 'Escape') {
+                handleCancelEdit();
+              }
+            }}
+            onBlur={handleSaveEdit}
+            autoFocus
+          />
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1">
+            <div {...listeners} className="text-purple-400 cursor-grab active:cursor-grabbing text-xs">
+              ⋮⋮
+            </div>
+            <button
+              onClick={() => onBoardChange(board.name)}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                handleEditBoard(board.name, board.title);
+              }}
+              className="flex-1 text-left"
+            >
+              {board.title}
+            </button>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBoardDelete(board.name);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 text-xs ml-2"
+          >
+            ×
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoardChange, onBoardDelete, onBoardReorder, minimized, onMinimize }: Props) {
   const [isCreating, setIsCreating] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [editingBoard, setEditingBoard] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [activeBoard, setActiveBoard] = useState<Board | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   const handleCreateBoard = () => {
     if (newBoardName.trim()) {
@@ -50,6 +179,25 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
     setEditingTitle("");
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const board = availableBoards.find(b => b.name === event.active.id);
+    setActiveBoard(board || null);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const oldIndex = availableBoards.findIndex(board => board.name === active.id);
+      const newIndex = availableBoards.findIndex(board => board.name === over?.id);
+      
+      const reorderedBoards = arrayMove(availableBoards, oldIndex, newIndex);
+      onBoardReorder(reorderedBoards);
+    }
+    
+    setActiveBoard(null);
+  };
+
   return (
     <div className="w-64 bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-2xl p-4 shadow-lg">
       {/* Header */}
@@ -69,60 +217,46 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
       </div>
 
       {/* Board List */}
-      <div className="space-y-2 mb-4">
-        {availableBoards.map((board) => (
-          <div
-            key={board.name}
-            className={`w-full p-3 rounded-xl text-sm font-medium transition-all border group ${
-              currentBoard === board.name
-                ? 'bg-purple-200 border-purple-300 text-purple-900 shadow-sm'
-                : 'bg-white/70 border-purple-200 text-purple-700 hover:bg-white/90 hover:border-purple-300'
-            }`}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="space-y-2 mb-4">
+          <SortableContext
+            items={availableBoards.map(board => board.name)}
+            strategy={verticalListSortingStrategy}
           >
-            {editingBoard === board.name ? (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                  className="w-full text-sm border border-purple-300 rounded-lg px-2 py-1 bg-white text-purple-900 focus:outline-none focus:border-purple-500"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveEdit();
-                    } else if (e.key === 'Escape') {
-                      handleCancelEdit();
-                    }
-                  }}
-                  onBlur={handleSaveEdit}
-                  autoFocus
-                />
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => onBoardChange(board.name)}
-                  onDoubleClick={(e) => {
-                    e.stopPropagation();
-                    handleEditBoard(board.name, board.title);
-                  }}
-                  className="flex-1 text-left"
-                >
-                  {board.title}
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onBoardDelete(board.name);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 text-xs ml-2"
-                >
-                  ×
-                </button>
+            {availableBoards.map((board) => (
+              <SortableBoardItem
+                key={board.name}
+                board={board}
+                currentBoard={currentBoard}
+                editingBoard={editingBoard}
+                editingTitle={editingTitle}
+                setEditingTitle={setEditingTitle}
+                onBoardChange={onBoardChange}
+                onBoardDelete={onBoardDelete}
+                handleEditBoard={handleEditBoard}
+                handleSaveEdit={handleSaveEdit}
+                handleCancelEdit={handleCancelEdit}
+              />
+            ))}
+          </SortableContext>
+        </div>
+        
+        {createPortal(
+          <DragOverlay>
+            {activeBoard && (
+              <div className="w-64 p-3 rounded-xl text-sm font-medium bg-purple-200 border-purple-300 text-purple-900 shadow-lg rotate-3">
+                {activeBoard.title}
               </div>
             )}
-          </div>
-        ))}
-      </div>
+          </DragOverlay>,
+          document.body
+        )}
+      </DndContext>
 
       {/* Create New Board */}
       {isCreating ? (

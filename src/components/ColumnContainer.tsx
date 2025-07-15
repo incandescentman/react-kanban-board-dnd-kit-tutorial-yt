@@ -6,6 +6,9 @@ import { useMemo, useState } from "react";
 import PlusIcon from "../icons/PlusIcon";
 import TaskCard from "./TaskCard";
 import GroupContainer from "./GroupContainer";
+import { Button } from "@/components/ui/button";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Props {
   column: Column;
@@ -177,6 +180,36 @@ function ColumnContainer({
             />
           )}
         </div>
+        
+        {!editMode && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="group">
+                <DeleteConfirmationDialog
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 opacity-60 hover:opacity-100 hover:bg-red-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  }
+                  title="Delete Column"
+                  description={`Are you sure you want to delete the "${column.title}" column? This will permanently delete the column and all its tasks.`}
+                  onConfirm={() => deleteColumn(column.id)}
+                  confirmText="Delete Column"
+                />
+                <TooltipContent side="bottom">
+                  Delete column
+                </TooltipContent>
+              </div>
+            </TooltipTrigger>
+          </Tooltip>
+        )}
       </div>
 
       {/* Column task container */}

@@ -1,5 +1,5 @@
 import PlusIcon from "../icons/PlusIcon";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Board, Column, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -15,736 +15,600 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
-import IntentionsPanel from "./IntentionsPanel";
-import BoardSelector from "./BoardSelector";
-import CommandPalette from "./CommandPalette";
-import TagView from "./TagView";
-import { extractTags } from "../utils/tags";
-import { recoverAllBoardData, exportBoardData, findAllBoardData } from "../utils/dataRecovery";
+
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, HelpCircle, Clipboard } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const defaultIntentions = [
-  "Track calories daily",
-  "In bed by midnight",
-  "Gym every day",
-  "Read for 30 minutes",
-  "Drink 8 glasses of water"
-];
+import { Plus, HelpCircle, Clipboard, Command, Tag, Archive, Trash2, Edit3 } from 'lucide-react';
 
-const defaultBoard: Board = {
-  title: "Rising Action Board",
-  columns: [
-    {
-      id: "ideas",
-      title: "Ideas",
-      groups: [],
-      tasks: [
-        {
-          id: "idea1",
-          content: "Write job descriptions",
-          status: "TODO",
-        },
-      ],
-    },
-    {
-      id: "todo",
-      title: "To Do",
-      groups: [],
-      tasks: [
-        {
-          id: "1",
-          content: "List admin APIs for dashboard",
-          status: "TODO",
-        },
-        {
-          id: "2",
-          content: "Develop user registration functionality with OTP delivered on SMS after email confirmation and phone number confirmation",
-          status: "TODO",
-        },
-        {
-          id: "8",
-          content: "Optimize application performance",
-          status: "TODO",
-        },
-        {
-          id: "9",
-          content: "Implement data validation",
-          status: "TODO",
-        },
-        {
-          id: "10",
-          content: "Design database schema",
-          status: "TODO",
-        },
-        {
-          id: "11",
-          content: "Integrate SSL web certificates into workflow",
-          status: "TODO",
-        },
-      ],
-    },
-    {
-      id: "doing",
-      title: "In Progress",
-      groups: [],
-      tasks: [
-        {
-          id: "3",
-          content: "Conduct security testing",
-          status: "STARTED",
-        },
-        {
-          id: "4",
-          content: "Analyze competitors",
-          status: "STARTED",
-        },
-        {
-          id: "12",
-          content: "Implement error logging and monitoring",
-          status: "STARTED",
-        },
-        {
-          id: "13",
-          content: "Design and implement responsive UI",
-          status: "STARTED",
-        },
-      ],
-    },
-    {
-      id: "done",
-      title: "Done",
-      groups: [],
-      tasks: [
-        {
-          id: "5",
-          content: "Create UI kit documentation",
-          status: "DONE",
-        },
-        {
-          id: "6",
-          content: "Dev meeting",
-          status: "DONE",
-        },
-        {
-          id: "7",
-          content: "Deliver dashboard prototype",
-          status: "DONE",
-        },
-      ],
-    },
-  ],
-};
+import CommandPalette from "./CommandPalette";
+import TagView from "./TagView";
+import Legend from "./Legend";
+import BoardSelector from "./BoardSelector";
+import GroupContainer from "./GroupContainer";
+import IntentionsPanel from "./IntentionsPanel";
 
-const STORAGE_KEY = 'kanban-board-state';
-const CURRENT_BOARD_KEY = 'kanban-current-board';
-const DATA_VERSION = 2; // Increment this when making breaking changes
-
-const defaultBoardTemplates = {
-  "Rising Action": {
-    title: "Rising Action",
-    columns: [
-      {
-        id: "ideas",
-        title: "Ideas",
-        groups: [],
-        tasks: [
-          { id: "idea1", content: "Write job descriptions", status: "TODO" },
-        ],
-      },
-      {
-        id: "todo",
-        title: "To Do",
-        groups: [],
-        tasks: [
-          { id: "1", content: "List admin APIs for dashboard", status: "TODO" },
-          { id: "2", content: "Develop user registration functionality", status: "TODO" },
-        ],
-      },
-      {
-        id: "doing",
-        title: "In Progress",
-        groups: [],
-        tasks: [
-          { id: "3", content: "Conduct security testing", status: "STARTED" },
-        ],
-      },
-      {
-        id: "done",
-        title: "Done",
-        groups: [],
-        tasks: [
-          { id: "5", content: "Create UI kit documentation", status: "DONE" },
-        ],
-      },
-    ],
-  },
-  "Creative": {
-    title: "Creative",
-    columns: [
-      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
-      { id: "todo", title: "To Do", groups: [], tasks: [] },
-      { id: "doing", title: "In Progress", groups: [], tasks: [] },
-      { id: "done", title: "Done", groups: [], tasks: [] },
-    ],
-  },
-  "Writing Projects": {
-    title: "Writing Projects",
-    columns: [
-      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
-      { id: "todo", title: "To Do", groups: [], tasks: [] },
-      { id: "doing", title: "In Progress", groups: [], tasks: [] },
-      { id: "done", title: "Done", groups: [], tasks: [] },
-    ],
-  },
-  "Finances": {
-    title: "Finances",
-    columns: [
-      { id: "ideas", title: "Ideas", groups: [], tasks: [] },
-      { id: "todo", title: "To Do", groups: [], tasks: [] },
-      { id: "doing", title: "In Progress", groups: [], tasks: [] },
-      { id: "done", title: "Done", groups: [], tasks: [] },
-    ],
-  },
-};
-
-function migrateBoard(boardData: any): Board {
-  // Ensure board has correct structure for current version
-  const migrated = {
-    ...boardData,
-    dataVersion: DATA_VERSION
-  };
-  
-  // Add any migration logic here for future versions
-  if (!migrated.columns) {
-    migrated.columns = [];
-  }
-  
-  // Ensure each column has groups array (added in version 2)
-  migrated.columns = migrated.columns.map((col: any) => ({
-    ...col,
-    groups: col.groups || [],
-    tasks: col.tasks || []
-  }));
-  
-  return migrated;
-}
+const DATA_VERSION = 2;
 
 function KanbanBoard() {
-  const [currentBoardName, setCurrentBoardName] = useState<string>(() => {
-    const stored = localStorage.getItem(CURRENT_BOARD_KEY);
-    return stored || "Rising Action";
-  });
-
   const [board, setBoard] = useState<Board>(() => {
-    const storedBoard = localStorage.getItem(`${STORAGE_KEY}-${currentBoardName}`);
-    if (storedBoard) {
+    const saved = localStorage.getItem('kanban-board-state');
+    if (saved) {
       try {
-        const parsed = JSON.parse(storedBoard);
+        const parsed = JSON.parse(saved);
         
-        // Remove the "delete" column if it exists
-        if (parsed.columns) {
-          parsed.columns = parsed.columns.filter((col: any) => 
-            col.id !== 'delete' && 
-            col.title?.toLowerCase() !== 'delete'
-          );
-        }
-        
-        // Check if data needs migration
+        // Check if this is version 1 data (flat structure)
         if (!parsed.dataVersion || parsed.dataVersion < DATA_VERSION) {
           console.log(`Migrating board data from version ${parsed.dataVersion || 1} to ${DATA_VERSION}`);
-          const migrated = migrateBoard(parsed);
-          // Save migrated version immediately
-          localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(migrated));
-          return migrated;
+          
+          // Migrate from version 1 to version 2
+          if (parsed.columns && parsed.tasks) {
+            const migratedColumns = parsed.columns.map((col: any) => ({
+              ...col,
+              tasks: parsed.tasks.filter((task: any) => task.columnId === col.id),
+              groups: [] // Add empty groups array
+            }));
+            
+            const migratedBoard = {
+              title: parsed.title || "Kanban Board",
+              columns: migratedColumns,
+              dataVersion: DATA_VERSION
+            };
+            
+            // Save migrated data
+            localStorage.setItem('kanban-board-state', JSON.stringify(migratedBoard));
+            return migratedBoard;
+          }
         }
         
-        return parsed;
-      } catch (e) {
-        console.error('Failed to parse stored board:', e);
+        // Ensure the board has the correct structure
+        return {
+          title: parsed.title || "Kanban Board",
+          columns: parsed.columns?.map((col: any) => ({
+            ...col,
+            tasks: col.tasks || [],
+            groups: col.groups || []
+          })) || [],
+          dataVersion: DATA_VERSION
+        };
+      } catch (error) {
+        console.error('Error parsing saved board data:', error);
       }
     }
     
-    // Fall back to default board from templates with version
-    const defaultBoardWithVersion = {
-      ...defaultBoardTemplates[currentBoardName as keyof typeof defaultBoardTemplates] || defaultBoard,
+    return {
+      title: "Sunjay's Post-OpenAI Action Plan",
+      columns: [
+        {
+          id: 7746,
+          title: "Ideas",
+          tasks: [
+            {
+              id: 9439,
+              content: "Write job descriptions",
+              completed: false,
+              tags: []
+            }
+          ],
+          groups: []
+        },
+        {
+          id: "todo",
+          title: "To Do",
+          tasks: [],
+          groups: [
+            {
+              id: "july-items",
+              title: "July items",
+              tasks: [
+                {
+                  id: 7350,
+                  content: "Pick up laundry",
+                  completed: false,
+                  tags: []
+                },
+                {
+                  id: 6263,
+                  content: "Do project",
+                  completed: false,
+                  tags: []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "doing",
+          title: "In Progress",
+          tasks: [
+            {
+              id: 5374,
+              content: "Write chapter",
+              completed: false,
+              tags: []
+            }
+          ],
+          groups: []
+        },
+        {
+          id: "done",
+          title: "Done",
+          tasks: [
+            {
+              id: 5056,
+              content: "Publish blog post",
+              completed: true,
+              tags: []
+            }
+          ],
+          groups: []
+        }
+      ],
       dataVersion: DATA_VERSION
     };
-    return defaultBoardWithVersion;
   });
 
-  const [intentions, setIntentions] = useState<string[]>(() => {
-    const stored = localStorage.getItem('kanban-intentions');
-    if (stored) {
-      return JSON.parse(stored);
-    }
-    return defaultIntentions;
-  });
+  const [allTags, setAllTags] = useState<Set<string>>(new Set());
+  const [currentBoardName, setCurrentBoardName] = useState<string>('kanban-board-state');
+  const [availableBoards, setAvailableBoards] = useState<string[]>([]);
+  const [boardOrder, setBoardOrder] = useState<string[]>([]);
+  const [boardSelectorMinimized, setBoardSelectorMinimized] = useState(false);
 
-  const [columnMoveMode, setColumnMoveMode] = useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [tagViewOpen, setTagViewOpen] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<string>('');
-  const [boardsUpdateTrigger, setBoardsUpdateTrigger] = useState(0);
-
-  const commands = useMemo(() => [
-    {
-      id: 'toggle-column-move',
-      label: 'Toggle Column Move Mode',
-      description: 'Enable or disable column drag and drop',
-      action: () => setColumnMoveMode(prev => !prev),
-      shortcut: 'Option+Shift+C'
-    },
-    {
-      id: 'add-column',
-      label: 'Add New Column',
-      description: 'Create a new column',
-      action: () => createNewColumn(),
-    },
-    {
-      id: 'minimize-legend',
-      label: 'Toggle Keyboard Shortcuts',
-      description: 'Show or hide the keyboard shortcuts legend',
-      action: () => setLegendMinimized(prev => !prev),
-    },
-    {
-      id: 'minimize-board-selector',
-      label: 'Toggle Board Selector',
-      description: 'Show or hide the board selector',
-      action: () => setBoardSelectorMinimized(prev => !prev),
-    },
-    {
-      id: 'clear-notes',
-      label: 'Clear Notes',
-      description: 'Clear all notes in the notes section',
-      action: () => setNotes(''),
-    },
-    {
-      id: 'view-all-tags',
-      label: 'View All Tags',
-      description: 'Show a list of all tags used in cards',
-      action: () => {
-        // Get all unique tags
-        const allTags = new Set<string>();
-        if (board.columns) {
-          board.columns.forEach(col => {
-            col.tasks?.forEach(task => {
-              extractTags(task.content).forEach(tag => allTags.add(tag));
-            });
-            col.groups?.forEach(group => {
-              group.tasks?.forEach(task => {
-                extractTags(task.content).forEach(tag => allTags.add(tag));
-              });
-            });
-          });
-        }
-        console.log('All tags:', Array.from(allTags));
-        // For now just log them, could create a tags overview modal later
-      },
-    },
-    {
-      id: 'recover-data',
-      label: 'Recover Lost Data',
-      description: 'Scan localStorage for any lost board data and recover it',
-      action: () => {
-        const recoveredBoards = recoverAllBoardData();
-        console.log('Found recoverable boards:', recoveredBoards);
-        
-        if (recoveredBoards.length > 0) {
-          // Save each recovered board
-          recoveredBoards.forEach((recoveredBoard, index) => {
-            const boardName = recoveredBoard.title || `Recovered Board ${index + 1}`;
-            localStorage.setItem(`${STORAGE_KEY}-${boardName}`, JSON.stringify(recoveredBoard));
-          });
-          
-          alert(`Recovered ${recoveredBoards.length} board(s)! Check the board selector to access them.`);
-          setBoardsUpdateTrigger(prev => prev + 1);
-        } else {
-          alert('No recoverable board data found in localStorage.');
-        }
-      },
-    },
-    {
-      id: 'export-data',
-      label: 'Export All Data',
-      description: 'Export all board data to JSON for backup',
-      action: () => {
-        const exportData = exportBoardData();
-        const blob = new Blob([exportData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `kanban-backup-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      },
-    },
-    {
-      id: 'inspect-storage',
-      label: 'Inspect Storage',
-      description: 'Log all localStorage data to console for debugging',
-      action: () => {
-        const allData = findAllBoardData();
-        console.group('📊 localStorage Data Inspection');
-        console.log('All board-related data found:', allData);
-        console.log('Raw localStorage keys:', Object.keys(localStorage).filter(k => 
-          k.includes('kanban') || k.includes('board') || k.includes('task')
-        ));
-        allData.forEach(({ key, data, isValid }) => {
-          console.group(`🔑 ${key} (${isValid ? 'Valid' : 'Invalid'})`);
-          console.log(data);
-          console.groupEnd();
-        });
-        console.groupEnd();
-        alert('Storage data logged to console. Open DevTools to see details.');
-      },
-    }
-  ], []);
-  const columnsId = useMemo(() => board.columns?.map((col) => col.id) || [], [board.columns]);
-  
-  const allTasks = useMemo(() => {
-    const tasksWithColumnId: (Task & { columnId: Id })[] = [];
-    if (board.columns) {
-      board.columns.forEach(col => {
-        // Tasks directly in the column
-        if (col.tasks) {
-          col.tasks.forEach(task => {
-            tasksWithColumnId.push({ ...task, columnId: col.id });
-          });
-        }
-        // Tasks in groups within the column
-        if (col.groups) {
-          col.groups.forEach(group => {
-            if (group.tasks) {
-              group.tasks.forEach(task => {
-                tasksWithColumnId.push({ ...task, columnId: col.id });
-              });
-            }
-          });
-        }
+  // Extract and set all tags whenever board changes
+  useEffect(() => {
+    const extractedTags = new Set<string>();
+    
+    board.columns?.forEach(column => {
+      column.tasks?.forEach(task => {
+        task.tags?.forEach(tag => extractedTags.add(tag));
       });
-    }
-    return tasksWithColumnId;
-  }, [board.columns]);
-
-  const handleTagClick = (tag: string) => {
-    setSelectedTag(tag);
-    setTagViewOpen(true);
-  };
-
-  const getTasksWithTag = (tag: string) => {
-    const tasksWithTag: Array<Task & { columnId: Id; columnTitle: string; groupTitle?: string }> = [];
-    
-    if (board.columns) {
-      board.columns.forEach(col => {
-        // Check direct column tasks
-        if (col.tasks) {
-          col.tasks.forEach(task => {
-            const tags = extractTags(task.content);
-            if (tags.includes(tag)) {
-              tasksWithTag.push({
-                ...task,
-                columnId: col.id,
-                columnTitle: col.title
-              });
-            }
-          });
-        }
-        
-        // Check tasks in groups
-        if (col.groups) {
-          col.groups.forEach(group => {
-            if (group.tasks) {
-              group.tasks.forEach(task => {
-                const tags = extractTags(task.content);
-                if (tags.includes(tag)) {
-                  tasksWithTag.push({
-                    ...task,
-                    columnId: col.id,
-                    columnTitle: col.title,
-                    groupTitle: group.title
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
-    }
-    
-    return tasksWithTag;
-  };
-
-  const [activeColumn, setActiveColumn] = useState<Column | null>(null);
-
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-
-  const [deletedTask, setDeletedTask] = useState<Task | null>(null);
-  const [redoTask, setRedoTask] = useState<Task | null>(null);
-  const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
-  const [lastModifiedTaskId, setLastModifiedTaskId] = useState<Id | null>(null);
-  const [legendMinimized, setLegendMinimized] = useState(() => {
-    const stored = localStorage.getItem('kanban-legend-minimized');
-    return stored ? JSON.parse(stored) : false;
-  });
-  const [boardSelectorMinimized, setBoardSelectorMinimized] = useState(() => {
-    const stored = localStorage.getItem('kanban-board-selector-minimized');
-    return stored ? JSON.parse(stored) : false;
-  });
-  const [titleEditMode, setTitleEditMode] = useState(false);
-  const [notes, setNotes] = useState(() => {
-    const stored = localStorage.getItem('kanban-notes');
-    return stored || '';
-  });
-
-  const switchToBoard = (boardName: string) => {
-    // Save current board state before switching
-    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(board));
-    
-    // Update current board name
-    setCurrentBoardName(boardName);
-    
-    // Load the new board
-    const storedBoard = localStorage.getItem(`${STORAGE_KEY}-${boardName}`);
-    if (storedBoard) {
-      const parsed = JSON.parse(storedBoard);
-      // Remove the "delete" column if it exists
-      if (parsed.columns) {
-        parsed.columns = parsed.columns.filter((col: any) => 
-          col.id !== 'delete' && 
-          col.title?.toLowerCase() !== 'delete'
-        );
-      }
-      setBoard(parsed);
-    } else {
-      // Create new board from template
-      const template = defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates];
-      if (template) {
-        setBoard(template);
-      } else {
-        // Create a new empty board
-        setBoard({
-          title: boardName,
-          columns: [
-            { id: "ideas", title: "Ideas", groups: [], tasks: [] },
-            { id: "todo", title: "To Do", groups: [], tasks: [] },
-            { id: "doing", title: "In Progress", groups: [], tasks: [] },
-            { id: "done", title: "Done", groups: [], tasks: [] },
-          ],
+      column.groups?.forEach(group => {
+        group.tasks?.forEach(task => {
+          task.tags?.forEach(tag => extractedTags.add(tag));
         });
-      }
-    }
-  };
-
-  const isBlankBoard = (boardData: any): boolean => {
-    if (!boardData || !boardData.columns) return true;
-    
-    for (const column of boardData.columns) {
-      // Check if column has any tasks
-      if (column.tasks && column.tasks.length > 0) {
-        return false;
-      }
-      
-      // Check if column has any groups with tasks
-      if (column.groups && column.groups.length > 0) {
-        for (const group of column.groups) {
-          if (group.tasks && group.tasks.length > 0) {
-            return false;
-          }
-        }
-      }
-    }
-    
-    return true;
-  };
-
-  const deleteOrArchiveBoard = (boardName: string) => {
-    const boardKey = `${STORAGE_KEY}-${boardName}`;
-    const boardData = localStorage.getItem(boardKey);
-    
-    if (!boardData) {
-      return;
-    }
-    
-    try {
-      const parsedBoard = JSON.parse(boardData);
-      const isEmpty = isBlankBoard(parsedBoard);
-      
-      if (isEmpty) {
-        // Delete blank boards completely
-        localStorage.removeItem(boardKey);
-      } else {
-        // Archive non-blank boards by adding archived flag
-        const archivedBoard = {
-          ...parsedBoard,
-          archived: true,
-          archivedDate: new Date().toISOString()
-        };
-        localStorage.setItem(boardKey, JSON.stringify(archivedBoard));
-      }
-      
-      // If we're deleting/archiving the current board, switch to a default board
-      if (boardName === currentBoardName) {
-        // Update trigger first, then switch to another board
-        setBoardsUpdateTrigger(prev => prev + 1);
-        
-        // Use setTimeout to ensure the boards list is refreshed
-        setTimeout(() => {
-          const allBoards = availableBoards.filter(b => b.name !== boardName);
-          
-          if (allBoards.length > 0) {
-            switchToBoard(allBoards[0].name);
-          } else {
-            // Create a new default board
-            switchToBoard("Rising Action");
-          }
-        }, 0);
-      } else {
-        // Force a re-render by updating the boards trigger
-        setBoardsUpdateTrigger(prev => prev + 1);
-      }
-    } catch (e) {
-      console.error(`Failed to delete/archive board ${boardName}:`, e);
-    }
-  };
-
-  const isArchivedBoard = (boardName: string): boolean => {
-    try {
-      const boardData = localStorage.getItem(`${STORAGE_KEY}-${boardName}`);
-      if (boardData) {
-        const parsedBoard = JSON.parse(boardData);
-        return parsedBoard.archived === true;
-      }
-    } catch (e) {
-      // Ignore parsing errors
-    }
-    return false;
-  };
-
-  const availableBoards = useMemo((): { name: string; title: string }[] => {
-    const boards: { name: string; title: string }[] = [];
-    
-    // Add default boards
-    Object.keys(defaultBoardTemplates).forEach(boardName => {
-      const template = defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates];
-      boards.push({ name: boardName, title: template.title });
+      });
     });
     
-    // Add custom boards from localStorage
+    console.log('All tags:', Array.from(extractedTags));
+    setAllTags(extractedTags);
+  }, [board]);
+
+  // Load available boards and their order on component mount
+  useEffect(() => {
+    const recoveredBoards = findAllBoards();
+    console.log('Found recoverable boards:', recoveredBoards);
+    
+    // Load saved board order
+    const savedOrder = localStorage.getItem('kanban-board-order');
+    let boardOrder: string[] = [];
+    
+    if (savedOrder) {
+      try {
+        boardOrder = JSON.parse(savedOrder);
+        // Filter out boards that no longer exist
+        boardOrder = boardOrder.filter(boardName => recoveredBoards.includes(boardName));
+      } catch (error) {
+        console.error('Error parsing board order:', error);
+      }
+    }
+    
+    // Add any new boards that aren't in the saved order
+    const newBoards = recoveredBoards.filter(boardName => !boardOrder.includes(boardName));
+    const orderedBoards = [...boardOrder, ...newBoards];
+    
+    setAvailableBoards(orderedBoards);
+    setBoardOrder(orderedBoards);
+  }, []);
+
+  // Function to find all boards in localStorage
+  const findAllBoards = (): string[] => {
+    const boards: string[] = [];
+    
+    // Get all localStorage keys
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(STORAGE_KEY + '-')) {
-        const boardName = key.substring((STORAGE_KEY + '-').length);
-        
-        // Skip if already added as default board
-        if (defaultBoardTemplates[boardName as keyof typeof defaultBoardTemplates]) {
-          continue;
-        }
-        
+      // Only look for keys that start with 'kanban-board-state' to avoid parsing non-JSON keys
+      if (key && key.startsWith('kanban-board-state')) {
         try {
-          const boardData = localStorage.getItem(key);
-          if (boardData) {
-            const parsedBoard = JSON.parse(boardData);
-            
-            // Skip archived boards
-            if (parsedBoard.archived === true) {
-              continue;
+          const value = localStorage.getItem(key);
+          if (value) {
+            const parsed = JSON.parse(value);
+            // Check if it looks like a board (has title and columns)
+            if (parsed.title && parsed.columns) {
+              boards.push(key);
             }
-            
-            boards.push({ 
-              name: boardName, 
-              title: parsedBoard.title || boardName 
-            });
           }
-        } catch (e) {
-          // Skip invalid board data
-          console.warn(`Failed to parse board data for ${boardName}:`, e);
+        } catch (error) {
+          console.error(`Error parsing localStorage key ${key}:`, error);
         }
       }
     }
     
     return boards;
-  }, [boardsUpdateTrigger]);
+  };
 
+  // Debug localStorage contents
   useEffect(() => {
-    const boardToSave = {
-      ...board,
-      dataVersion: DATA_VERSION
-    };
-    localStorage.setItem(`${STORAGE_KEY}-${currentBoardName}`, JSON.stringify(boardToSave));
-  }, [board, currentBoardName]);
+    if (availableBoards.length > 0) {
+      const allData = availableBoards.reduce((acc, boardName) => {
+        const data = localStorage.getItem(boardName);
+        if (data) {
+          try {
+            acc[boardName] = JSON.parse(data);
+          } catch (error) {
+            acc[boardName] = data;
+          }
+        }
+        return acc;
+      }, {} as Record<string, any>);
+      
+      console.log('All board-related data found:', allData);
+      console.log('Raw localStorage keys:', Object.keys(localStorage).filter(k => 
+        k.includes('kanban') || k.includes('board')
+      ));
+      
+      Object.keys(allData).forEach(boardName => {
+        const data = allData[boardName];
+        if (data && typeof data === 'object') {
+          console.log(data);
+        }
+      });
+    }
+  }, [availableBoards]);
 
-  useEffect(() => {
-    localStorage.setItem(CURRENT_BOARD_KEY, currentBoardName);
-  }, [currentBoardName]);
+  const [activeColumn, setActiveColumn] = useState<Column | null>(null);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem('kanban-legend-minimized', JSON.stringify(legendMinimized));
-  }, [legendMinimized]);
+  const [legendMinimized, setLegendMinimized] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [tagViewOpen, setTagViewOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [undoStack, setUndoStack] = useState<Task[]>([]);
+  const [redoStack, setRedoStack] = useState<Task[]>([]);
 
-  useEffect(() => {
-    localStorage.setItem('kanban-board-selector-minimized', JSON.stringify(boardSelectorMinimized));
-  }, [boardSelectorMinimized]);
+  const [columnMoveMode, setColumnMoveMode] = useState(false);
 
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem('kanban-notes');
+    return saved || '';
+  });
+
+  const [intentions, setIntentions] = useState<string[]>(() => {
+    const saved = localStorage.getItem('kanban-intentions');
+    return saved ? JSON.parse(saved) : [
+      "Focus on high-impact tasks",
+      "Complete one thing at a time",
+      "Take breaks when needed"
+    ];
+  });
+
+  // Auto-save notes to localStorage
   useEffect(() => {
     localStorage.setItem('kanban-notes', notes);
   }, [notes]);
 
+  // Auto-save intentions to localStorage
   useEffect(() => {
     localStorage.setItem('kanban-intentions', JSON.stringify(intentions));
   }, [intentions]);
 
+  // Auto-save board state to localStorage
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && deletedTask) {
-        e.preventDefault();
-        setBoard(prev => {
-          const newBoard = { ...prev };
-          const targetColumn = newBoard.columns.find(col => col.id === deletedTask.columnId);
-          if (targetColumn) {
-            targetColumn.tasks = [...targetColumn.tasks, deletedTask];
+    localStorage.setItem(currentBoardName, JSON.stringify(board));
+  }, [board, currentBoardName]);
+
+  const columnsId = useMemo(() => {
+    return board.columns?.map((col) => col.id) || [];
+  }, [board.columns]);
+
+  const switchToBoard = (boardName: string) => {
+    try {
+      const boardData = localStorage.getItem(boardName);
+      if (boardData) {
+        const parsed = JSON.parse(boardData);
+        setBoard(parsed);
+        setCurrentBoardName(boardName);
+      }
+    } catch (error) {
+      console.error('Error switching to board:', error);
+    }
+  };
+
+  const deleteOrArchiveBoard = (boardName: string) => {
+    try {
+      // Remove from localStorage
+      localStorage.removeItem(boardName);
+      
+      // Update available boards list
+      const updatedBoards = availableBoards.filter(name => name !== boardName);
+      setAvailableBoards(updatedBoards);
+      setBoardOrder(updatedBoards);
+      
+      // Save updated order
+      localStorage.setItem('kanban-board-order', JSON.stringify(updatedBoards));
+      
+      // If we deleted the current board, switch to the default one
+      if (boardName === currentBoardName) {
+        const defaultBoard = updatedBoards.length > 0 ? updatedBoards[0] : 'kanban-board-state';
+        switchToBoard(defaultBoard);
+      }
+    } catch (error) {
+      console.error('Error deleting/archiving board:', error);
+    }
+  };
+
+  const handleBoardReorder = (reorderedBoards: { name: string; title: string }[]) => {
+    const newOrder = reorderedBoards.map(board => board.name);
+    setAvailableBoards(newOrder);
+    setBoardOrder(newOrder);
+    
+    // Save the new order to localStorage
+    localStorage.setItem('kanban-board-order', JSON.stringify(newOrder));
+  };
+
+  const commands = [
+    {
+      id: 'add-column',
+      label: 'Add Column',
+      action: () => createNewColumn(),
+      icon: Plus
+    },
+    {
+      id: 'toggle-legend',
+      label: 'Toggle Legend',
+      action: () => setLegendMinimized(!legendMinimized),
+      icon: HelpCircle
+    },
+    {
+      id: 'show-tags',
+      label: 'Show Tags',
+      action: () => setTagViewOpen(true),
+      icon: Tag
+    },
+    {
+      id: 'board-selector',
+      label: 'Board Selector',
+      action: () => setBoardSelectorMinimized(!boardSelectorMinimized),
+      icon: Archive
+    },
+    {
+      id: 'column-move-mode',
+      label: 'Toggle Column Move Mode',
+      action: () => setColumnMoveMode(!columnMoveMode),
+      icon: Edit3
+    }
+  ];
+
+  const handleKeyboardNavigation = (key: string) => {
+    if (!focusedTaskId) return;
+
+    const allTasks = getAllTasks();
+    const currentIndex = allTasks.findIndex(task => task.id === focusedTaskId);
+    
+    if (currentIndex === -1) return;
+
+    let newIndex = currentIndex;
+    
+    switch (key) {
+      case 'ArrowUp':
+        newIndex = Math.max(0, currentIndex - 1);
+        break;
+      case 'ArrowDown':
+        newIndex = Math.min(allTasks.length - 1, currentIndex + 1);
+        break;
+      case 'ArrowLeft':
+        // Find task in previous column
+        const currentTask = allTasks[currentIndex];
+        const { columnIndex, taskIndex } = findTaskPosition(currentTask.id);
+        if (columnIndex > 0) {
+          const prevColumn = board.columns?.[columnIndex - 1];
+          if (prevColumn) {
+            const prevTasks = getColumnTasks(prevColumn);
+            const targetIndex = Math.min(taskIndex, prevTasks.length - 1);
+            if (targetIndex >= 0) {
+              setFocusedTaskId(prevTasks[targetIndex].id);
+              return;
+            }
           }
-          return newBoard;
-        });
-        setRedoTask(deletedTask);
-        setDeletedTask(null);
-        return;
-      }
-
-      if ((e.metaKey || e.ctrlKey) && e.key === 'y' && redoTask) {
-        e.preventDefault();
-        const taskToRedo = redoTask;
-        setDeletedTask(taskToRedo);
-        setRedoTask(null);
-        setBoard(prev => {
-          const newBoard = { ...prev };
-          newBoard.columns = newBoard.columns.map(col => ({
-            ...col,
-            tasks: col.tasks.filter(task => task.id !== taskToRedo.id)
-          }));
-          return newBoard;
-        });
-        return;
-      }
-
-      if (e.altKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-        // Don't interfere with alt+arrow keys when editing text
-        const activeElement = document.activeElement;
-        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-          return;
         }
-        
+        break;
+      case 'ArrowRight':
+        // Find task in next column
+        const currentTask2 = allTasks[currentIndex];
+        const { columnIndex: colIndex, taskIndex: taskIdx } = findTaskPosition(currentTask2.id);
+        if (colIndex < (board.columns?.length || 0) - 1) {
+          const nextColumn = board.columns?.[colIndex + 1];
+          if (nextColumn) {
+            const nextTasks = getColumnTasks(nextColumn);
+            const targetIndex = Math.min(taskIdx, nextTasks.length - 1);
+            if (targetIndex >= 0) {
+              setFocusedTaskId(nextTasks[targetIndex].id);
+              return;
+            }
+          }
+        }
+        break;
+    }
+    
+    if (newIndex !== currentIndex && allTasks[newIndex]) {
+      setFocusedTaskId(allTasks[newIndex].id);
+    }
+  };
+
+  const getAllTasks = (): Task[] => {
+    const tasks: Task[] = [];
+    board.columns?.forEach(column => {
+      column.tasks?.forEach(task => tasks.push(task));
+      column.groups?.forEach(group => {
+        group.tasks?.forEach(task => tasks.push(task));
+      });
+    });
+    return tasks;
+  };
+
+  const getColumnTasks = (column: Column): Task[] => {
+    const tasks: Task[] = [];
+    column.tasks?.forEach(task => tasks.push(task));
+    column.groups?.forEach(group => {
+      group.tasks?.forEach(task => tasks.push(task));
+    });
+    return tasks;
+  };
+
+  const findTaskPosition = (taskId: Id): { columnIndex: number; taskIndex: number } => {
+    for (let colIndex = 0; colIndex < (board.columns?.length || 0); colIndex++) {
+      const column = board.columns?.[colIndex];
+      if (column) {
+        const columnTasks = getColumnTasks(column);
+        const taskIndex = columnTasks.findIndex(task => task.id === taskId);
+        if (taskIndex !== -1) {
+          return { columnIndex: colIndex, taskIndex };
+        }
+      }
+    }
+    return { columnIndex: -1, taskIndex: -1 };
+  };
+
+  const handleKeyboardDragDrop = (key: string) => {
+    if (!focusedTaskId) return;
+
+    const currentTask = getAllTasks().find(task => task.id === focusedTaskId);
+    if (!currentTask) return;
+
+    const { columnIndex, taskIndex } = findTaskPosition(focusedTaskId);
+    if (columnIndex === -1) return;
+
+    const currentColumn = board.columns?.[columnIndex];
+    if (!currentColumn) return;
+
+    let targetColumnIndex = columnIndex;
+    let targetTaskIndex = taskIndex;
+
+    switch (key) {
+      case 'ArrowUp':
+        targetTaskIndex = Math.max(0, taskIndex - 1);
+        break;
+      case 'ArrowDown':
+        const currentColumnTasks = getColumnTasks(currentColumn);
+        targetTaskIndex = Math.min(currentColumnTasks.length - 1, taskIndex + 1);
+        break;
+      case 'ArrowLeft':
+        targetColumnIndex = Math.max(0, columnIndex - 1);
+        break;
+      case 'ArrowRight':
+        targetColumnIndex = Math.min((board.columns?.length || 0) - 1, columnIndex + 1);
+        break;
+    }
+
+    if (targetColumnIndex !== columnIndex || targetTaskIndex !== taskIndex) {
+      // Perform the move
+      moveTaskToPosition(focusedTaskId, targetColumnIndex, targetTaskIndex);
+    }
+  };
+
+  const moveTaskToPosition = (taskId: Id, targetColumnIndex: number, targetTaskIndex: number) => {
+    setBoard(prev => {
+      const newColumns = [...(prev.columns || [])];
+      const sourceColumnIndex = findTaskPosition(taskId).columnIndex;
+      
+      if (sourceColumnIndex === -1 || targetColumnIndex >= newColumns.length) return prev;
+      
+      const sourceColumn = newColumns[sourceColumnIndex];
+      const targetColumn = newColumns[targetColumnIndex];
+      
+      let taskToMove: Task | null = null;
+      
+      // Remove task from source
+      if (sourceColumn.tasks) {
+        const taskIndex = sourceColumn.tasks.findIndex(task => task.id === taskId);
+        if (taskIndex !== -1) {
+          taskToMove = sourceColumn.tasks[taskIndex];
+          sourceColumn.tasks.splice(taskIndex, 1);
+        }
+      }
+      
+      if (!taskToMove) {
+        // Check groups
+        for (const group of sourceColumn.groups || []) {
+          const taskIndex = group.tasks?.findIndex(task => task.id === taskId) || -1;
+          if (taskIndex !== -1) {
+            taskToMove = group.tasks?.[taskIndex] || null;
+            group.tasks?.splice(taskIndex, 1);
+            break;
+          }
+        }
+      }
+      
+      if (!taskToMove) return prev;
+      
+      // Add task to target
+      if (sourceColumnIndex === targetColumnIndex) {
+        // Same column, just reorder
+        const allTasks = getColumnTasks(targetColumn);
+        const insertIndex = Math.min(targetTaskIndex, allTasks.length);
+        targetColumn.tasks = targetColumn.tasks || [];
+        targetColumn.tasks.splice(insertIndex, 0, taskToMove);
+      } else {
+        // Different column
+        targetColumn.tasks = targetColumn.tasks || [];
+        const insertIndex = Math.min(targetTaskIndex, targetColumn.tasks.length);
+        targetColumn.tasks.splice(insertIndex, 0, taskToMove);
+      }
+      
+      return { ...prev, columns: newColumns };
+    });
+  };
+
+  const toggleKeyboardFocus = () => {
+    if (focusedTaskId) {
+      // If something is focused, unfocus it
+      setFocusedTaskId(null);
+    } else {
+      // If nothing is focused, focus the first task
+      const allTasks = getAllTasks();
+      if (allTasks.length > 0) {
+        // Try to find the most recently modified task, or fall back to the first task
+        const lastModifiedTask = allTasks[0]; // You could implement last modified tracking
+        setFocusedTaskId(lastModifiedTask.id);
+      }
+    }
+  };
+
+  // Handle global keyboard shortcuts
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      // Command palette
+      if (e.metaKey && e.key === 'k') {
         e.preventDefault();
-        e.stopPropagation();
-        handleKeyboardNavigation(e.key);
+        setCommandPaletteOpen(true);
+        return;
       }
 
-      if (!e.altKey && !e.ctrlKey && !e.metaKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      // Undo/Redo
+      if (e.metaKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+
+      if (e.metaKey && e.key === 'y' || (e.metaKey && e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        redo();
+        return;
+      }
+
+      // Column move mode toggle
+      if (e.metaKey && e.key === 'm') {
+        e.preventDefault();
+        setColumnMoveMode(!columnMoveMode);
+        return;
+      }
+
+      // Arrow key navigation
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         // Don't interfere with arrow keys when editing text
         const activeElement = document.activeElement;
         if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
@@ -802,647 +666,89 @@ function KanbanBoard() {
           return;
         }
         
-        // Create new task below focused task
+        // Add new task when meta+enter is pressed
         if (focusedTaskId) {
           e.preventDefault();
           e.stopPropagation();
-          createTaskBelow(focusedTaskId);
+          
+          // Find which column the focused task is in
+          const { columnIndex } = findTaskPosition(focusedTaskId);
+          if (columnIndex !== -1 && board.columns?.[columnIndex]) {
+            createTask(board.columns[columnIndex].id);
+          }
         }
       }
 
-      if (e.key === 'c' && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      // Toggle legend
+      if (e.key === '?' && !e.altKey && !e.ctrlKey && !e.metaKey) {
         // Don't interfere when editing text
         const activeElement = document.activeElement;
         if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
           return;
         }
         
-        // Toggle column move mode
         e.preventDefault();
-        e.stopPropagation();
-        setColumnMoveMode(prev => !prev);
+        setLegendMinimized(!legendMinimized);
       }
 
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+      // Tag view
+      if (e.key === 't' && !e.altKey && !e.ctrlKey && !e.metaKey) {
         // Don't interfere when editing text
         const activeElement = document.activeElement;
         if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
           return;
         }
         
-        // Open command palette
         e.preventDefault();
-        e.stopPropagation();
-        setCommandPaletteOpen(true);
-      }
-
-      if (e.key === 'Escape' && !e.altKey && !e.ctrlKey && !e.metaKey) {
-        // Close tag view if open
-        if (tagViewOpen) {
-          e.preventDefault();
-          e.stopPropagation();
-          setTagViewOpen(false);
-          return;
-        }
-        
-        // Close command palette if open
-        if (commandPaletteOpen) {
-          e.preventDefault();
-          e.stopPropagation();
-          setCommandPaletteOpen(false);
-          return;
-        }
-        
-        // Cancel column move mode if active
-        if (columnMoveMode) {
-          e.preventDefault();
-          e.stopPropagation();
-          setColumnMoveMode(false);
-          return;
-        }
+        setTagViewOpen(true);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [deletedTask, redoTask, focusedTaskId, lastModifiedTaskId, board.columns]);
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
+  }, [focusedTaskId, legendMinimized, columnMoveMode]);
 
-  const handleKeyboardNavigation = (key: string) => {
-    if (allTasks.length === 0) return;
-
-    // If no task is focused, focus the first task
-    if (!focusedTaskId) {
-      const firstTask = tasks[0];
-      if (firstTask) {
-        setFocusedTaskId(firstTask.id);
-        focusTask(firstTask.id);
+  const undo = () => {
+    if (undoStack.length > 0) {
+      const taskToRestore = undoStack[undoStack.length - 1];
+      setUndoStack(prev => prev.slice(0, -1));
+      setRedoStack(prev => [...prev, taskToRestore]);
+      
+      // Find the task's original column and restore it
+      // This is a simplified restore - in a real app you'd want to store more context
+      const firstColumn = board.columns?.[0];
+      if (firstColumn) {
+        createTaskWithContent(firstColumn.id, taskToRestore.content);
       }
-      return;
-    }
-
-    const currentTask = allTasks.find(task => task.id === focusedTaskId);
-    if (!currentTask) return;
-
-    const currentColumn = columns.find(col => col.id === currentTask.columnId);
-    if (!currentColumn) return;
-
-    const tasksInCurrentColumn = allTasks.filter(task => task.columnId === currentColumn.id);
-    const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
-
-    switch (key) {
-      case 'ArrowUp':
-        if (currentTaskIndex > 0) {
-          const prevTask = tasksInCurrentColumn[currentTaskIndex - 1];
-          setFocusedTaskId(prevTask.id);
-          focusTask(prevTask.id);
-        }
-        break;
-      
-      case 'ArrowDown':
-        if (currentTaskIndex < tasksInCurrentColumn.length - 1) {
-          const nextTask = tasksInCurrentColumn[currentTaskIndex + 1];
-          setFocusedTaskId(nextTask.id);
-          focusTask(nextTask.id);
-        }
-        break;
-      
-      case 'ArrowLeft':
-        const currentColumnIndex = board.columns.findIndex(col => col.id === currentColumn.id);
-        if (currentColumnIndex > 0) {
-          const prevColumn = board.columns[currentColumnIndex - 1];
-          const tasksInPrevColumn = allTasks.filter(task => task.columnId === prevColumn.id);
-          if (tasksInPrevColumn.length > 0) {
-            const targetTask = tasksInPrevColumn[Math.min(currentTaskIndex, tasksInPrevColumn.length - 1)];
-            setFocusedTaskId(targetTask.id);
-            focusTask(targetTask.id);
-          }
-        }
-        break;
-      
-      case 'ArrowRight':
-        const currentColIndex = columns.findIndex(col => col.id === currentColumn.id);
-        if (currentColIndex < columns.length - 1) {
-          const nextColumn = board.columns[currentColIndex + 1];
-          const tasksInNextColumn = allTasks.filter(task => task.columnId === nextColumn.id);
-          if (tasksInNextColumn.length > 0) {
-            const targetTask = tasksInNextColumn[Math.min(currentTaskIndex, tasksInNextColumn.length - 1)];
-            setFocusedTaskId(targetTask.id);
-            focusTask(targetTask.id);
-          }
-        }
-        break;
     }
   };
 
-  const focusTask = (taskId: Id) => {
-    const element = document.querySelector(`[data-task-id="${taskId}"]`) as HTMLElement;
-    if (element) {
-      element.focus();
+  const redo = () => {
+    if (redoStack.length > 0) {
+      const taskToRestore = redoStack[redoStack.length - 1];
+      setRedoStack(prev => prev.slice(0, -1));
+      setUndoStack(prev => [...prev, taskToRestore]);
+      
+      // Find and delete the task again
+      deleteTask(taskToRestore.id);
     }
   };
 
-  const toggleKeyboardFocus = () => {
-    if (allTasks.length === 0) return;
-
-    // If a task is currently focused, remove focus
-    if (focusedTaskId && allTasks.find(task => task.id === focusedTaskId)) {
-      setFocusedTaskId(null);
-      // Remove focus from the currently focused element
-      const focusedElement = document.activeElement as HTMLElement;
-      if (focusedElement && focusedElement.blur) {
-        focusedElement.blur();
-      }
-      return;
-    }
-
-    // Otherwise, initiate focus using priority system
-    initiateKeyboardFocus();
+  const handleTagClick = (tag: string) => {
+    setSelectedTag(tag);
+    setTagViewOpen(true);
   };
 
-  const initiateKeyboardFocus = () => {
-    if (allTasks.length === 0) return;
-
-    // Priority 1: Use the most recently focused task if it still exists
-    if (focusedTaskId && allTasks.find(task => task.id === focusedTaskId)) {
-      focusTask(focusedTaskId);
-      return;
-    }
-
-    // Priority 2: Use the most recently modified task if it exists
-    if (lastModifiedTaskId && allTasks.find(task => task.id === lastModifiedTaskId)) {
-      setFocusedTaskId(lastModifiedTaskId);
-      focusTask(lastModifiedTaskId);
-      return;
-    }
-
-    // Priority 3: Focus the first task as fallback
-    const firstTask = tasks[0];
-    if (firstTask) {
-      setFocusedTaskId(firstTask.id);
-      focusTask(firstTask.id);
-    }
+  const updateBoardTitle = (newTitle: string) => {
+    setBoard(prev => ({ ...prev, title: newTitle }));
   };
 
-  const handleKeyboardDragDrop = (key: string) => {
-    if (!focusedTaskId || tasks.length === 0) return;
-
-    const currentTask = allTasks.find(task => task.id === focusedTaskId);
-    if (!currentTask) return;
-
-    const currentColumn = columns.find(col => col.id === currentTask.columnId);
-    if (!currentColumn) return;
-
-    const tasksInCurrentColumn = allTasks.filter(task => task.columnId === currentColumn.id);
-    const currentTaskIndex = tasksInCurrentColumn.findIndex(task => task.id === focusedTaskId);
-
-    switch (key) {
-      case 'ArrowUp':
-        if (currentTaskIndex > 0) {
-          // Move task up within the same column
-          setBoard(prev => ({
-            ...prev,
-            columns: prev.columns.map(col => 
-              col.id === currentColumn.id 
-                ? { ...col, tasks: arrayMove(col.tasks, currentTaskIndex, currentTaskIndex - 1) }
-                : col
-            )
-          }));
-        }
-        break;
-      
-      case 'ArrowDown':
-        if (currentTaskIndex < tasksInCurrentColumn.length - 1) {
-          // Move task down within the same column
-          setBoard(prev => ({
-            ...prev,
-            columns: prev.columns.map(col => 
-              col.id === currentColumn.id 
-                ? { ...col, tasks: arrayMove(col.tasks, currentTaskIndex, currentTaskIndex + 1) }
-                : col
-            )
-          }));
-        }
-        break;
-      
-      case 'ArrowLeft':
-        const currentColumnIndex = board.columns?.findIndex(col => col.id === currentColumn.id) || -1;
-        if (currentColumnIndex > 0) {
-          // Move task to the previous column
-          const prevColumn = board.columns?.[currentColumnIndex - 1];
-          if (!prevColumn) break;
-          
-          setBoard(prev => {
-            const taskToMove = prev.columns?.find(col => col.id === currentColumn.id)?.tasks?.find(task => task.id === focusedTaskId);
-            if (!taskToMove) return prev;
-            
-            return {
-              ...prev,
-              columns: prev.columns?.map(col => {
-                if (col.id === currentColumn.id) {
-                  return { ...col, tasks: col.tasks?.filter(task => task.id !== focusedTaskId) || [] };
-                } else if (col.id === prevColumn.id) {
-                  return { ...col, tasks: [...(col.tasks || []), taskToMove] };
-                }
-                return col;
-              }) || []
-            };
-          });
-          // Re-focus the task after moving to a new column
-          setTimeout(() => focusTask(focusedTaskId), 0);
-        }
-        break;
-      
-      case 'ArrowRight':
-        const currentColIndex = board.columns?.findIndex(col => col.id === currentColumn.id) || -1;
-        if (currentColIndex >= 0 && currentColIndex < (board.columns?.length || 0) - 1) {
-          // Move task to the next column
-          const nextColumn = board.columns?.[currentColIndex + 1];
-          if (!nextColumn) break;
-          
-          setBoard(prev => {
-            const taskToMove = prev.columns?.find(col => col.id === currentColumn.id)?.tasks?.find(task => task.id === focusedTaskId);
-            if (!taskToMove) return prev;
-            
-            return {
-              ...prev,
-              columns: prev.columns?.map(col => {
-                if (col.id === currentColumn.id) {
-                  return { ...col, tasks: col.tasks?.filter(task => task.id !== focusedTaskId) || [] };
-                } else if (col.id === nextColumn.id) {
-                  return { ...col, tasks: [...(col.tasks || []), taskToMove] };
-                }
-                return col;
-              }) || []
-            };
-          });
-          // Re-focus the task after moving to a new column
-          setTimeout(() => focusTask(focusedTaskId), 0);
-        }
-        break;
-    }
-  };
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    })
-  );
-
-  return (
-    <TooltipProvider>
-      <div
-        className="
-          m-auto
-          flex
-          flex-col
-          min-h-screen
-          w-full
-          items-center
-          overflow-x-auto
-          overflow-y-hidden
-          px-[40px]
-          py-8
-          bg-background
-          text-foreground
-      "
-      >
-        {!titleEditMode ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <h1 
-                className="text-4xl font-bold text-foreground mb-12 cursor-pointer hover:text-muted-foreground transition-colors"
-                onClick={() => setTitleEditMode(true)}
-              >
-                {board.title}
-              </h1>
-            </TooltipTrigger>
-            <TooltipContent>
-              Click to edit title
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Input
-            className="text-4xl font-bold mb-12 bg-transparent border-b-2 border-primary outline-none text-center h-auto px-0 border-x-0 border-t-0 rounded-none focus-visible:ring-0"
-            value={board.title}
-            onChange={(e) => setBoard(prev => ({ ...prev, title: e.target.value }))}
-            onBlur={() => {
-              setTitleEditMode(false);
-              // Update currentBoardName to match the new title if it changed
-              if (board.title !== currentBoardName) {
-                const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
-                const newKey = `${STORAGE_KEY}-${board.title}`;
-                
-                // Move data from old key to new key in localStorage
-                const boardData = localStorage.getItem(oldKey);
-                if (boardData) {
-                  localStorage.setItem(newKey, boardData);
-                  localStorage.removeItem(oldKey);
-                }
-                
-                setCurrentBoardName(board.title);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                setTitleEditMode(false);
-                // Update currentBoardName to match the new title if it changed
-                if (board.title !== currentBoardName) {
-                  const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
-                  const newKey = `${STORAGE_KEY}-${board.title}`;
-                  
-                  // Move data from old key to new key in localStorage
-                  const boardData = localStorage.getItem(oldKey);
-                  if (boardData) {
-                    localStorage.setItem(newKey, boardData);
-                    localStorage.removeItem(oldKey);
-                  }
-                  
-                  setCurrentBoardName(board.title);
-                }
-              }
-            }}
-            autoFocus
-          />
-        )}
-      <DndContext
-        sensors={sensors}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-      >
-        <div className="m-auto flex gap-6">
-          {/* Sidebar */}
-          <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>
-            {/* Board Selector */}
-            {!boardSelectorMinimized && (
-              <BoardSelector 
-                currentBoard={currentBoardName}
-                currentBoardTitle={board.title}
-                availableBoards={availableBoards}
-                onBoardChange={switchToBoard}
-                onBoardDelete={deleteOrArchiveBoard}
-                minimized={boardSelectorMinimized}
-                onMinimize={() => setBoardSelectorMinimized(true)}
-              />
-            )}
-            
-            {/* Intentions Panel - slides up when board selector is minimized */}
-            <div className={`transition-all duration-300 ${boardSelectorMinimized ? 'transform -translate-y-0' : ''}`}>
-              <IntentionsPanel 
-                intentions={intentions} 
-                setIntentions={setIntentions}
-              />
-            </div>
-          </div>
-          
-          <div className="flex gap-4">
-            <SortableContext items={columnsId}>
-              {board.columns?.map((col) => (
-                <ColumnContainer
-                  key={col.id}
-                  column={col}
-                  deleteColumn={deleteColumn}
-                  updateColumn={updateColumn}
-                  createTask={createTask}
-                  deleteTask={deleteTask}
-                  updateTask={updateTask}
-                  toggleTaskComplete={toggleTaskComplete}
-                  toggleGroupComplete={toggleGroupComplete}
-                  updateGroup={updateGroup}
-                  deleteGroup={deleteGroup}
-                  convertTaskToHeading={convertTaskToHeading}
-                  tasks={col.tasks}
-                  focusedTaskId={focusedTaskId}
-                  setFocusedTaskId={setFocusedTaskId}
-                  columnMoveMode={columnMoveMode}
-                  onTagClick={handleTagClick}
-                />
-              ))}
-            </SortableContext>
-          </div>
-          
-          {/* Keyboard Navigation Legend */}
-          {!legendMinimized && (
-            <div className="ml-8 p-6 bg-gray-50 border border-gray-200 rounded-lg min-w-[300px] max-w-[350px] self-start">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-black">Keyboard Navigation</h3>
-                <button
-                  onClick={() => setLegendMinimized(true)}
-                  className="text-gray-500 hover:text-gray-700 text-sm font-mono bg-gray-200 px-2 py-1 rounded"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="space-y-2 text-sm text-gray-700">
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Tab/Shift+Tab</span>
-                  <span className="ml-2">Focus navigation</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Spacebar</span>
-                  <span className="ml-2">Toggle task focus</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Arrow Keys</span>
-                  <span className="ml-2">Navigate between tasks</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Ctrl+Arrows</span>
-                  <span className="ml-2">Drag and drop task</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Z/Ctrl+Z</span>
-                  <span className="ml-2">Undo deleted tasks</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Y/Ctrl+Y</span>
-                  <span className="ml-2">Redo deleted tasks</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Enter</span>
-                  <span className="ml-2">Save task when editing</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+Enter</span>
-                  <span className="ml-2">Create new card below</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Shift+Enter</span>
-                  <span className="ml-2">Add line break</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Escape</span>
-                  <span className="ml-2">Cancel editing</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">X or Cmd+D</span>
-                  <span className="ml-2">Toggle task done</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Option+Shift+C</span>
-                  <span className="ml-2">Toggle column move mode</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-mono bg-gray-200 px-2 py-1 rounded">Cmd+K</span>
-                  <span className="ml-2">Open command palette</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Column Move Mode Indicator */}
-        {columnMoveMode && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🔄</span>
-              <span className="font-semibold">Column Move Mode Active</span>
-              <span className="text-sm opacity-80">(Drag columns to reorder)</span>
-            </div>
-          </div>
-        )}
-
-        {/* Notes Section */}
-        <div className="mt-8 mx-auto w-full max-w-[76.5%] px-8">
-          <h2 className="text-2xl font-bold text-foreground mb-4" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
-            Advice / Notes / Comments
-          </h2>
-          <Textarea
-            className="w-full h-64 resize-none"
-            placeholder="Add your notes, advice, or comments here..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
-        {createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <ColumnContainer
-                column={activeColumn}
-                deleteColumn={deleteColumn}
-                updateColumn={updateColumn}
-                createTask={createTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-                toggleTaskComplete={toggleTaskComplete}
-                toggleGroupComplete={toggleGroupComplete}
-                updateGroup={updateGroup}
-                deleteGroup={deleteGroup}
-                convertTaskToHeading={convertTaskToHeading}
-                tasks={activeColumn.tasks}
-                focusedTaskId={focusedTaskId}
-                setFocusedTaskId={setFocusedTaskId}
-                columnMoveMode={columnMoveMode}
-                onTagClick={handleTagClick}
-              />
-            )}
-            {activeTask && (
-              <TaskCard
-                task={activeTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-                toggleTaskComplete={toggleTaskComplete}
-                focusedTaskId={focusedTaskId}
-                setFocusedTaskId={setFocusedTaskId}
-              />
-            )}
-          </DragOverlay>,
-          document.body
-        )}
-      </DndContext>
-      
-        {/* Bottom Right Corner Icons */}
-        <div className="fixed bottom-4 right-4 flex gap-2 z-10">
-          {/* Minimized Board Selector */}
-          {boardSelectorMinimized && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={() => setBoardSelectorMinimized(false)}
-                  size="icon"
-                  variant="outline"
-                  className="h-10 w-10 rounded-full shadow-lg bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 hover:text-purple-700"
-                >
-                  <Clipboard className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                Show Boards
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          {/* Add Column Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={() => createNewColumn()}
-                size="icon"
-                variant="outline"
-                className="h-10 w-10 rounded-full shadow-lg"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              Add Column
-            </TooltipContent>
-          </Tooltip>
-          
-          {/* Minimized Legend */}
-          {legendMinimized && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={() => setLegendMinimized(false)}
-                  size="icon"
-                  variant="outline"
-                  className="h-10 w-10 rounded-full shadow-lg"
-                >
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                Show Keyboard Shortcuts
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-
-      {/* Command Palette */}
-      <CommandPalette
-        isOpen={commandPaletteOpen}
-        onClose={() => setCommandPaletteOpen(false)}
-        commands={commands}
-      />
-
-      {/* Tag View */}
-      <TagView
-        isOpen={tagViewOpen}
-        onClose={() => setTagViewOpen(false)}
-        tag={selectedTag}
-        tasks={getTasksWithTag(selectedTag)}
-        onTaskClick={(taskId) => {
-          // Focus the task when clicked in tag view
-          setFocusedTaskId(taskId);
-          setTagViewOpen(false);
-          setTimeout(() => {
-            focusTask(taskId);
-          }, 100);
-        }}
-      />
-      </div>
-    </TooltipProvider>
-  );
-
-  function createTask(columnId: Id) {
+  const createTaskWithContent = (columnId: Id, content: string): Id => {
     const newTask: Task = {
       id: generateId(),
-      content: "",
-      status: "TODO",
+      content,
+      completed: false,
+      tags: []
     };
 
     setBoard(prev => ({
@@ -1453,225 +759,19 @@ function KanbanBoard() {
           : col
       ) || []
     }));
-    setLastModifiedTaskId(newTask.id);
-  }
 
-  function createTaskBelow(taskId: Id) {
-    const currentTask = allTasks.find(task => task.id === taskId);
-    if (!currentTask) return;
+    return newTask.id;
+  };
 
-    const newTask: Task = {
-      id: generateId(),
-      content: "",
-      status: "TODO",
-    };
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    })
+  );
 
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => {
-        if (col.id === currentTask.columnId) {
-          // First check if task is in column.tasks
-          const taskIndex = col.tasks?.findIndex(task => task.id === taskId) ?? -1;
-          if (taskIndex >= 0) {
-            const newTasks = [...(col.tasks || [])];
-            newTasks.splice(taskIndex + 1, 0, newTask);
-            return { ...col, tasks: newTasks };
-          }
-          
-          // If not found in column.tasks, check in groups
-          const updatedGroups = col.groups?.map(group => {
-            const groupTaskIndex = group.tasks?.findIndex(task => task.id === taskId) ?? -1;
-            if (groupTaskIndex >= 0) {
-              const newGroupTasks = [...(group.tasks || [])];
-              newGroupTasks.splice(groupTaskIndex + 1, 0, newTask);
-              return { ...group, tasks: newGroupTasks };
-            }
-            return group;
-          });
-          
-          if (updatedGroups !== col.groups) {
-            return { ...col, groups: updatedGroups || [] };
-          }
-        }
-        return col;
-      }) || []
-    }));
-    
-    setLastModifiedTaskId(newTask.id);
-    setFocusedTaskId(newTask.id);
-    
-    // Focus the new task after it's created
-    setTimeout(() => {
-      focusTask(newTask.id);
-    }, 0);
-  }
-
-  function deleteTask(id: Id) {
-    let taskToDelete: Task | null = null;
-    let sourceColumnId: Id | null = null;
-    
-    if (board.columns) {
-      board.columns.forEach(col => {
-        const task = col.tasks?.find(task => task.id === id);
-        if (task) {
-          taskToDelete = task;
-          sourceColumnId = col.id;
-        }
-      });
-    }
-    
-    if (taskToDelete && sourceColumnId) {
-      setDeletedTask({ ...taskToDelete, columnId: sourceColumnId });
-      setRedoTask(null);
-    }
-    
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        tasks: col.tasks?.filter(task => task.id !== id) || []
-      })) || []
-    }));
-  }
-
-  function updateTask(id: Id, content: string) {
-    // Regular task update - no heading parsing here
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        tasks: col.tasks?.map(task => 
-          task.id === id ? { ...task, content } : task
-        ) || [],
-        groups: col.groups?.map(group => ({
-          ...group,
-          tasks: group.tasks?.map(task => 
-            task.id === id ? { ...task, content } : task
-          ) || []
-        })) || []
-      })) || []
-    }));
-    setLastModifiedTaskId(id);
-  }
-
-  function convertTaskToHeading(id: Id, content: string) {
-    // Check if content contains heading syntax
-    const parsed = parseHeadingAndTasks(content);
-    
-    if (parsed.isHeading && parsed.title) {
-      // Convert task to heading (group)
-      const currentTask = allTasks.find(task => task.id === id);
-      if (!currentTask) return;
-      
-      const columnId = currentTask.columnId;
-      const { group } = createGroupWithTasks(parsed.title, parsed.tasks || [], columnId);
-      
-      setBoard(prev => ({
-        ...prev,
-        columns: prev.columns?.map(col => {
-          if (col.id === columnId) {
-            return {
-              ...col,
-              // Remove the original task
-              tasks: col.tasks?.filter(task => task.id !== id) || [],
-              // Add the new group
-              groups: [...(col.groups || []), group]
-            };
-          }
-          return col;
-        }) || []
-      }));
-      
-      setLastModifiedTaskId(null);
-      return true; // Indicates conversion happened
-    }
-    
-    return false; // No conversion
-  }
-
-  function toggleTaskComplete(id: Id) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        tasks: col.tasks?.map(task => 
-          task.id === id ? { ...task, completed: !task.completed } : task
-        ) || [],
-        groups: col.groups?.map(group => ({
-          ...group,
-          tasks: group.tasks?.map(task => 
-            task.id === id ? { ...task, completed: !task.completed } : task
-          ) || []
-        })) || []
-      })) || []
-    }));
-  }
-
-  function toggleGroupComplete(id: string) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        groups: col.groups?.map(group => 
-          group.id === id ? { ...group, completed: !group.completed } : group
-        ) || []
-      })) || []
-    }));
-  }
-
-  function updateGroup(id: string, title: string) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        groups: col.groups?.map(group => 
-          group.id === id ? { ...group, title } : group
-        ) || []
-      })) || []
-    }));
-  }
-
-  function deleteGroup(id: string) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        groups: col.groups?.filter(group => group.id !== id) || []
-      })) || []
-    }));
-  }
-
-  function createNewColumn() {
-    const columnToAdd: Column = {
-      id: generateId(),
-      title: `Column ${(board.columns?.length || 0) + 1}`,
-      groups: [],
-      tasks: [],
-    };
-
-    setBoard(prev => ({
-      ...prev,
-      columns: [...(prev.columns || []), columnToAdd]
-    }));
-  }
-
-  function deleteColumn(id: Id) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.filter(col => col.id !== id) || []
-    }));
-  }
-
-  function updateColumn(id: Id, title: string) {
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => 
-        col.id === id ? { ...col, title } : col
-      ) || []
-    }));
-  }
-
-  function onDragStart(event: DragStartEvent) {
+  const onDragStart = useCallback((event: DragStartEvent) => {
     if (event.active.data.current?.type === "Column") {
       setActiveColumn(event.active.data.current.column);
       return;
@@ -1681,9 +781,9 @@ function KanbanBoard() {
       setActiveTask(event.active.data.current.task);
       return;
     }
-  }
+  }, []);
 
-  function onDragEnd(event: DragEndEvent) {
+  const onDragEnd = useCallback((event: DragEndEvent) => {
     setActiveColumn(null);
     setActiveTask(null);
 
@@ -1718,9 +818,9 @@ function KanbanBoard() {
     
     // Task dragging is handled in onDragOver, so we don't need to do anything here for tasks
     // This prevents accidental column reordering when dragging tasks
-  }
+  }, [columnMoveMode]);
 
-  function onDragOver(event: DragOverEvent) {
+  const onDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -1736,21 +836,11 @@ function KanbanBoard() {
 
     if (!isActiveATask) return;
 
-    console.log('🔍 Drop detection:', {
-      isActiveATask,
-      isOverATask,
-      isOverAColumn,
-      isOverAGroup,
-      overType: over.data.current?.type,
-      activeType: active.data.current?.type
-    });
-
     // Priority order: Group > Task > Column
     // This prevents multiple handlers from running for the same drop
 
     // Im dropping a Task over a group (highest priority)
     if (isActiveATask && isOverAGroup) {
-      console.log('🎯 Dropping task over group:', { activeId, overId });
       setBoard(prev => {
         let activeTask: Task | null = null;
         let activeColumnId: Id | null = null;
@@ -1793,11 +883,8 @@ function KanbanBoard() {
         }
         
         if (!activeTask || !activeColumnId || !targetColumnId) {
-          console.log('❌ Could not find active task or target group:', { activeTask, activeColumnId, targetColumnId });
           return prev;
         }
-        
-        console.log('✅ Found active task:', { activeTask: activeTask.content, activeColumnId, activeGroupId, targetColumnId });
         
         return {
           ...prev,
@@ -1808,11 +895,9 @@ function KanbanBoard() {
             if (col.id === activeColumnId) {
               if (!activeGroupId) {
                 // Remove from column tasks
-                console.log('🗑️ Removing from column tasks in:', col.title);
                 newCol.tasks = col.tasks?.filter(t => t.id !== activeId) || [];
               } else {
                 // Remove from group tasks
-                console.log('🗑️ Removing from group tasks in:', col.title);
                 newCol.groups = col.groups?.map(group => 
                   group.id === activeGroupId 
                     ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
@@ -1823,7 +908,6 @@ function KanbanBoard() {
             
             // Add to target group (only if this is the target column)
             if (col.id === targetColumnId) {
-              console.log('✅ Adding to target group in column:', col.title);
               newCol.groups = newCol.groups?.map(group => 
                 group.id === overId 
                   ? { ...group, tasks: [...(group.tasks || []), activeTask] }
@@ -1840,7 +924,6 @@ function KanbanBoard() {
 
     // Im dropping a Task over another Task (second priority)
     if (isActiveATask && isOverATask) {
-      console.log('🎯 Dropping task over task:', { activeId, overId });
       setBoard(prev => {
         let activeTask: Task | null = null;
         let overTask: Task | null = null;
@@ -1957,7 +1040,6 @@ function KanbanBoard() {
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      console.log('🎯 Dropping task over column:', { activeId, overId });
       setBoard(prev => {
         let activeTask: Task | null = null;
         let activeColumnId: Id | null = null;
@@ -1997,15 +1079,13 @@ function KanbanBoard() {
           columns: prev.columns?.map(col => {
             let newCol = { ...col };
             
-            // ALWAYS remove from source first (if this is the source column)
+            // FIRST remove from source column
             if (col.id === activeColumnId) {
               if (!activeGroupId) {
                 // Remove from column tasks
-                console.log('🗑️ Removing task from column tasks in:', col.title);
                 newCol.tasks = col.tasks?.filter(t => t.id !== activeId) || [];
               } else {
                 // Remove from group tasks
-                console.log('🗑️ Removing task from group to make standalone in:', col.title);
                 newCol.groups = col.groups?.map(group => 
                   group.id === activeGroupId 
                     ? { ...group, tasks: group.tasks?.filter(t => t.id !== activeId) || [] }
@@ -2016,7 +1096,6 @@ function KanbanBoard() {
             
             // THEN add to target column (if this is the target column)
             if (col.id === overId) {
-              console.log('✅ Adding task to column tasks in:', col.title);
               newCol.tasks = [...(newCol.tasks || []), activeTask];
             }
             
@@ -2025,6 +1104,468 @@ function KanbanBoard() {
         };
       });
     }
+  }, []);
+
+  return (
+    <TooltipProvider>
+      <div
+        className="
+          m-auto
+          flex
+          flex-col
+          min-h-screen
+          w-full
+          items-center
+          overflow-x-auto
+          overflow-y-hidden
+          px-[40px]
+        "
+        style={{
+          background: 'white',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitScrollbar: { display: 'none' }
+        }}
+      >
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragOver={onDragOver}
+        >
+          <div className="m-auto flex gap-6">
+            {/* Sidebar */}
+            <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>
+              {/* Board Selector */}
+              {!boardSelectorMinimized && (
+                <BoardSelector 
+                  currentBoard={currentBoardName}
+                  currentBoardTitle={board.title}
+                  availableBoards={availableBoards.map(boardName => {
+                    // Extract title from localStorage or use a default
+                    try {
+                      const boardData = localStorage.getItem(boardName);
+                      if (boardData) {
+                        const parsed = JSON.parse(boardData);
+                        return {
+                          name: boardName,
+                          title: parsed.title || boardName
+                        };
+                      }
+                    } catch (error) {
+                      // Fallback if parsing fails
+                    }
+                    return {
+                      name: boardName,
+                      title: boardName
+                    };
+                  })}
+                  onBoardChange={switchToBoard}
+                  onBoardDelete={deleteOrArchiveBoard}
+                  onBoardReorder={handleBoardReorder}
+                  minimized={boardSelectorMinimized}
+                  onMinimize={() => setBoardSelectorMinimized(true)}
+                />
+              )}
+              
+              {/* Intentions Panel */}
+              <IntentionsPanel 
+                intentions={intentions}
+                setIntentions={setIntentions}
+              />
+              
+              {/* Legend */}
+              {!legendMinimized && (
+                <Legend onMinimize={() => setLegendMinimized(true)} />
+              )}
+              
+              {/* Notes Section */}
+              <div className="w-80 p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-semibold mb-2">Notes</h3>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add your notes here..."
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex flex-col min-w-0">
+              {/* Title */}
+              <div className="flex items-center gap-2 mb-4">
+                <Input
+                  value={board.title}
+                  onChange={(e) => updateBoardTitle(e.target.value)}
+                  className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
+                  style={{ fontFamily: 'Inter Tight, sans-serif' }}
+                />
+                {columnMoveMode && (
+                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    Column Move Mode
+                  </span>
+                )}
+              </div>
+
+              {/* Columns */}
+              <div className="flex gap-4">
+                <div className="flex gap-4">
+                  <SortableContext items={columnsId}>
+                    {board.columns?.map((col) => (
+                      <ColumnContainer
+                        key={col.id}
+                        column={col}
+                        deleteColumn={deleteColumn}
+                        updateColumn={updateColumn}
+                        createTask={createTask}
+                        tasks={col.tasks || []}
+                        deleteTask={deleteTask}
+                        updateTask={updateTask}
+                        toggleTaskComplete={toggleTaskComplete}
+                        toggleGroupComplete={toggleGroupComplete}
+                        updateGroup={updateGroup}
+                        deleteGroup={deleteGroup}
+                        convertTaskToHeading={convertTaskToHeading}
+                        focusedTaskId={focusedTaskId}
+                        setFocusedTaskId={setFocusedTaskId}
+                        columnMoveMode={columnMoveMode}
+                        onTagClick={handleTagClick}
+                      />
+                    ))}
+                  </SortableContext>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <ColumnContainer
+                  column={activeColumn}
+                  deleteColumn={deleteColumn}
+                  updateColumn={updateColumn}
+                  createTask={createTask}
+                  tasks={activeColumn.tasks || []}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                  toggleTaskComplete={toggleTaskComplete}
+                  toggleGroupComplete={toggleGroupComplete}
+                  updateGroup={updateGroup}
+                  deleteGroup={deleteGroup}
+                  convertTaskToHeading={convertTaskToHeading}
+                  focusedTaskId={focusedTaskId}
+                  setFocusedTaskId={setFocusedTaskId}
+                  columnMoveMode={columnMoveMode}
+                  onTagClick={handleTagClick}
+                />
+              )}
+              {activeTask && (
+                <TaskCard
+                  task={activeTask}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                  toggleTaskComplete={toggleTaskComplete}
+                  convertTaskToHeading={convertTaskToHeading}
+                  focusedTaskId={focusedTaskId}
+                  setFocusedTaskId={setFocusedTaskId}
+                  onTagClick={handleTagClick}
+                />
+              )}
+            </DragOverlay>,
+            document.body
+          )}
+        </DndContext>
+        
+        {/* Bottom Right Corner Icons */}
+        <div className="fixed bottom-4 right-4 flex gap-2 z-10">
+          {/* Minimized Board Selector */}
+          {boardSelectorMinimized && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="group relative">
+                  <Button
+                    onClick={() => setBoardSelectorMinimized(false)}
+                    size="icon"
+                    variant="outline"
+                    className="h-10 w-10 rounded-full shadow-lg bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 hover:text-purple-700"
+                  >
+                    <Clipboard className="h-4 w-4" />
+                  </Button>
+                  <TooltipContent side="left">
+                    Show Boards
+                  </TooltipContent>
+                </div>
+              </TooltipTrigger>
+            </Tooltip>
+          )}
+          
+          {/* Add Column Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="group relative">
+                <Button
+                  onClick={() => createNewColumn()}
+                  size="icon"
+                  variant="outline"
+                  className="h-10 w-10 rounded-full shadow-lg"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <TooltipContent side="left">
+                  Add Column
+                </TooltipContent>
+              </div>
+            </TooltipTrigger>
+          </Tooltip>
+          
+          {/* Minimized Legend */}
+          {legendMinimized && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="group relative">
+                  <Button
+                    onClick={() => setLegendMinimized(false)}
+                    size="icon"
+                    variant="outline"
+                    className="h-10 w-10 rounded-full shadow-lg"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                  <TooltipContent side="left">
+                    Show Keyboard Shortcuts
+                  </TooltipContent>
+                </div>
+              </TooltipTrigger>
+            </Tooltip>
+          )}
+        </div>
+
+        {/* Command Palette */}
+        <CommandPalette
+          isOpen={commandPaletteOpen}
+          onClose={() => setCommandPaletteOpen(false)}
+          commands={commands}
+        />
+
+        {/* Tag View */}
+        <TagView
+          isOpen={tagViewOpen}
+          onClose={() => setTagViewOpen(false)}
+          selectedTag={selectedTag}
+          onTagSelect={setSelectedTag}
+          tags={Array.from(allTags)}
+          board={board}
+        />
+      </div>
+    </TooltipProvider>
+  );
+
+  function createTask(columnId: Id) {
+    const newTask: Task = {
+      id: generateId(),
+      content: `Task ${generateId()}`,
+      completed: false,
+      tags: []
+    };
+
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => 
+        col.id === columnId 
+          ? { ...col, tasks: [...(col.tasks || []), newTask] }
+          : col
+      ) || []
+    }));
+
+    // Auto-focus the new task
+    setFocusedTaskId(newTask.id);
+  }
+
+  function deleteTask(id: Id) {
+    // Find and store the task being deleted for undo functionality
+    const taskToDelete = getAllTasks().find(task => task.id === id);
+    if (taskToDelete) {
+      setUndoStack(prev => [...prev, taskToDelete]);
+      setRedoStack([]); // Clear redo stack when new action is performed
+    }
+
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.filter(task => task.id !== id) || [],
+        groups: col.groups?.map(group => ({
+          ...group,
+          tasks: group.tasks?.filter(task => task.id !== id) || []
+        })) || []
+      })) || []
+    }));
+
+    // Clear focus if the focused task was deleted
+    if (focusedTaskId === id) {
+      setFocusedTaskId(null);
+    }
+  }
+
+  function updateTask(id: Id, content: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.map(task => 
+          task.id === id ? { ...task, content } : task
+        ) || [],
+        groups: col.groups?.map(group => ({
+          ...group,
+          tasks: group.tasks?.map(task => 
+            task.id === id ? { ...task, content } : task
+          ) || []
+        })) || []
+      })) || []
+    }));
+  }
+
+  function toggleTaskComplete(id: Id) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        tasks: col.tasks?.map(task => 
+          task.id === id ? { ...task, completed: !task.completed } : task
+        ) || [],
+        groups: col.groups?.map(group => ({
+          ...group,
+          tasks: group.tasks?.map(task => 
+            task.id === id ? { ...task, completed: !task.completed } : task
+          ) || []
+        })) || []
+      })) || []
+    }));
+  }
+
+  function toggleGroupComplete(id: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.map(group => {
+          if (group.id === id) {
+            // Toggle all tasks in the group
+            const allCompleted = group.tasks?.every(task => task.completed);
+            return {
+              ...group,
+              tasks: group.tasks?.map(task => ({ ...task, completed: !allCompleted })) || []
+            };
+          }
+          return group;
+        }) || []
+      })) || []
+    }));
+  }
+
+  function updateGroup(id: string, title: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.map(group => 
+          group.id === id ? { ...group, title } : group
+        ) || []
+      })) || []
+    }));
+  }
+
+  function deleteGroup(id: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => ({
+        ...col,
+        groups: col.groups?.filter(group => group.id !== id) || []
+      })) || []
+    }));
+  }
+
+  function convertTaskToHeading(id: Id, content: string): boolean {
+    const { headingTitle, tasks } = parseHeadingAndTasks(content);
+    
+    if (!headingTitle) return false;
+
+    // Find which column contains this task
+    let targetColumnId: Id | null = null;
+    let isInGroup = false;
+    
+    for (const col of board.columns || []) {
+      if (col.tasks?.some(task => task.id === id)) {
+        targetColumnId = col.id;
+        break;
+      }
+      if (col.groups?.some(group => group.tasks?.some(task => task.id === id))) {
+        targetColumnId = col.id;
+        isInGroup = true;
+        break;
+      }
+    }
+    
+    if (!targetColumnId) return false;
+
+    // Create new group with tasks
+    const newGroup = {
+      id: generateId().toString(),
+      title: headingTitle,
+      tasks: tasks.map(taskContent => ({
+        id: generateId(),
+        content: taskContent,
+        completed: false,
+        tags: []
+      }))
+    };
+
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => {
+        if (col.id !== targetColumnId) return col;
+        
+        return {
+          ...col,
+          tasks: col.tasks?.filter(task => task.id !== id) || [],
+          groups: [...(col.groups || []), newGroup]
+        };
+      }) || []
+    }));
+
+    return true;
+  }
+
+  function createNewColumn() {
+    const newColumn: Column = {
+      id: generateId(),
+      title: `Column ${generateId()}`,
+      tasks: [],
+      groups: []
+    };
+
+    setBoard(prev => ({
+      ...prev,
+      columns: [...(prev.columns || []), newColumn]
+    }));
+  }
+
+  function deleteColumn(id: Id) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.filter(col => col.id !== id) || []
+    }));
+  }
+
+  function updateColumn(id: Id, title: string) {
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => 
+        col.id === id ? { ...col, title } : col
+      ) || []
+    }));
   }
 }
 
@@ -2033,47 +1574,31 @@ function generateId() {
   return Math.floor(Math.random() * 10001);
 }
 
-function parseHeadingAndTasks(content: string): { isHeading: boolean; title?: string; tasks?: string[] } {
+function parseHeadingAndTasks(content: string): { headingTitle?: string; tasks: string[] } {
   const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
   
   if (lines.length === 0) {
-    return { isHeading: false };
+    return { tasks: [] };
   }
   
   // Check if first line is a heading
-  if (lines[0].startsWith('# ')) {
-    const title = lines[0].substring(2).trim();
-    const tasks = lines.slice(1)
-      .filter(line => line.startsWith('- '))
-      .map(line => line.substring(2).trim());
+  const firstLine = lines[0];
+  if (firstLine.startsWith('#')) {
+    const headingTitle = firstLine.replace(/^#+\s*/, '');
+    const tasks = lines.slice(1).map(line => {
+      // Remove markdown list markers
+      return line.replace(/^[-*+]\s*/, '');
+    });
     
-    return {
-      isHeading: true,
-      title,
-      tasks: tasks.length > 0 ? tasks : undefined
-    };
+    return { headingTitle, tasks };
   }
   
-  return { isHeading: false };
-}
-
-function createGroupWithTasks(title: string, taskContents: string[], columnId: Id): { group: Group; tasks: Task[] } {
-  const groupId = `group-${generateId()}`;
-  const tasks: Task[] = taskContents.map(content => ({
-    id: generateId(),
-    content,
-    status: "TODO",
-    completed: false
-  }));
-
-  const group: Group = {
-    id: groupId,
-    title,
-    tasks,
-    completed: false
-  };
-
-  return { group, tasks };
+  // If no heading, treat all lines as tasks
+  const tasks = lines.map(line => {
+    return line.replace(/^[-*+]\s*/, '');
+  });
+  
+  return { tasks };
 }
 
 export default KanbanBoard;
