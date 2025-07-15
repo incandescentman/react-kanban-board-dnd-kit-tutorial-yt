@@ -4,6 +4,12 @@ import { Id, Task } from "../types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { renderContentWithTags } from "../utils/tags";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { cn } from "@/lib/utils";
 
 interface Props {
   task: Task;
@@ -70,134 +76,152 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
 
   if (isDragging) {
     return (
-      <div
+      <Card
         ref={setNodeRef}
         style={style}
-        className="
-        opacity-30
-      bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl border-2 border-blue-500  cursor-grab relative text-black
-      "
-      />
+        className="opacity-30 h-[100px] min-h-[100px] border-2 border-primary cursor-grab"
+      >
+        <CardContent className="p-2.5 h-full" />
+      </Card>
     );
   }
 
   if (editMode) {
     return (
-      <div
+      <Card
         ref={setNodeRef}
         style={style}
         {...attributes}
         {...listeners}
         onClick={(e) => e.stopPropagation()}
-        className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 cursor-grab relative border border-gray-200"
+        className="h-[100px] min-h-[100px] cursor-grab transition-all duration-200"
       >
-        <textarea
-          className="
-        h-[90%]
-        w-full resize-none border-none rounded bg-transparent text-black focus:outline-none
-        "
-          value={task.content}
-          autoFocus
-          placeholder="Task content here"
-          onBlur={toggleEditMode}
-          onClick={(e) => e.stopPropagation()}
-          onFocus={(e) => {
-            const textarea = e.target as HTMLTextAreaElement;
-            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (e.shiftKey) {
-                // Allow Shift+Enter for line breaks (don't prevent default)
-                return;
-              } else {
-                // Save on Enter without Shift
+        <CardContent className="p-2.5 h-full">
+          <Textarea
+            className="h-[90%] w-full resize-none border-none bg-transparent focus:ring-0 focus:ring-offset-0"
+            value={task.content}
+            autoFocus
+            placeholder="Task content here"
+            onBlur={toggleEditMode}
+            onClick={(e) => e.stopPropagation()}
+            onFocus={(e) => {
+              const textarea = e.target as HTMLTextAreaElement;
+              textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (e.shiftKey) {
+                  // Allow Shift+Enter for line breaks (don't prevent default)
+                  return;
+                } else {
+                  // Save on Enter without Shift
+                  e.preventDefault();
+                  toggleEditMode();
+                }
+              } else if (e.key === "Escape") {
                 e.preventDefault();
-                toggleEditMode();
+                cancelEdit();
               }
-            } else if (e.key === "Escape") {
-              e.preventDefault();
-              cancelEdit();
-            }
-          }}
-          onChange={(e) => updateTask(task.id, e.target.value)}
-        />
-      </div>
+            }}
+            onChange={(e) => updateTask(task.id, e.target.value)}
+          />
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleEditMode();
-      }}
-      data-task-id={task.id}
-      tabIndex={0}
-      className="bg-mainBackgroundColor p-2.5 h-[100px] min-h-[100px] items-center flex text-left rounded-xl hover:ring-2 hover:ring-inset hover:ring-blue-500 focus:ring-2 focus:ring-inset focus:ring-blue-600 cursor-grab relative task border border-gray-200"
-      onMouseEnter={() => {
-        setMouseIsOver(true);
-      }}
-      onMouseLeave={() => {
-        setMouseIsOver(false);
-      }}
-      onFocus={() => {
-        setFocusedTaskId(task.id);
-      }}
-    >
-      <div className="flex items-start gap-3 my-auto h-[90%] w-full">
-        <div 
-          className="flex-shrink-0 mt-1 cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleTaskComplete(task.id);
-          }}
-        >
-          {task.completed ? (
-            <div className="w-4 h-4 border border-gray-400 rounded bg-green-100 flex items-center justify-center hover:bg-green-200 transition-colors duration-150">
-              <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-          ) : (
-            <div className="w-4 h-4 border border-gray-400 rounded bg-white hover:bg-gray-100 hover:border-gray-500 transition-colors duration-150"></div>
-          )}
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <div className={`overflow-y-auto overflow-x-hidden whitespace-pre-wrap ${task.completed ? 'line-through text-gray-500' : ''}`}>
-            {onTagClick ? (() => {
-              const { content, tags } = renderContentWithTags(task.content, onTagClick);
-              return (
-                <>
-                  <div>{content}</div>
-                  {tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {tags}
-                    </div>
-                  )}
-                </>
-              );
-            })() : task.content}
-          </div>
-        </div>
-      </div>
+    <TooltipProvider>
+      <Card
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleEditMode();
+        }}
+        data-task-id={task.id}
+        tabIndex={0}
+        className={cn(
+          "group h-[100px] min-h-[100px] cursor-grab transition-all duration-200",
+          "hover:shadow-md hover:ring-2 hover:ring-primary/20",
+          focusedTaskId === task.id && "ring-2 ring-primary",
+          task.completed && "opacity-75"
+        )}
+        onMouseEnter={() => setMouseIsOver(true)}
+        onMouseLeave={() => setMouseIsOver(false)}
+        onFocus={() => setFocusedTaskId(task.id)}
+      >
+        <CardContent className="p-2.5 h-full flex items-start">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mr-2 h-6 w-6 shrink-0 hover:bg-accent mt-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTaskComplete(task.id);
+                }}
+              >
+                {task.completed ? (
+                  <div className="w-4 h-4 border border-gray-400 rounded bg-green-100 flex items-center justify-center hover:bg-green-200 transition-colors duration-150">
+                    <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                ) : (
+                  <div className="w-4 h-4 border border-gray-400 rounded bg-white hover:bg-gray-100 hover:border-gray-500 transition-colors duration-150"></div>
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {task.completed ? "Mark as incomplete" : "Mark as complete"}
+            </TooltipContent>
+          </Tooltip>
 
-      {mouseIsOver && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteTask(task.id);
-          }}
-          className="stroke-black absolute right-4 top-2 bg-columnBackgroundColor p-2 rounded opacity-60 hover:opacity-100"
-        >
-          <TrashIcon />
-        </button>
-      )}
-    </div>
+          <div className="flex-1 flex flex-col gap-1">
+            <div className={cn(
+              "overflow-y-auto overflow-x-hidden whitespace-pre-wrap text-sm",
+              task.completed && "line-through text-muted-foreground"
+            )}>
+              {onTagClick ? (() => {
+                const { content, tags } = renderContentWithTags(task.content, onTagClick);
+                return (
+                  <>
+                    <div>{content}</div>
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {tags}
+                      </div>
+                    )}
+                  </>
+                );
+              })() : task.content}
+            </div>
+          </div>
+
+          {mouseIsOver && (
+            <DeleteConfirmationDialog
+              trigger={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <TrashIcon />
+                </Button>
+              }
+              title="Delete Task"
+              description="Are you sure you want to delete this task? This action cannot be undone."
+              onConfirm={() => deleteTask(task.id)}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }
 

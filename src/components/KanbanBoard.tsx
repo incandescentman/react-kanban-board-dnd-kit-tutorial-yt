@@ -21,6 +21,11 @@ import CommandPalette from "./CommandPalette";
 import TagView from "./TagView";
 import { extractTags } from "../utils/tags";
 import { recoverAllBoardData, exportBoardData, findAllBoardData } from "../utils/dataRecovery";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, HelpCircle, Clipboard } from "lucide-react";
 
 const defaultIntentions = [
   "Track calories daily",
@@ -1086,52 +1091,43 @@ function KanbanBoard() {
   );
 
   return (
-    <div
-      className="
-        m-auto
-        flex
-        flex-col
-        min-h-screen
-        w-full
-        items-center
-        overflow-x-auto
-        overflow-y-hidden
-        px-[40px]
-        py-8
-    "
-    >
-      {!titleEditMode ? (
-        <h1 
-          className="text-4xl font-bold text-black mb-12 cursor-pointer hover:text-gray-600 transition-colors"
-          onClick={() => setTitleEditMode(true)}
-          title="Click to edit title"
-        >
-          {board.title}
-        </h1>
-      ) : (
-        <input
-          className="text-4xl font-bold text-black mb-12 bg-transparent border-b-2 border-blue-500 outline-none text-center"
-          value={board.title}
-          onChange={(e) => setBoard(prev => ({ ...prev, title: e.target.value }))}
-          onBlur={() => {
-            setTitleEditMode(false);
-            // Update currentBoardName to match the new title if it changed
-            if (board.title !== currentBoardName) {
-              const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
-              const newKey = `${STORAGE_KEY}-${board.title}`;
-              
-              // Move data from old key to new key in localStorage
-              const boardData = localStorage.getItem(oldKey);
-              if (boardData) {
-                localStorage.setItem(newKey, boardData);
-                localStorage.removeItem(oldKey);
-              }
-              
-              setCurrentBoardName(board.title);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+    <TooltipProvider>
+      <div
+        className="
+          m-auto
+          flex
+          flex-col
+          min-h-screen
+          w-full
+          items-center
+          overflow-x-auto
+          overflow-y-hidden
+          px-[40px]
+          py-8
+          bg-background
+          text-foreground
+      "
+      >
+        {!titleEditMode ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <h1 
+                className="text-4xl font-bold text-foreground mb-12 cursor-pointer hover:text-muted-foreground transition-colors"
+                onClick={() => setTitleEditMode(true)}
+              >
+                {board.title}
+              </h1>
+            </TooltipTrigger>
+            <TooltipContent>
+              Click to edit title
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Input
+            className="text-4xl font-bold mb-12 bg-transparent border-b-2 border-primary outline-none text-center h-auto px-0 border-x-0 border-t-0 rounded-none focus-visible:ring-0"
+            value={board.title}
+            onChange={(e) => setBoard(prev => ({ ...prev, title: e.target.value }))}
+            onBlur={() => {
               setTitleEditMode(false);
               // Update currentBoardName to match the new title if it changed
               if (board.title !== currentBoardName) {
@@ -1147,11 +1143,29 @@ function KanbanBoard() {
                 
                 setCurrentBoardName(board.title);
               }
-            }
-          }}
-          autoFocus
-        />
-      )}
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setTitleEditMode(false);
+                // Update currentBoardName to match the new title if it changed
+                if (board.title !== currentBoardName) {
+                  const oldKey = `${STORAGE_KEY}-${currentBoardName}`;
+                  const newKey = `${STORAGE_KEY}-${board.title}`;
+                  
+                  // Move data from old key to new key in localStorage
+                  const boardData = localStorage.getItem(oldKey);
+                  if (boardData) {
+                    localStorage.setItem(newKey, boardData);
+                    localStorage.removeItem(oldKey);
+                  }
+                  
+                  setCurrentBoardName(board.title);
+                }
+              }
+            }}
+            autoFocus
+          />
+        )}
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
@@ -1292,11 +1306,11 @@ function KanbanBoard() {
 
         {/* Notes Section */}
         <div className="mt-8 mx-auto w-full max-w-[76.5%] px-8">
-          <h2 className="text-2xl font-bold text-black mb-4" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-foreground mb-4" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
             Advice / Notes / Comments
           </h2>
-          <textarea
-            className="w-full h-64 p-4 border border-gray-300 rounded-lg resize-none bg-white text-black focus:outline-none focus:border-blue-500 transition-colors"
+          <Textarea
+            className="w-full h-64 resize-none"
             placeholder="Add your notes, advice, or comments here..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -1340,51 +1354,63 @@ function KanbanBoard() {
         )}
       </DndContext>
       
-      {/* Bottom Right Corner Icons */}
-      <div className="fixed bottom-4 right-4 flex gap-2 z-10">
-        {/* Minimized Board Selector */}
-        {boardSelectorMinimized && (
-          <div className="relative group">
-            <button
-              onClick={() => setBoardSelectorMinimized(false)}
-              className="w-10 h-10 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-full flex items-center justify-center text-purple-600 hover:text-purple-800 shadow-lg"
-            >
-              📋
-            </button>
-            <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
-              Show Boards
-            </div>
-          </div>
-        )}
-        
-        {/* Add Column Button */}
-        <div className="relative group">
-          <button
-            onClick={() => createNewColumn()}
-            className="w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg"
-          >
-            +
-          </button>
-          <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
-            Add Column
-          </div>
+        {/* Bottom Right Corner Icons */}
+        <div className="fixed bottom-4 right-4 flex gap-2 z-10">
+          {/* Minimized Board Selector */}
+          {boardSelectorMinimized && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setBoardSelectorMinimized(false)}
+                  size="icon"
+                  variant="outline"
+                  className="h-10 w-10 rounded-full shadow-lg bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 hover:text-purple-700"
+                >
+                  <Clipboard className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                Show Boards
+              </TooltipContent>
+            </Tooltip>
+          )}
+          
+          {/* Add Column Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => createNewColumn()}
+                size="icon"
+                variant="outline"
+                className="h-10 w-10 rounded-full shadow-lg"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              Add Column
+            </TooltipContent>
+          </Tooltip>
+          
+          {/* Minimized Legend */}
+          {legendMinimized && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setLegendMinimized(false)}
+                  size="icon"
+                  variant="outline"
+                  className="h-10 w-10 rounded-full shadow-lg"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left">
+                Show Keyboard Shortcuts
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
-        
-        {/* Minimized Legend */}
-        {legendMinimized && (
-          <div className="relative group">
-            <button
-              onClick={() => setLegendMinimized(false)}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 shadow-lg"
-            >
-              ?
-            </button>
-            <div className="absolute bottom-12 right-0 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded border border-gray-300 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-75 pointer-events-none whitespace-nowrap">
-              Show Keyboard Shortcuts
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Command Palette */}
       <CommandPalette
@@ -1408,7 +1434,8 @@ function KanbanBoard() {
           }, 100);
         }}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 
   function createTask(columnId: Id) {
