@@ -69,71 +69,6 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
             </div>
           </div>
 
-          {/* Prompts Section */}
-          <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <MessageCircle className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-blue-700">Prompts to Self:</h2>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-800">"What am I about to lose by stepping out of my structure?"</p>
-              </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-800">"What would I gain by staying aligned instead?"</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column - Values & Choice */}
-        <div className="space-y-6">
-          
-          {/* Values at Stake */}
-          <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Target className="h-6 w-6 text-green-600" />
-              <h2 className="text-xl font-bold text-green-700">Values at Stake</h2>
-            </div>
-            <p className="text-gray-600 italic mb-4">What I stand to gain by staying on track:</p>
-            
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex items-center gap-3 p-2">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                <span className="text-sm text-gray-800">Pride in myself</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Brain className="h-4 w-4 text-purple-500" />
-                <span className="text-sm text-gray-800">Achievements & accomplishments</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <GraduationCap className="h-4 w-4 text-blue-500" />
-                <span className="text-sm text-gray-800">Sharing my knowledge to help others</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Rocket className="h-4 w-4 text-orange-500" />
-                <span className="text-sm text-gray-800">Maximizing my potential and gifts</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Heart className="h-4 w-4 text-red-500" />
-                <span className="text-sm text-gray-800">Social connection</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Users className="h-4 w-4 text-indigo-500" />
-                <span className="text-sm text-gray-800">Feeling close and emotionally connected</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Sun className="h-4 w-4 text-yellow-400" />
-                <span className="text-sm text-gray-800">Mood stability & uplift</span>
-              </div>
-              <div className="flex items-center gap-3 p-2">
-                <Dumbbell className="h-4 w-4 text-gray-600" />
-                <span className="text-sm text-gray-800">Confidence in my body through exercise & nutrition</span>
-              </div>
-            </div>
-          </div>
-
           {/* The Choice */}
           <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-purple-700 mb-4 text-center">THE CHOICE:</h2>
@@ -178,6 +113,71 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
                   <span>Say no to an urge that will take me away from what I truly care about?</span>
                 </li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Values & Choice */}
+        <div className="space-y-6">
+          
+          {/* Values at Stake */}
+          <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Target className="h-6 w-6 text-green-600" />
+              <h2 className="text-xl font-bold text-green-700">Values at Stake</h2>
+            </div>
+            <p className="text-gray-600 italic mb-4">What I stand to gain by staying on track:</p>
+            
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-center gap-4 p-3">
+                <Trophy className="h-7 w-7 text-yellow-500" />
+                <span className="text-base text-gray-800 font-medium">Pride in myself</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Brain className="h-7 w-7 text-purple-500" />
+                <span className="text-base text-gray-800 font-medium">Achievements & accomplishments</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <GraduationCap className="h-7 w-7 text-blue-500" />
+                <span className="text-base text-gray-800 font-medium">Sharing my knowledge to help others</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Rocket className="h-7 w-7 text-orange-500" />
+                <span className="text-base text-gray-800 font-medium">Maximizing my potential and gifts</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Heart className="h-7 w-7 text-red-500" />
+                <span className="text-base text-gray-800 font-medium">Social connection</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Users className="h-7 w-7 text-indigo-500" />
+                <span className="text-base text-gray-800 font-medium">Feeling close and emotionally connected</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Sun className="h-7 w-7 text-yellow-400" />
+                <span className="text-base text-gray-800 font-medium">Mood stability & uplift</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Dumbbell className="h-7 w-7 text-gray-600" />
+                <span className="text-base text-gray-800 font-medium">Confidence in my body through exercise & nutrition</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Prompts Section */}
+          <div className="bg-white rounded-xl border border-blue-200 shadow-sm p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <MessageCircle className="h-6 w-6 text-blue-600" />
+              <h2 className="text-xl font-bold text-blue-700">Prompts to Self:</h2>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-800">"What am I about to lose by stepping out of my structure?"</p>
+              </div>
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-800">"What would I gain by staying aligned instead?"</p>
+              </div>
             </div>
           </div>
         </div>
