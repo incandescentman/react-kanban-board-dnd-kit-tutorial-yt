@@ -1276,6 +1276,7 @@ function KanbanBoard() {
                 />
               )}
               
+              
               {/* Intentions Panel */}
               <IntentionsPanel 
                 intentions={intentions}
@@ -1286,17 +1287,6 @@ function KanbanBoard() {
               {!legendMinimized && (
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
-              
-              {/* Notes Section */}
-              <div className="w-80 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-semibold mb-2">Notes</h3>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add your notes here..."
-                  className="min-h-[100px] resize-none"
-                />
-              </div>
             </div>
 
             {/* Main Content */}
@@ -1343,6 +1333,16 @@ function KanbanBoard() {
                     ))}
                   </SortableContext>
                 </div>
+              </div>
+
+              {/* Notes Section - positioned below all columns */}
+              <div className="mt-6 p-3 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl shadow-lg">
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add your notes here..."
+                  className="min-h-[200px] resize-none border-gray-300 bg-white/90 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-500 w-full"
+                />
               </div>
             </div>
           </div>
