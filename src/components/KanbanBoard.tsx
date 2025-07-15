@@ -1336,12 +1336,15 @@ function KanbanBoard() {
               </div>
 
               {/* Notes Section - positioned below all columns */}
-              <div className="mt-6 p-3 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl shadow-lg">
+              <div className="mt-6 w-full">
+                <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Inter Tight, sans-serif' }}>
+                  Notes
+                </h3>
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Add your notes here..."
-                  className="min-h-[200px] resize-none border-gray-300 bg-white/90 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-500 w-full"
+                  className="min-h-[200px] resize-none border-gray-300 bg-white/90 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-500 w-full mt-1"
                 />
               </div>
             </div>
