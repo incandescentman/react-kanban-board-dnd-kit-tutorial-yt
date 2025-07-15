@@ -266,8 +266,15 @@ function KanbanBoard() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [undoStack, setUndoStack] = useState<Task[]>([]);
-  const [redoStack, setRedoStack] = useState<Task[]>([]);
+  // Enhanced undo system
+  interface UndoAction {
+    type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
+    data: any;
+    timestamp: number;
+  }
+
+  const [undoStack, setUndoStack] = useState<UndoAction[]>([]);
+  const [redoStack, setRedoStack] = useState<UndoAction[]>([]);
 
   const [columnMoveMode, setColumnMoveMode] = useState(false);
 
@@ -319,6 +326,23 @@ function KanbanBoard() {
 
   const deleteOrArchiveBoard = (boardName: string) => {
     try {
+      // Get the board content before deleting
+      const boardContent = localStorage.getItem(boardName);
+      const boardIndex = availableBoards.findIndex(name => name === boardName);
+      
+      if (boardContent && boardIndex !== -1) {
+        // Store undo action
+        addUndoAction({
+          type: 'DELETE_BOARD',
+          data: {
+            boardName,
+            boardContent,
+            index: boardIndex
+          },
+          timestamp: Date.now()
+        });
+      }
+      
       // Remove from localStorage
       localStorage.removeItem(boardName);
       
@@ -708,30 +732,114 @@ function KanbanBoard() {
     return () => window.removeEventListener('keydown', handleKeydown);
   }, [focusedTaskId, legendMinimized, columnMoveMode]);
 
+  const addUndoAction = (action: UndoAction) => {
+    setUndoStack(prev => [...prev.slice(-9), action]); // Keep only last 10 actions
+    setRedoStack([]); // Clear redo stack when new action is performed
+  };
+
   const undo = () => {
     if (undoStack.length > 0) {
-      const taskToRestore = undoStack[undoStack.length - 1];
+      const action = undoStack[undoStack.length - 1];
       setUndoStack(prev => prev.slice(0, -1));
-      setRedoStack(prev => [...prev, taskToRestore]);
       
-      // Find the task's original column and restore it
-      // This is a simplified restore - in a real app you'd want to store more context
-      const firstColumn = board.columns?.[0];
-      if (firstColumn) {
-        createTaskWithContent(firstColumn.id, taskToRestore.content);
+      switch (action.type) {
+        case 'DELETE_TASK':
+          restoreTask(action.data);
+          break;
+        case 'DELETE_COLUMN':
+          restoreColumn(action.data);
+          break;
+        case 'DELETE_BOARD':
+          restoreBoard(action.data);
+          break;
       }
+      
+      setRedoStack(prev => [...prev, action]);
     }
   };
 
   const redo = () => {
     if (redoStack.length > 0) {
-      const taskToRestore = redoStack[redoStack.length - 1];
+      const action = redoStack[redoStack.length - 1];
       setRedoStack(prev => prev.slice(0, -1));
-      setUndoStack(prev => [...prev, taskToRestore]);
       
-      // Find and delete the task again
-      deleteTask(taskToRestore.id);
+      switch (action.type) {
+        case 'DELETE_TASK':
+          deleteTask(action.data.task.id);
+          break;
+        case 'DELETE_COLUMN':
+          deleteColumn(action.data.column.id);
+          break;
+        case 'DELETE_BOARD':
+          deleteOrArchiveBoard(action.data.boardName);
+          break;
+      }
+      
+      setUndoStack(prev => [...prev, action]);
     }
+  };
+
+  const restoreTask = (taskData: any) => {
+    const { task, columnId, groupId } = taskData;
+    
+    setBoard(prev => ({
+      ...prev,
+      columns: prev.columns?.map(col => {
+        if (col.id === columnId) {
+          if (groupId) {
+            // Restore to group
+            return {
+              ...col,
+              groups: col.groups?.map(group => 
+                group.id === groupId 
+                  ? { ...group, tasks: [...(group.tasks || []), task] }
+                  : group
+              ) || []
+            };
+          } else {
+            // Restore to column
+            return {
+              ...col,
+              tasks: [...(col.tasks || []), task]
+            };
+          }
+        }
+        return col;
+      }) || []
+    }));
+  };
+
+  const restoreColumn = (columnData: any) => {
+    const { column, index } = columnData;
+    
+    setBoard(prev => {
+      const newColumns = [...(prev.columns || [])];
+      newColumns.splice(index, 0, column);
+      return {
+        ...prev,
+        columns: newColumns
+      };
+    });
+    
+    // Update available boards list
+    const newOrder = [...availableBoards];
+    setAvailableBoards(newOrder);
+    setBoardOrder(newOrder);
+    localStorage.setItem('kanban-board-order', JSON.stringify(newOrder));
+  };
+
+  const restoreBoard = (boardData: any) => {
+    const { boardName, boardContent, index } = boardData;
+    
+    // Restore board to localStorage
+    localStorage.setItem(boardName, boardContent);
+    
+    // Update available boards list
+    const newBoards = [...availableBoards];
+    newBoards.splice(index, 0, boardName);
+    setAvailableBoards(newBoards);
+    setBoardOrder(newBoards);
+    localStorage.setItem('kanban-board-order', JSON.stringify(newBoards));
   };
 
   const handleTagClick = (tag: string) => {
@@ -1278,6 +1386,25 @@ function KanbanBoard() {
           )}
         </DndContext>
         
+        {/* Undo Notification */}
+        {undoStack.length > 0 && (
+          <div className="fixed bottom-4 left-4 z-20">
+            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-3">
+              <span className="text-sm">
+                {undoStack[undoStack.length - 1].type === 'DELETE_TASK' && 'Task deleted'}
+                {undoStack[undoStack.length - 1].type === 'DELETE_COLUMN' && 'Column deleted'}
+                {undoStack[undoStack.length - 1].type === 'DELETE_BOARD' && 'Board deleted'}
+              </span>
+              <button
+                onClick={undo}
+                className="bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-xs font-medium transition-colors"
+              >
+                Undo (⌘Z)
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Bottom Right Corner Icons */}
         <div className="fixed bottom-4 right-4 flex gap-2 z-10">
           {/* Minimized Board Selector */}
@@ -1385,10 +1512,44 @@ function KanbanBoard() {
 
   function deleteTask(id: Id) {
     // Find and store the task being deleted for undo functionality
-    const taskToDelete = getAllTasks().find(task => task.id === id);
-    if (taskToDelete) {
-      setUndoStack(prev => [...prev, taskToDelete]);
-      setRedoStack([]); // Clear redo stack when new action is performed
+    let taskToDelete: Task | null = null;
+    let columnId: Id | null = null;
+    let groupId: string | null = null;
+
+    // Find the task and its location
+    for (const col of board.columns || []) {
+      // Check column tasks
+      const foundTask = col.tasks?.find(task => task.id === id);
+      if (foundTask) {
+        taskToDelete = foundTask;
+        columnId = col.id;
+        break;
+      }
+      
+      // Check group tasks
+      for (const group of col.groups || []) {
+        const foundGroupTask = group.tasks?.find(task => task.id === id);
+        if (foundGroupTask) {
+          taskToDelete = foundGroupTask;
+          columnId = col.id;
+          groupId = group.id;
+          break;
+        }
+      }
+      if (taskToDelete) break;
+    }
+
+    if (taskToDelete && columnId) {
+      // Store undo action
+      addUndoAction({
+        type: 'DELETE_TASK',
+        data: {
+          task: taskToDelete,
+          columnId,
+          groupId
+        },
+        timestamp: Date.now()
+      });
     }
 
     setBoard(prev => ({
@@ -1553,6 +1714,22 @@ function KanbanBoard() {
   }
 
   function deleteColumn(id: Id) {
+    // Find the column to delete and its index
+    const columnToDelete = board.columns?.find(col => col.id === id);
+    const columnIndex = board.columns?.findIndex(col => col.id === id) ?? -1;
+    
+    if (columnToDelete && columnIndex !== -1) {
+      // Store undo action
+      addUndoAction({
+        type: 'DELETE_COLUMN',
+        data: {
+          column: columnToDelete,
+          index: columnIndex
+        },
+        timestamp: Date.now()
+      });
+    }
+
     setBoard(prev => ({
       ...prev,
       columns: prev.columns?.filter(col => col.id !== id) || []
