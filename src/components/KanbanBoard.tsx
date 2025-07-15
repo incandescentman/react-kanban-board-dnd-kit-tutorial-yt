@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { Plus, HelpCircle, Clipboard, Command, Tag, Archive, Trash2, Edit3 } from 'lucide-react';
+import { Plus, HelpCircle, Clipboard, Command, Tag, Archive, Trash2, Edit3, Heart, Columns3 } from 'lucide-react';
 
 import CommandPalette from "./CommandPalette";
 import TagView from "./TagView";
@@ -29,6 +29,7 @@ import Legend from "./Legend";
 import BoardSelector from "./BoardSelector";
 import GroupContainer from "./GroupContainer";
 import IntentionsPanel from "./IntentionsPanel";
+import ValuesCard from "./ValuesCard";
 
 const DATA_VERSION = 2;
 
@@ -291,6 +292,8 @@ function KanbanBoard() {
       "Take breaks when needed"
     ];
   });
+
+  const [showValuesCard, setShowValuesCard] = useState(false);
 
   // Auto-save notes to localStorage
   useEffect(() => {
@@ -1216,25 +1219,40 @@ function KanbanBoard() {
 
   return (
     <TooltipProvider>
-      <div
-        className="
-          m-auto
-          flex
-          flex-col
-          min-h-screen
-          w-full
-          items-center
-          overflow-x-auto
-          overflow-y-hidden
-          px-[40px]
-        "
-        style={{
-          background: 'white',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitScrollbar: { display: 'none' }
-        }}
-      >
+      {/* Toggle button in top right */}
+      <div className="fixed top-4 right-4 z-30">
+        <Button
+          onClick={() => setShowValuesCard(!showValuesCard)}
+          size="icon"
+          variant="outline"
+          className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 shadow-sm h-8 w-8"
+        >
+          {showValuesCard ? <Columns3 className="h-4 w-4" /> : <Heart className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {showValuesCard ? (
+        <ValuesCard onToggleBack={() => setShowValuesCard(false)} />
+      ) : (
+        <div
+          className="
+            m-auto
+            flex
+            flex-col
+            min-h-screen
+            w-full
+            items-center
+            overflow-x-auto
+            overflow-y-hidden
+            px-[40px]
+          "
+          style={{
+            background: 'white',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitScrollbar: { display: 'none' }
+          }}
+        >
         <DndContext
           sensors={sensors}
           onDragStart={onDragStart}
@@ -1488,7 +1506,8 @@ function KanbanBoard() {
           tags={Array.from(allTags)}
           board={board}
         />
-      </div>
+        </div>
+      )}
     </TooltipProvider>
   );
 
