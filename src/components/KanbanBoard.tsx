@@ -729,11 +729,23 @@ function KanbanBoard() {
         e.preventDefault();
         setTagViewOpen(true);
       }
+
+      // Toggle between kanban and values with Command+;
+      if (e.key === ';' && e.metaKey && !e.altKey && !e.ctrlKey) {
+        // Don't interfere when editing text
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+          return;
+        }
+        
+        e.preventDefault();
+        setShowValuesCard(!showValuesCard);
+      }
     };
 
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
-  }, [focusedTaskId, legendMinimized, columnMoveMode]);
+  }, [focusedTaskId, legendMinimized, columnMoveMode, showValuesCard]);
 
   const addUndoAction = (action: UndoAction) => {
     setUndoStack(prev => [...prev.slice(-9), action]); // Keep only last 10 actions

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
-import { Target, Compass, PauseCircle, Trophy, Brain, GraduationCap, Rocket, Heart, Users, Sun, Dumbbell, MessageCircle, Star, Hand } from 'lucide-react';
+import { Target, Compass, PauseCircle, Trophy, Brain, GraduationCap, Rocket, Heart, Users, Sun, Dumbbell, MessageCircle, Star, Hand, HeartHandshake } from 'lucide-react';
 
 interface ValuesCardProps {
   onToggleBack: () => void;
@@ -73,7 +73,7 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
           <div className="bg-white rounded-xl border border-purple-200 shadow-sm p-6">
             <h2 className="text-xl font-bold text-purple-700 mb-4 text-center">THE CHOICE:</h2>
             
-            <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4 items-center">
               <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
                 <span className="text-2xl">😋</span>
                 <p className="font-medium text-orange-700 mt-1">Immediate gratification</p>
@@ -146,7 +146,7 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
                 <span className="text-base text-gray-800 font-medium">Maximizing my potential and gifts</span>
               </div>
               <div className="flex items-center gap-4 p-3">
-                <Heart className="h-7 w-7 text-red-500" />
+                <HeartHandshake className="h-7 w-7 text-red-500" />
                 <span className="text-base text-gray-800 font-medium">Social connection</span>
               </div>
               <div className="flex items-center gap-4 p-3">
@@ -160,6 +160,10 @@ function ValuesCard({ onToggleBack }: ValuesCardProps) {
               <div className="flex items-center gap-4 p-3">
                 <Dumbbell className="h-7 w-7 text-gray-600" />
                 <span className="text-base text-gray-800 font-medium">Confidence in my body through exercise & nutrition</span>
+              </div>
+              <div className="flex items-center gap-4 p-3">
+                <Heart className="h-7 w-7 text-pink-500" />
+                <span className="text-base text-gray-800 font-medium">Love and romance</span>
               </div>
             </div>
           </div>
