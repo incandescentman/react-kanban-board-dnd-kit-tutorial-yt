@@ -1375,7 +1375,7 @@ function KanbanBoard() {
               />
 
               {/* Compact Top Priorities */}
-              <CompactPriorities onOpenPriorities={() => setActiveView('priorities')} />
+              <CompactPriorities board={board} onOpenPriorities={() => setActiveView('priorities')} />
               
               {/* Legend */}
               {!legendMinimized && (

@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Board } from "../types";
+import { extractTags } from "../utils/tags";
 
 function cleanLine(s: string) {
   return s
@@ -8,10 +10,11 @@ function cleanLine(s: string) {
 }
 
 interface Props {
+  board?: Board;
   onOpenPriorities?: () => void;
 }
 
-export default function CompactPriorities({ onOpenPriorities }: Props) {
+export default function CompactPriorities({ board, onOpenPriorities }: Props) {
   const [hidden, setHidden] = useState<boolean>(() => {
     try {
       return localStorage.getItem('kanban-compact-priorities-hidden') === '1';
@@ -37,7 +40,34 @@ export default function CompactPriorities({ onOpenPriorities }: Props) {
     } catch {}
   }, [hidden]);
 
-  const items = useMemo(() => pinned.map(cleanLine).filter(Boolean).slice(0, 6), [pinned]);
+  const tagDerived = useMemo(() => {
+    if (!board) return [] as string[];
+    const tops = new Set(["#top", "#priority", "#prio", "#p1"]);
+    const lines: string[] = [];
+    for (const col of board.columns || []) {
+      for (const t of col.tasks || []) {
+        const tags = new Set(extractTags(t.content));
+        if ([...tags].some(tg => tops.has(tg))) {
+          lines.push(t.content.replace(/#[a-zA-Z0-9_]+/g, '').trim());
+        }
+      }
+      for (const g of col.groups || []) {
+        for (const t of g.tasks || []) {
+          const tags = new Set(extractTags(t.content));
+          if ([...tags].some(tg => tops.has(tg))) {
+            lines.push(t.content.replace(/#[a-zA-Z0-9_]+/g, '').trim());
+          }
+        }
+      }
+    }
+    return lines.filter(Boolean);
+  }, [board]);
+
+  const items = useMemo(() => {
+    const pinnedClean = pinned.map(cleanLine).filter(Boolean);
+    if (pinnedClean.length > 0) return pinnedClean.slice(0, 6);
+    return tagDerived.slice(0, 6);
+  }, [pinned, tagDerived]);
 
   if (hidden || items.length === 0) return null;
 
@@ -72,4 +102,3 @@ export default function CompactPriorities({ onOpenPriorities }: Props) {
     </div>
   );
 }
-
