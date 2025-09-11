@@ -1647,7 +1647,7 @@ function KanbanBoard() {
   function createTask(columnId: Id) {
     const newTask: Task = {
       id: generateId(),
-      content: `Task ${generateId()}`,
+      content: "",
       completed: false,
       tags: []
     };
