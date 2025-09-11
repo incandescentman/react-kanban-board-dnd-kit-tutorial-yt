@@ -233,24 +233,6 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
 
           {mouseIsOver && !selectMode && (
             <>
-              {duplicateTask && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-10 top-2 h-8 w-8 opacity-100 transition-opacity hover:bg-accent"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        duplicateTask(task.id);
-                      }}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Duplicate</TooltipContent>
-                </Tooltip>
-              )}
             <DeleteConfirmationDialog
               trigger={
                 <Button
