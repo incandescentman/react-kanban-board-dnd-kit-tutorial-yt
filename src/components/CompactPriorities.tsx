@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
-import { IconCircle } from '@tabler/icons-react';
+import { IconPointFilled } from '@tabler/icons-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
 
@@ -107,7 +107,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
                 className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2"
                 title={line}
               >
-                <IconCircle size={14} className="mt-0.5 text-blue-600" />
+                <IconPointFilled size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />
                 <span className="text-sm text-blue-900">{line}</span>
               </div>
             ))}

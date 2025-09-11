@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IconCircle } from '@tabler/icons-react';
+import { IconPointFilled } from '@tabler/icons-react';
 import { Star } from 'lucide-react';
 import { Board, Id } from "../types";
 
@@ -132,7 +132,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
             <div className="space-y-2">
               {pinned.map((p, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <IconCircle size={16} className="mt-1 text-blue-700" />
+                  <IconPointFilled size={16} className="mt-1 text-blue-700" aria-hidden="true" />
                   <div className="text-lg text-gray-900 leading-7">{cleanLine(p)}</div>
                 </div>
               ))}
