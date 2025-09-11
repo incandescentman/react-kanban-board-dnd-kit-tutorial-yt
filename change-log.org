@@ -1,16 +1,30 @@
-* Fixes for Task Deletion
+* 2025-09-11 — Updates & UX Improvements
 
-** Issues
-- Delete (trash) icon was not appearing on task cards.
-- Even when deletion was triggered, the task would remain on the board, though an "undo" notification appeared.
+** Priorities
+- Added compact "Top Priorities" panel in the left sidebar (under Current Intentions) with tiny icon controls (open/minimize).
+- Shows pinned priorities by default; falls back to cards tagged with #top/#priority/#prio/#p1 when pinned is empty.
+- Priorities tab simplified to pinned-only view (no clickable card list to the board).
 
-** Fixes
-- **Icon Visibility**: The trash icon was not visible because its SVG code was missing a `stroke` color property, making it invisible by default. This was fixed by adding `stroke="currentColor"` to the SVG, allowing it to inherit the parent button's text color.
-- **Button Visibility**: The delete button (containing the icon) was not configured to appear on hover. This was changed to make the button appear when a user hovers over the task card.
-- **Deletion Logic**: The `deleteTask` function in the main `KanbanBoard` component was rewritten to be more robust. The original implementation was not reliably updating the board state, causing the task to remain visually present after deletion. The new implementation performs a more targeted update to the state, ensuring the task is removed correctly.
+** Deletion
+- Fixed delete confirmation dialog: implemented a functional modal so confirm actually deletes.
+- Delete icon always rendered at top-right of task cards (visible on hover; hidden in Select Mode only).
+- Kept Undo behavior (Cmd+Z or the blue Undo toast) to restore last delete.
 
-* Improved Deletion Flow
+** Tasks & Board UX
+- New tasks start empty (no auto-generated "Task <id>" content) and enter edit mode immediately.
+- Added Select Mode to multi-select and bulk delete tasks (toggle via bottom-right button or command palette).
+- Removed duplicate action button from card hover (kept delete only).
+- Column colors: added color picker to column headers and applied header background.
 
-** Changes
-- Removed the confirmation dialog for task deletion. Deletion is now immediate upon clicking the trash icon.
-- Verified that the Command-Z undo functionality correctly restores deleted tasks.
+** Drag & Drop
+- Added KeyboardSensor (dnd-kit) for keyboard-accessible drag/drop.
+- Switched collision detection to closestCorners for better drop behavior.
+- Updated task.status when moving across columns (drag or keyboard moves).
+- Highlight column drop area during drag.
+
+** Boards
+- Board list (sidebar) supports drag-to-reorder; top-most becomes default/current.
+- On startup, opens the first board in saved order if available.
+
+** Corrections
+- Previous note claiming the delete confirmation dialog was removed was inaccurate; the dialog is present and functional now.
