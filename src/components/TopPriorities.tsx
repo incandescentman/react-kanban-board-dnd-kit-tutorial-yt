@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IconCircle } from '@tabler/icons-react';
 import { Star } from 'lucide-react';
 import { Board, Id } from "../types";
@@ -23,6 +23,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
   });
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<string>("");
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try {
@@ -50,6 +51,23 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
     setPinned(next);
     setEditing(false);
   };
+  const cancelEdit = () => {
+    setEditing(false);
+    setDraft("");
+  };
+
+  // Save when clicking outside the pinned card while editing
+  useEffect(() => {
+    if (!editing) return;
+    function onDocMouseDown(e: MouseEvent) {
+      if (!cardRef.current) return;
+      if (!cardRef.current.contains(e.target as Node)) {
+        saveEdit();
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [editing, draft, pinned]);
 
   // Tag-derived cards are intentionally not rendered here to keep it minimal.
 
@@ -84,27 +102,31 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
               Add as #top cards{preferredBoardTitle ? ` in \"${preferredBoardTitle}\"` : ''}
             </button>
           )}
-          {editing ? (
-            <div className="flex gap-2">
-              <button className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm" onClick={saveEdit}>Save</button>
-              <button className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm" onClick={() => setEditing(false)}>Cancel</button>
-            </div>
-          ) : (
-            <button className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm" onClick={startEdit}>Edit</button>
-          )}
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm p-5 max-w-xl mx-auto">
+        <div
+          ref={cardRef}
+          onDoubleClick={startEdit}
+          className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm p-5 max-w-xl mx-auto cursor-text"
+          title={editing ? 'Click outside to save • Esc to cancel' : 'Double‑click to edit • Click outside to save'}
+        >
           {editing ? (
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="One priority per line"
               className="w-full min-h-[180px] text-base border border-gray-300 rounded-md p-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-300 leading-7"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancelEdit();
+                }
+              }}
             />
           ) : pinned.length === 0 ? (
             <div className="text-sm text-gray-500">
-              No pinned priorities yet. Click Edit to paste your list (one per line).
+              No pinned priorities yet. Double‑click to paste your list (one per line).
             </div>
           ) : (
             <div className="space-y-2">
