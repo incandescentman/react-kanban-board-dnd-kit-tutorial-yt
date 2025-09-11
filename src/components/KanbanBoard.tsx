@@ -1292,7 +1292,7 @@ function KanbanBoard() {
           }}
         >
         {/* Top nav: view switcher */}
-        <div className="w-full max-w-5xl mx-auto mt-8 mb-6 flex items-center gap-2">
+        <div className="w-full max-w-5xl mx-auto mt-14 mb-10 flex items-center gap-3">
           <button
             className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
             onClick={() => setActiveView('board')}
