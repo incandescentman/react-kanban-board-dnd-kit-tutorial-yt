@@ -1,0 +1,55 @@
+* Rising Action Kanban
+
+A powerful, local-first kanban board application for managing tasks, projects, and daily intentions with a rich feature set designed for power users.
+
+** Features
+
+*** Board & Project Management
+- *Multi-Board Support*: Manage multiple, distinct kanban boards for different projects or contexts.
+- *Board Management*: Create, delete, rename, and reorder your boards.
+- *Persistent Storage*: All boards, tasks, and notes are automatically saved to your browser's =localStorage=.
+
+*** Columns and Tasks
+- *Columns*: Create, delete, rename, and reorder columns. Customize columns with background colors.
+- *Tasks*: Create, edit, and delete tasks with full undo/redo support.
+- *Drag & Drop*: Intuitively move tasks between columns, reorder them within a column, and organize them into groups.
+- *Task Completion*: Mark tasks as complete with a single click.
+
+*** Advanced Organization
+- *Task Groups (Headings)*: Automatically create sub-groups of tasks by starting a task with Markdown heading syntax (e.g., =# My Group=). Any list items below it will become tasks in that group.
+- *Tagging*: Add tags to tasks using the =#tag= syntax. 
+- *Tag View*: See all tasks across the board that share a specific tag in a dedicated view.
+
+*** Power-User Features
+- *Command Palette (⌘K)*: A pop-up palette to quickly access key actions like adding columns, toggling views, and more.
+- *Undo/Redo (⌘Z, ⌘Y)*: A robust undo/redo system for actions like task, column, and board deletion.
+- *Select Mode*: A special mode to select multiple tasks at once for batch deletion.
+- *Full Keyboard Navigation*: Move between tasks with arrow keys, move tasks with =Ctrl+Arrow=, and use various shortcuts for maximum efficiency.
+
+*** Views & Panels
+- *Board View*: The primary kanban interface.
+- *Priorities View*: A dedicated view to manage and import top priorities.
+- *Values View*: A space to keep your personal or project values front and center.
+- *Intentions Panel*: A sidebar panel to list and manage your daily intentions or habits.
+- *Notes Section*: A dedicated space at the bottom of the board for general notes.
+- *Keyboard Shortcut Legend ( ? )*: A popup that displays all available keyboard shortcuts.
+
+** Tech Stack
+
+- React 18 with TypeScript
+- Dnd-Kit for drag and drop functionality
+- TailwindCSS for styling
+- Vite for build tooling
+
+** Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   #+BEGIN_SRC shell
+   npm install
+   #+END_SRC
+3. Start the development server:
+   #+BEGIN_SRC shell
+   npm run dev
+   #+END_SRC
+4. Open your browser to =http://localhost:5173=
