@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, Minus, Plus } from 'lucide-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
 
@@ -76,10 +77,11 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-violet-900">Top Priorities</h3>
             <button
-              className="text-xs px-2 py-1 rounded-md border border-violet-300 bg-white hover:bg-gray-50"
+              className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50"
               onClick={() => setHidden(false)}
+              aria-label="Show priorities"
             >
-              Show
+              <Plus className="h-4 w-4 text-violet-700" />
             </button>
           </div>
         </div>
@@ -104,16 +106,18 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
           {onOpenPriorities && (
             <button
               onClick={onOpenPriorities}
-              className="px-3 py-1.5 text-xs rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+              className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+              aria-label="Open priorities view"
             >
-              Open
+              <ArrowUpRight className="h-4 w-4 text-violet-700" />
             </button>
           )}
           <button
             onClick={() => setHidden(true)}
-            className="px-3 py-1.5 text-xs rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+            className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+            aria-label="Hide priorities"
           >
-            Hide
+            <Minus className="h-4 w-4 text-violet-700" />
           </button>
         </div>
       </div>
