@@ -14,7 +14,8 @@
       "Bash(npm:*)",
       "Bash(mv:*)",
       "Bash(mkdir:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "*"
     ],
     "deny": []
   }

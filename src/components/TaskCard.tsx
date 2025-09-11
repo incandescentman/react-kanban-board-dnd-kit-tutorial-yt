@@ -153,7 +153,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
         data-task-id={task.id}
         tabIndex={0}
         className={cn(
-          "group h-[100px] min-h-[100px] cursor-grab transition-all duration-200",
+          "group relative h-[100px] min-h-[100px] cursor-grab transition-all duration-200",
           "hover:shadow-md hover:ring-2 hover:ring-primary/20",
           focusedTaskId === task.id && "ring-2 ring-primary",
           task.completed && "opacity-75",
@@ -239,7 +239,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute right-10 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent"
+                      className="absolute right-10 top-2 h-8 w-8 opacity-100 transition-opacity hover:bg-accent"
                       onClick={(e) => {
                         e.stopPropagation();
                         duplicateTask(task.id);
@@ -256,7 +256,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                  className="absolute right-2 top-2 h-8 w-8 opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <TrashIcon />
