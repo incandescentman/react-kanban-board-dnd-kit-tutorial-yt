@@ -272,6 +272,7 @@ function KanbanBoard() {
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'board' | 'priorities'>('board');
+  const DEFAULT_TOP_BOARD_TITLE = "Sunjay's Post-OpenAI Action Plan";
   // Enhanced undo system
   interface UndoAction {
     type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
@@ -1291,7 +1292,7 @@ function KanbanBoard() {
           }}
         >
         {/* Top nav: view switcher */}
-        <div className="w-full max-w-5xl mx-auto mt-6 mb-2 flex items-center gap-2">
+        <div className="w-full max-w-5xl mx-auto mt-8 mb-6 flex items-center gap-2">
           <button
             className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
             onClick={() => setActiveView('board')}
@@ -1472,6 +1473,8 @@ function KanbanBoard() {
               setFocusedTaskId(id);
               setActiveView('board');
             }}
+            onImportPinnedToBoard={(title) => importPinnedToBoard(title)}
+            preferredBoardTitle={DEFAULT_TOP_BOARD_TITLE}
           />
         )}
         
@@ -1880,6 +1883,67 @@ function KanbanBoard() {
       }
       return prev;
     });
+  }
+
+  function importPinnedToBoard(targetTitle: string) {
+    try {
+      const raw = localStorage.getItem('kanban-pinned-priorities');
+      if (!raw) return;
+      const pinned: string[] = JSON.parse(raw);
+      const items = pinned.map(s => s.trim()).filter(Boolean);
+      if (items.length === 0) return;
+
+      // Find board key by title
+      let targetKey: string | null = null;
+      let targetBoard: Board | null = null;
+      for (const key of availableBoards) {
+        const val = localStorage.getItem(key);
+        if (!val) continue;
+        try {
+          const parsed = JSON.parse(val);
+          if (parsed && parsed.title === targetTitle) {
+            targetKey = key;
+            targetBoard = parsed as Board;
+            break;
+          }
+        } catch {}
+      }
+
+      // Fallback to current board if not found
+      if (!targetKey || !targetBoard) {
+        targetKey = currentBoardName;
+        targetBoard = board;
+      }
+
+      // Find or create a "To Do" column (case-insensitive)
+      let colIndex = (targetBoard.columns || []).findIndex(c => c.title.toLowerCase() === 'to do' || c.title.toLowerCase() === 'todo');
+      let columns = [...(targetBoard.columns || [])];
+      if (colIndex === -1) {
+        const newCol: Column = { id: generateId(), title: 'To Do', tasks: [], groups: [] };
+        columns = [...columns, newCol];
+        colIndex = columns.length - 1;
+      }
+
+      const targetCol = { ...columns[colIndex] };
+      const newTasks = [...(targetCol.tasks || [])];
+      for (const txt of items) {
+        newTasks.push({ id: generateId(), content: `${txt} #top`, completed: false, tags: [] });
+      }
+      targetCol.tasks = newTasks;
+      columns[colIndex] = targetCol;
+
+      const updatedBoard: Board = { ...targetBoard, columns };
+      localStorage.setItem(targetKey, JSON.stringify(updatedBoard));
+
+      if (currentBoardName === targetKey) {
+        setBoard(updatedBoard);
+      } else {
+        switchToBoard(targetKey);
+      }
+      setActiveView('board');
+    } catch (e) {
+      console.error('Failed to import pinned priorities:', e);
+    }
   }
 }
 

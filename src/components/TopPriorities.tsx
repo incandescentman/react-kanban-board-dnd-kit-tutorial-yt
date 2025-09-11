@@ -5,6 +5,8 @@ import { extractTags, getTagColor } from "../utils/tags";
 interface Props {
   board: Board;
   onSelectTask: (id: Id) => void;
+  onImportPinnedToBoard?: (boardTitle: string) => void;
+  preferredBoardTitle?: string;
 }
 
 const TOP_TAGS = new Set(["#top", "#priority", "#prio", "#p1"]);
@@ -18,7 +20,7 @@ type TaskItem = {
   groupTitle?: string;
 };
 
-export default function TopPriorities({ board, onSelectTask }: Props) {
+export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoard, preferredBoardTitle }: Props) {
   const [pinned, setPinned] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem('kanban-pinned-priorities');
@@ -105,9 +107,19 @@ export default function TopPriorities({ board, onSelectTask }: Props) {
       </div>
 
       {/* Pinned priorities (manual) */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold text-gray-800">Pinned</h3>
+          <div className="flex items-center gap-2">
+          {onImportPinnedToBoard && !editing && pinned.length > 0 && (
+            <button
+              className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50"
+              onClick={() => onImportPinnedToBoard(preferredBoardTitle || board.title)}
+              title={`Create #top cards in \"${preferredBoardTitle || board.title}\"`}
+            >
+              Add as #top cards{preferredBoardTitle ? ` in \"${preferredBoardTitle}\"` : ''}
+            </button>
+          )}
           {editing ? (
             <div className="flex gap-2">
               <button className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50" onClick={saveEdit}>Save</button>
@@ -116,6 +128,7 @@ export default function TopPriorities({ board, onSelectTask }: Props) {
           ) : (
             <button className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50" onClick={startEdit}>Edit</button>
           )}
+          </div>
         </div>
         {editing ? (
           <textarea
