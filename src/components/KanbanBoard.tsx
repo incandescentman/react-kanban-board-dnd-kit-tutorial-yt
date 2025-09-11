@@ -585,7 +585,8 @@ function KanbanBoard() {
         // Different column
         targetColumn.tasks = targetColumn.tasks || [];
         const insertIndex = Math.min(targetTaskIndex, targetColumn.tasks.length);
-        targetColumn.tasks.splice(insertIndex, 0, taskToMove);
+        const updated: Task = { ...taskToMove, status: targetColumn.title } as Task;
+        targetColumn.tasks.splice(insertIndex, 0, updated);
       }
       
       return { ...prev, columns: newColumns };
