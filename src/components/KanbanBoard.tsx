@@ -267,7 +267,7 @@ function KanbanBoard() {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [focusedTaskId, setFocusedTaskId] = useState<Id | null>(null);
 
-  const [legendMinimized, setLegendMinimized] = useState(false);
+  const [legendMinimized, setLegendMinimized] = useState(true);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
