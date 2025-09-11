@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Star, ArrowRight, CheckCircle2, Circle } from 'lucide-react';
 import { Board, Id, Task } from "../types";
 import { extractTags, getTagColor } from "../utils/tags";
 
@@ -102,26 +103,33 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
   }, [board]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Current Top Priorities</h2>
-          <p className="text-sm text-gray-500 mt-1">Pinned items first, then any card tagged with #top or #priority</p>
+    <div className="w-full max-w-6xl mx-auto py-12">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white flex items-center justify-center shadow-sm">
+            <Star className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Top Priorities</h2>
+            <p className="text-sm text-gray-500 mt-0.5">Pinned first, then cards tagged with <span className="font-medium">#top</span> or <span className="font-medium">#priority</span></p>
+          </div>
         </div>
         <div className="text-sm text-gray-500">{items.length} item{items.length === 1 ? "" : "s"}</div>
       </div>
 
       {/* Pinned priorities (manual) */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-base font-semibold text-gray-800">Pinned</h3>
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-gray-900">Pinned</h3>
           <div className="flex items-center gap-2">
           {onImportPinnedToBoard && !editing && pinned.length > 0 && (
             <button
-              className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm"
+              className="px-3 py-1.5 text-sm rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm inline-flex items-center gap-2"
               onClick={() => onImportPinnedToBoard(preferredBoardTitle || board.title)}
               title={`Create #top cards in \"${preferredBoardTitle || board.title}\"`}
             >
+              <Star className="h-4 w-4 text-amber-500" />
               Add as #top cards{preferredBoardTitle ? ` in \"${preferredBoardTitle}\"` : ''}
             </button>
           )}
@@ -135,48 +143,60 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
           )}
           </div>
         </div>
-        {editing ? (
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="One priority per line"
-            className="w-full min-h-[140px] text-sm border border-gray-300 rounded-md p-3 shadow-inner"
-          />
-        ) : pinned.length === 0 ? (
-          <div className="text-sm text-gray-500">
-            No pinned priorities yet. Click Edit to paste your list (one per line).
-          </div>
-        ) : (
-          <ul className="list-disc pl-6 space-y-1.5">
-            {pinned.map((p, i) => (
-              <li key={i} className="text-base text-gray-800">{p}</li>
-            ))}
-          </ul>
-        )}
+        <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm p-4">
+          {editing ? (
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="One priority per line"
+              className="w-full min-h-[160px] text-sm border border-gray-300 rounded-md p-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-300"
+            />
+          ) : pinned.length === 0 ? (
+            <div className="text-sm text-gray-500">
+              No pinned priorities yet. Click Edit to paste your list (one per line).
+            </div>
+          ) : (
+            <ul className="list-disc pl-6 space-y-2">
+              {pinned.map((p, i) => (
+                <li key={i} className="text-base text-gray-900">{p}</li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       {items.length === 0 ? (
-        <div className="text-gray-500">Add #top or #priority to any card to show it here.</div>
+        <div className="rounded-2xl border border-dashed border-gray-300 p-10 text-center text-gray-500 bg-white/50">
+          No #top or #priority cards yet. Tag a card to feature it here.
+        </div>
       ) : (
         <div className="space-y-3">
           {items.map((it) => (
             <button
               key={it.id}
               onClick={() => onSelectTask(it.id)}
-              className={`w-full text-left p-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 shadow-sm transition-colors ${
-                it.completed ? "opacity-70" : ""
+              className={`group w-full text-left p-4 rounded-2xl border border-gray-200 bg-white/80 hover:bg-white shadow-sm hover:shadow-md transition-all ${
+                it.completed ? "opacity-75" : ""
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1">
-                  <div className={`text-base ${it.completed ? "line-through text-gray-500" : "text-gray-900"}`}>
-                    {it.content}
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 mr-2 font-medium">{it.columnTitle}</span>
-                    {it.groupTitle && <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">{it.groupTitle}</span>}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  {it.completed ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-gray-300 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <div className={`text-[15px] leading-6 ${it.completed ? "line-through text-gray-500" : "text-gray-900"}`}>
+                      {it.content}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mt-2">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200 font-medium">{it.columnTitle}</span>
+                      {it.groupTitle && <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">{it.groupTitle}</span>}
+                    </div>
                   </div>
                 </div>
+                <ArrowRight className="h-4 w-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mt-1" />
               </div>
             </button>
           ))}
