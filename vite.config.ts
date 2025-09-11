@@ -10,4 +10,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    // Automatically open the app in the default browser on dev
+    open: true,
+  },
 })

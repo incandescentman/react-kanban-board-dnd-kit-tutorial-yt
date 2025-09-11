@@ -8,11 +8,13 @@ import {
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
+  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
+  closestCorners,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext, arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
@@ -30,6 +32,7 @@ import BoardSelector from "./BoardSelector";
 import GroupContainer from "./GroupContainer";
 import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
+import { extractTags } from "../utils/tags";
 
 const DATA_VERSION = 2;
 
@@ -83,11 +86,11 @@ function KanbanBoard() {
       title: "Sunjay's Post-OpenAI Action Plan",
       columns: [
         {
-          id: 7746,
+          id: "7746",
           title: "Ideas",
           tasks: [
             {
-              id: 9439,
+              id: "9439",
               content: "Write job descriptions",
               completed: false,
               tags: []
@@ -105,13 +108,13 @@ function KanbanBoard() {
               title: "July items",
               tasks: [
                 {
-                  id: 7350,
+                  id: "7350",
                   content: "Pick up laundry",
                   completed: false,
                   tags: []
                 },
                 {
-                  id: 6263,
+                  id: "6263",
                   content: "Do project",
                   completed: false,
                   tags: []
@@ -125,7 +128,7 @@ function KanbanBoard() {
           title: "In Progress",
           tasks: [
             {
-              id: 5374,
+              id: "5374",
               content: "Write chapter",
               completed: false,
               tags: []
@@ -138,7 +141,7 @@ function KanbanBoard() {
           title: "Done",
           tasks: [
             {
-              id: 5056,
+              id: "5056",
               content: "Publish blog post",
               completed: true,
               tags: []
@@ -163,11 +166,11 @@ function KanbanBoard() {
     
     board.columns?.forEach(column => {
       column.tasks?.forEach(task => {
-        task.tags?.forEach(tag => extractedTags.add(tag));
+        extractTags(task.content).forEach(tag => extractedTags.add(tag));
       });
       column.groups?.forEach(group => {
         group.tasks?.forEach(task => {
-          task.tags?.forEach(tag => extractedTags.add(tag));
+          extractTags(task.content).forEach(tag => extractedTags.add(tag));
         });
       });
     });
@@ -894,6 +897,9 @@ function KanbanBoard() {
       activationConstraint: {
         distance: 10,
       },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -958,6 +964,7 @@ function KanbanBoard() {
     const isActiveATask = active.data.current?.type === "Task";
     const isOverATask = over.data.current?.type === "Task";
     const isOverAColumn = over.data.current?.type === "Column";
+    const isOverAColumnArea = over.data.current?.type === "ColumnArea";
     const isOverAGroup = over.data.current?.type === "Group";
 
     if (!isActiveATask) return;
@@ -1034,11 +1041,13 @@ function KanbanBoard() {
             
             // Add to target group (only if this is the target column)
             if (col.id === targetColumnId) {
-              newCol.groups = newCol.groups?.map(group => 
-                group.id === overId 
-                  ? { ...group, tasks: [...(group.tasks || []), activeTask] }
-                  : group
-              ) || [];
+              newCol.groups = newCol.groups?.map(group => {
+                if (group.id === overId) {
+                  const updatedTask: Task = { ...activeTask!, status: newCol.title };
+                  return { ...group, tasks: [...(group.tasks || []), updatedTask] };
+                }
+                return group;
+              }) || [];
             }
             
             return newCol;
@@ -1142,7 +1151,10 @@ function KanbanBoard() {
                     if (group.id === overGroupId) {
                       const overIndex = group.tasks?.findIndex(t => t.id === overId) || 0;
                       const newTasks = [...(group.tasks || [])];
-                      newTasks.splice(overIndex, 0, activeTask);
+                      const taskToInsert: Task = (activeColumnId !== overColumnId)
+                        ? { ...activeTask!, status: newCol.title }
+                        : activeTask!;
+                      newTasks.splice(overIndex, 0, taskToInsert);
                       return { ...group, tasks: newTasks };
                     }
                     return group;
@@ -1151,7 +1163,10 @@ function KanbanBoard() {
                   // Add to column tasks at position
                   const overIndex = col.tasks?.findIndex(t => t.id === overId) || 0;
                   const newTasks = [...(col.tasks || [])];
-                  newTasks.splice(overIndex, 0, activeTask);
+                  const taskToInsert: Task = (activeColumnId !== overColumnId)
+                    ? { ...activeTask!, status: newCol.title }
+                    : activeTask!;
+                  newTasks.splice(overIndex, 0, taskToInsert);
                   newCol.tasks = newTasks;
                 }
               }
@@ -1165,11 +1180,12 @@ function KanbanBoard() {
     }
 
     // Im dropping a Task over a column
-    if (isActiveATask && isOverAColumn) {
+    if (isActiveATask && (isOverAColumn || isOverAColumnArea)) {
       setBoard(prev => {
         let activeTask: Task | null = null;
         let activeColumnId: Id | null = null;
         let activeGroupId: string | null = null;
+        let targetColumnId: Id | null = null;
         
         // Find the active task (could be in column tasks or group tasks)
         if (prev.columns) {
@@ -1220,9 +1236,12 @@ function KanbanBoard() {
               }
             }
             
+            // Determine target column id
+            const targetId = isOverAColumn ? overId : (over.data.current as any)?.columnId;
             // THEN add to target column (if this is the target column)
-            if (col.id === overId) {
-              newCol.tasks = [...(newCol.tasks || []), activeTask];
+            if (col.id === targetId) {
+              const updatedTask: Task = { ...activeTask!, status: newCol.title };
+              newCol.tasks = [...(newCol.tasks || []), updatedTask];
             }
             
             return newCol;
@@ -1273,6 +1292,7 @@ function KanbanBoard() {
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           onDragOver={onDragOver}
+          collisionDetection={closestCorners}
         >
           <div className="m-auto flex gap-6">
             {/* Sidebar */}
@@ -1361,6 +1381,7 @@ function KanbanBoard() {
                         setFocusedTaskId={setFocusedTaskId}
                         columnMoveMode={columnMoveMode}
                         onTagClick={handleTagClick}
+                        duplicateTask={duplicateTask}
                       />
                     ))}
                   </SortableContext>
@@ -1402,6 +1423,7 @@ function KanbanBoard() {
                   setFocusedTaskId={setFocusedTaskId}
                   columnMoveMode={columnMoveMode}
                   onTagClick={handleTagClick}
+                  duplicateTask={duplicateTask}
                 />
               )}
               {activeTask && (
@@ -1414,6 +1436,7 @@ function KanbanBoard() {
                   focusedTaskId={focusedTaskId}
                   setFocusedTaskId={setFocusedTaskId}
                   onTagClick={handleTagClick}
+                  duplicateTask={duplicateTask}
                 />
               )}
             </DragOverlay>,
@@ -1772,19 +1795,65 @@ function KanbanBoard() {
     }));
   }
 
-  function updateColumn(id: Id, title: string) {
+  function updateColumn(id: Id, updates: Partial<Column>) {
     setBoard(prev => ({
       ...prev,
       columns: prev.columns?.map(col => 
-        col.id === id ? { ...col, title } : col
+        col.id === id ? { ...col, ...updates } : col
       ) || []
     }));
   }
+
+  function duplicateTask(id: Id) {
+    setBoard(prev => {
+      const columns = prev.columns ? [...prev.columns] : [];
+      for (let c = 0; c < columns.length; c++) {
+        const col = columns[c];
+        // Check direct tasks
+        const directIndex = col.tasks?.findIndex(t => t.id === id) ?? -1;
+        if (directIndex !== -1 && col.tasks) {
+          const original = col.tasks[directIndex];
+          const copy: Task = {
+            id: generateId(),
+            content: original.content,
+            completed: false,
+            tags: original.tags ? [...original.tags] : []
+          };
+          const newTasks = [...col.tasks];
+          newTasks.splice(directIndex + 1, 0, copy);
+          columns[c] = { ...col, tasks: newTasks };
+          return { ...prev, columns };
+        }
+        // Check groups
+        if (col.groups) {
+          for (let g = 0; g < col.groups.length; g++) {
+            const group = col.groups[g];
+            const idx = group.tasks?.findIndex(t => t.id === id) ?? -1;
+            if (idx !== -1 && group.tasks) {
+              const original = group.tasks[idx];
+              const copy: Task = {
+                id: generateId(),
+                content: original.content,
+                completed: false,
+                tags: original.tags ? [...original.tags] : []
+              };
+              const newGroupTasks = [...group.tasks];
+              newGroupTasks.splice(idx + 1, 0, copy);
+              const newGroups = [...(col.groups || [])];
+              newGroups[g] = { ...group, tasks: newGroupTasks };
+              columns[c] = { ...col, groups: newGroups };
+              return { ...prev, columns };
+            }
+          }
+        }
+      }
+      return prev;
+    });
+  }
 }
 
-function generateId() {
-  /* Generate a random number between 0 and 10000 */
-  return Math.floor(Math.random() * 10001);
+function generateId(): Id {
+  return crypto.randomUUID();
 }
 
 function parseHeadingAndTasks(content: string): { headingTitle?: string; tasks: string[] } {

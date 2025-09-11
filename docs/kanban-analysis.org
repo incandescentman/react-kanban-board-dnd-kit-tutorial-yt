@@ -1,0 +1,87 @@
+#+title: Rising Action Kanban — Codebase Analysis
+#+author: Codex CLI Assistant
+#+options: toc:2
+
+* Overview
+- App: React 18 + TypeScript + Vite + TailwindCSS + dnd-kit
+- Purpose: Kanban board with columns, grouped tasks, keyboard shortcuts, localStorage persistence, and multi‑board management.
+- Entrypoint: =src/components/KanbanBoard.tsx= mounted from =src/App.tsx=.
+
+* How To Run
+- Dev server: =npm run dev= (Vite on port 5173)
+- Build: =npm run build=
+- Preview build: =npm run preview=
+
+* Build Status
+- Command: =npm run build=
+- Result: Successful. No TypeScript errors. Vite produced assets under =dist/=. 
+
+* Architecture
+- Core components:
+  - =KanbanBoard=: state, persistence, DnD orchestration, keyboard logic.
+  - =ColumnContainer=: per‑column UI, sortable direct tasks, group rendering.
+  - =GroupContainer=: grouped task lists within a column.
+  - =TaskCard=: task UI, edit/complete/delete, tag rendering.
+  - Utilities: =src/utils/tags.tsx= (tag parsing/colour), =src/utils/dataRecovery.ts= (migration/recovery).
+- Types: =src/types.ts= defines =Task=, =Group=, =Column=, =Board=.
+- Storage: localStorage with per‑board keys (default =~kanban-board-state~=) and =kanban-board-order= for ordering.
+
+* Strengths
+- Clean component structure and separation of concerns.
+- Thoughtful UX: column move mode, command palette, keyboard shortcuts, confirmations, drag overlay.
+- Data migration helpers for legacy → modern formats.
+- LocalStorage persistence and multi‑board support.
+
+* Issues and Improvements
+** Tag aggregation does not persist or derive from content
+- Observation: =allTags= is derived from =task.tags= in =KanbanBoard=, but tasks are not updated with tags when content changes; tag badges are only rendered on the fly via =renderContentWithTags(...)=.
+- Impact: TagView/tag browsing may miss tags and tag list can be empty/stale.
+- Recommendation: Derive tags from content when aggregating, e.g. use =extractTags(task.content)= for both direct and grouped tasks.
+
+** TagView prop mismatch
+- Current: =KanbanBoard= passes =selectedTag=, =onTagSelect=, =tags=, and =board= to =TagView=.
+- Component: =TagView= expects props: ={ isOpen, onClose, tag, tasks, onTaskClick }= and builds its own list UI.
+- Impact: Runtime/type mismatch and unused props; likely from a refactor in progress.
+- Recommendation: Decide on one API. Option A: Keep =TagView= as a focused “cards for a single tag” view; supply =(tag, tasks)= computed in =KanbanBoard=. Option B: Make =TagView= the tag browser and accept =(selectedTag, onTagSelect, tags, board)=. Align both files accordingly.
+
+** Task type drift
+- =Task= has =status: "TODO" | ...= and optional =completed=. The codebase primarily uses =completed= and not =status=.
+- Recommendation: Either standardize on =status= (and derive completed from it) or remove =status= to avoid redundancy. If keeping tag persistence, add =tags?: string[]=.
+
+** ID collision risk
+- =generateId()= returns 0–10000. Collisions are likely across tasks, groups, and columns.
+- Recommendation: Prefer =crypto.randomUUID()= (string IDs) or a monotonic timestamp+counter.
+
+** Logging noise
+- Several =console.log= statements for migration/tag debug.
+- Recommendation: Guard logs behind a debug flag or only in development.
+
+** Data recovery breadth
+- =findAllBoardData()= matches any key containing “kanban/board/task/column”. This can pull unrelated data in the same origin.
+- Recommendation: Scope to known prefixes or partition storage keys.
+
+* Actions Taken
+- Updated Vite config to auto‑open the browser on dev.
+  - File: =vite.config.ts=
+  - Change: add =server.open = true=
+  - Usage: =npm run dev= now launches the default browser automatically.
+- Fixed tag aggregation to parse from task content.
+  - File: =src/components/KanbanBoard.tsx=
+  - Change: use =extractTags(task.content)= for both column and group tasks; aggregate into =allTags=.
+- Switched IDs to random UUID strings.
+  - Files: =src/types.ts= (set =Id= to =string=, add =tags?= to =Task=), =src/components/KanbanBoard.tsx= (default seed IDs to strings; =generateId()= uses =crypto.randomUUID()=).
+
+* Suggested Next Steps
+- Implement tag aggregation from content and (optionally) persist tags onto tasks.
+- Reconcile =TagView= props with =KanbanBoard= usage; add a small integration test/QA pass.
+- Replace =generateId()= with =crypto.randomUUID()= and adjust =Id= type to =string= across components.
+- Decide on =Task.status= vs =completed= and refactor accordingly.
+- Gate verbose logging with a debug toggle.
+
+* Appendix: Key Files
+- =src/components/KanbanBoard.tsx=: main board logic and UI composition.
+- =src/components/ColumnContainer.tsx=: column interactions and rendering.
+- =src/components/TaskCard.tsx=: task editing, completion, and tag display.
+- =src/utils/tags.tsx=: =extractTags=, =getTagColor=, and tag rendering helpers.
+- =src/utils/dataRecovery.ts=: data discovery, migration, recovery helpers.
+- =vite.config.ts=: Vite config (now with =server.open=true=).

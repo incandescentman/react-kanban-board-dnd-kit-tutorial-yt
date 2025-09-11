@@ -1,10 +1,11 @@
-export type Id = string | number;
+export type Id = string;
 
 export type Task = {
   id: Id;
   content: string;
   status: "TODO" | "DONE" | "STARTED" | "NEXT" | "HABIT" | string;
   completed?: boolean;
+  tags?: string[];
 };
 
 export type Group = {
@@ -19,6 +20,7 @@ export type Column = {
   title: string;
   groups: Group[];
   tasks: Task[];
+  color?: string;
 };
 
 export type Board = {

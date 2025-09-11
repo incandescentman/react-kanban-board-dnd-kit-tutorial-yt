@@ -18,6 +18,7 @@ interface Props {
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
   onTagClick?: (tag: string) => void;
+  duplicateTask?: (id: Id) => void;
 }
 
 function GroupContainer({
@@ -32,6 +33,7 @@ function GroupContainer({
   focusedTaskId,
   setFocusedTaskId,
   onTagClick,
+  duplicateTask,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
   const [mouseIsOver, setMouseIsOver] = useState(false);
@@ -135,6 +137,7 @@ function GroupContainer({
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
+              duplicateTask={duplicateTask}
             />
           ))}
         </SortableContext>

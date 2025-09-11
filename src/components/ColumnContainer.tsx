@@ -1,24 +1,27 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import TrashIcon from "../icons/TrashIcon";
 import { Column, Id, Task, Group } from "../types";
 import { CSS } from "@dnd-kit/utilities";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import PlusIcon from "../icons/PlusIcon";
 import TaskCard from "./TaskCard";
 import GroupContainer from "./GroupContainer";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Palette } from 'lucide-react';
 
 interface Props {
   column: Column;
   deleteColumn: (id: Id) => void;
-  updateColumn: (id: Id, title: string) => void;
+  updateColumn: (id: Id, updates: Partial<Column>) => void;
 
   createTask: (columnId: Id) => void;
   updateTask: (id: Id, content: string) => void;
   deleteTask: (id: Id) => void;
   toggleTaskComplete: (id: Id) => void;
+  duplicateTask?: (id: Id) => void;
   toggleGroupComplete?: (id: Id) => void;
   updateGroup?: (id: string, title: string) => void;
   deleteGroup?: (id: string) => void;
@@ -39,6 +42,7 @@ function ColumnContainer({
   deleteTask,
   updateTask,
   toggleTaskComplete,
+  duplicateTask,
   toggleGroupComplete,
   updateGroup,
   deleteGroup,
@@ -49,6 +53,21 @@ function ColumnContainer({
   onTagClick,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!pickerRef.current) return;
+      if (!pickerRef.current.contains(e.target as Node)) {
+        setShowColorPicker(false);
+      }
+    }
+    if (showColorPicker) {
+      document.addEventListener('mousedown', onDocClick);
+      return () => document.removeEventListener('mousedown', onDocClick);
+    }
+  }, [showColorPicker]);
 
   const tasksIds = useMemo(() => {
     // Only include direct tasks in column, not group tasks
@@ -84,6 +103,12 @@ function ColumnContainer({
     transition,
     transform: CSS.Transform.toString(transform),
   };
+
+  // Highlight column area when a task is dragged over
+  const { isOver: isOverColumnArea, setNodeRef: setAreaRef } = useDroppable({
+    id: `${column.id}-area`,
+    data: { type: 'ColumnArea', columnId: column.id },
+  });
 
   if (isDragging) {
     return (
@@ -127,8 +152,8 @@ function ColumnContainer({
         onClick={() => {
           setEditMode(true);
         }}
-        className="
-      bg-mainBackgroundColor
+        className={`
+      ${column.color ? column.color : 'bg-mainBackgroundColor'}
       text-3xl
       h-[60px]
       cursor-grab
@@ -141,7 +166,7 @@ function ColumnContainer({
       flex
       items-center
       justify-between
-      "
+      `}
       >
         <div className="flex gap-2 items-center">
           {getColumnIcon()}
@@ -164,7 +189,7 @@ function ColumnContainer({
             <input
               className="bg-white focus:border-blue-500 border border-gray-300 rounded outline-none px-2 text-black"
               value={column.title}
-              onChange={(e) => updateColumn(column.id, e.target.value)}
+              onChange={(e) => updateColumn(column.id, { title: e.target.value })}
               autoFocus
               onBlur={() => {
                 setEditMode(false);
@@ -179,6 +204,53 @@ function ColumnContainer({
             />
           )}
         </div>
+        <div className="relative flex items-center gap-1">
+          {/* Color picker trigger */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 opacity-60 hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowColorPicker((v) => !v);
+                }}
+              >
+                <Palette className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Column color</TooltipContent>
+          </Tooltip>
+          {showColorPicker && (
+            <div ref={pickerRef} className="absolute right-10 top-1 z-20 bg-white p-2 rounded-md shadow-md border grid grid-cols-5 gap-2">
+              {[
+                'bg-white',
+                'bg-blue-50','bg-green-50','bg-yellow-50','bg-purple-50','bg-pink-50',
+                'bg-orange-50','bg-cyan-50','bg-teal-50','bg-red-50','bg-gray-100',
+              ].map((cls) => (
+                <button
+                  key={cls}
+                  className={`${cls} h-6 w-6 rounded border border-gray-300 hover:opacity-80`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateColumn(column.id, { color: cls });
+                    setShowColorPicker(false);
+                  }}
+                />
+              ))}
+              <button
+                className="col-span-5 text-xs text-gray-600 hover:text-gray-900 underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateColumn(column.id, { color: undefined });
+                  setShowColorPicker(false);
+                }}
+              >
+                Reset
+              </button>
+            </div>
+          )}
         
         {!editMode && (
           <Tooltip>
@@ -209,11 +281,13 @@ function ColumnContainer({
             </TooltipTrigger>
           </Tooltip>
         )}
+        </div>
       </div>
 
       {/* Column task container */}
       <div 
-        className="flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto cursor-pointer"
+        ref={setAreaRef}
+        className={`flex flex-grow flex-col gap-4 p-2 overflow-x-hidden overflow-y-auto cursor-pointer ${isOverColumnArea ? 'ring-2 ring-blue-300 bg-blue-50/40' : ''}`}
         onClick={() => createTask(column.id)}
       >
         <SortableContext items={tasksIds}>
@@ -232,6 +306,7 @@ function ColumnContainer({
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
+              duplicateTask={duplicateTask}
             />
           ))}
           
@@ -247,6 +322,7 @@ function ColumnContainer({
               focusedTaskId={focusedTaskId}
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
+              duplicateTask={duplicateTask}
             />
           ))}
         </SortableContext>

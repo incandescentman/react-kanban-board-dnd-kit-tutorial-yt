@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { cn } from "@/lib/utils";
+import { Copy } from 'lucide-react';
 
 interface Props {
   task: Task;
@@ -20,9 +21,10 @@ interface Props {
   focusedTaskId: Id | null;
   setFocusedTaskId: (id: Id | null) => void;
   onTagClick?: (tag: string) => void;
+  duplicateTask?: (id: Id) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId, onTagClick }: Props) {
+function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId, onTagClick, duplicateTask }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
   const [originalContent, setOriginalContent] = useState(task.content);
@@ -203,6 +205,25 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
           </div>
 
           {mouseIsOver && (
+            <>
+              {duplicateTask && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-10 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        duplicateTask(task.id);
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Duplicate</TooltipContent>
+                </Tooltip>
+              )}
             <DeleteConfirmationDialog
               trigger={
                 <Button
@@ -218,6 +239,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
               description="Are you sure you want to delete this task? This action cannot be undone."
               onConfirm={() => deleteTask(task.id)}
             />
+            </>
           )}
         </CardContent>
       </Card>
