@@ -1,0 +1,10 @@
+* Fixes for Task Deletion
+
+** Issues
+- Delete (trash) icon was not appearing on task cards.
+- Even when deletion was triggered, the task would remain on the board, though an "undo" notification appeared.
+
+** Fixes
+- **Icon Visibility**: The trash icon was not visible because its SVG code was missing a `stroke` color property, making it invisible by default. This was fixed by adding `stroke="currentColor"` to the SVG, allowing it to inherit the parent button's text color.
+- **Button Visibility**: The delete button (containing the icon) was not configured to appear on hover. This was changed to make the button appear when a user hovers over the task card.
+- **Deletion Logic**: The `deleteTask` function in the main `KanbanBoard` component was rewritten to be more robust. The original implementation was not reliably updating the board state, causing the task to remain visually present after deletion. The new implementation performs a more targeted update to the state, ensuring the task is removed correctly.

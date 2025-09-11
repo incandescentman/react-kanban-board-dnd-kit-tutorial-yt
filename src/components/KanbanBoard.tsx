@@ -1691,60 +1691,63 @@ function KanbanBoard() {
   }
 
   function deleteTask(id: Id) {
-    // Find and store the task being deleted for undo functionality
     let taskToDelete: Task | null = null;
     let columnId: Id | null = null;
     let groupId: string | null = null;
 
     // Find the task and its location
     for (const col of board.columns || []) {
-      // Check column tasks
-      const foundTask = col.tasks?.find(task => task.id === id);
-      if (foundTask) {
-        taskToDelete = foundTask;
+      const taskIndex = col.tasks?.findIndex(t => t.id === id) ?? -1;
+      if (taskIndex !== -1) {
+        taskToDelete = col.tasks[taskIndex];
         columnId = col.id;
         break;
       }
-      
-      // Check group tasks
-      for (const group of col.groups || []) {
-        const foundGroupTask = group.tasks?.find(task => task.id === id);
-        if (foundGroupTask) {
-          taskToDelete = foundGroupTask;
-          columnId = col.id;
-          groupId = group.id;
-          break;
+
+      if (col.groups) {
+        for (const group of col.groups) {
+          const taskInGroupIndex = group.tasks?.findIndex(t => t.id === id) ?? -1;
+          if (taskInGroupIndex !== -1) {
+            taskToDelete = group.tasks[taskInGroupIndex];
+            columnId = col.id;
+            groupId = group.id;
+            break;
+          }
         }
       }
       if (taskToDelete) break;
     }
 
     if (taskToDelete && columnId) {
-      // Store undo action
       addUndoAction({
         type: 'DELETE_TASK',
-        data: {
-          task: taskToDelete,
-          columnId,
-          groupId
-        },
+        data: { task: taskToDelete, columnId, groupId },
         timestamp: Date.now()
+      });
+
+      setBoard(prev => {
+        const newColumns = prev.columns.map(c => {
+          if (c.id === columnId) {
+            if (groupId) {
+              // Task is in a group
+              const newGroups = c.groups.map(g => {
+                if (g.id === groupId) {
+                  return { ...g, tasks: g.tasks.filter(t => t.id !== id) };
+                }
+                return g;
+              });
+              return { ...c, groups: newGroups };
+            } else {
+              // Task is in the column
+              return { ...c, tasks: c.tasks.filter(t => t.id !== id) };
+            }
+          }
+          return c;
+        });
+        return { ...prev, columns: newColumns };
       });
     }
 
-    setBoard(prev => ({
-      ...prev,
-      columns: prev.columns?.map(col => ({
-        ...col,
-        tasks: col.tasks?.filter(task => task.id !== id) || [],
-        groups: col.groups?.map(group => ({
-          ...group,
-          tasks: group.tasks?.filter(task => task.id !== id) || []
-        })) || []
-      })) || []
-    }));
-
-    // Clear focus if the focused task was deleted
     if (focusedTaskId === id) {
       setFocusedTaskId(null);
     }

@@ -222,13 +222,13 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             </div>
           </div>
 
-          {!selectMode && (
+          {!selectMode && mouseIsOver && (
             <DeleteConfirmationDialog
               trigger={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 z-10 opacity-80 hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                  className="absolute right-2 top-2 h-8 w-8 z-10 opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <TrashIcon />
