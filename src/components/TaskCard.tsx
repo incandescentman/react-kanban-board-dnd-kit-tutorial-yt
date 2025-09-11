@@ -22,9 +22,12 @@ interface Props {
   setFocusedTaskId: (id: Id | null) => void;
   onTagClick?: (tag: string) => void;
   duplicateTask?: (id: Id) => void;
+  selectMode?: boolean;
+  selected?: boolean;
+  onSelectToggle?: (id: Id) => void;
 }
 
-function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId, onTagClick, duplicateTask }: Props) {
+function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTaskToHeading, focusedTaskId, setFocusedTaskId, onTagClick, duplicateTask, selectMode, selected, onSelectToggle }: Props) {
   const [mouseIsOver, setMouseIsOver] = useState(false);
   const [editMode, setEditMode] = useState(task.content === "");
   const [originalContent, setOriginalContent] = useState(task.content);
@@ -42,7 +45,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
       type: "Task",
       task,
     },
-    disabled: editMode,
+    disabled: editMode || !!selectMode,
   });
 
   const style = {
@@ -141,6 +144,10 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
         {...listeners}
         onClick={(e) => {
           e.stopPropagation();
+          if (selectMode && onSelectToggle) {
+            onSelectToggle(task.id);
+            return;
+          }
           toggleEditMode();
         }}
         data-task-id={task.id}
@@ -149,13 +156,33 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
           "group h-[100px] min-h-[100px] cursor-grab transition-all duration-200",
           "hover:shadow-md hover:ring-2 hover:ring-primary/20",
           focusedTaskId === task.id && "ring-2 ring-primary",
-          task.completed && "opacity-75"
+          task.completed && "opacity-75",
+          selectMode && "cursor-pointer"
         )}
         onMouseEnter={() => setMouseIsOver(true)}
         onMouseLeave={() => setMouseIsOver(false)}
         onFocus={() => setFocusedTaskId(task.id)}
       >
         <CardContent className="p-2.5 h-full flex items-start">
+          {selectMode && (
+            <button
+              className={cn(
+                "mr-2 h-5 w-5 shrink-0 rounded border",
+                selected ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300"
+              )}
+              aria-pressed={selected}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectToggle && onSelectToggle(task.id);
+              }}
+            >
+              {selected && (
+                <svg className="mx-auto mt-[2px] h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -204,7 +231,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             </div>
           </div>
 
-          {mouseIsOver && (
+          {mouseIsOver && !selectMode && (
             <>
               {duplicateTask && (
                 <Tooltip>

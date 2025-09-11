@@ -19,6 +19,9 @@ interface Props {
   setFocusedTaskId: (id: Id | null) => void;
   onTagClick?: (tag: string) => void;
   duplicateTask?: (id: Id) => void;
+  selectMode?: boolean;
+  selectedTaskIds?: Set<Id>;
+  onSelectToggle?: (id: Id) => void;
 }
 
 function GroupContainer({
@@ -34,6 +37,9 @@ function GroupContainer({
   setFocusedTaskId,
   onTagClick,
   duplicateTask,
+  selectMode,
+  selectedTaskIds,
+  onSelectToggle,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
   const [mouseIsOver, setMouseIsOver] = useState(false);
@@ -138,6 +144,9 @@ function GroupContainer({
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
               duplicateTask={duplicateTask}
+              selectMode={selectMode}
+              selected={selectedTaskIds?.has(task.id)}
+              onSelectToggle={onSelectToggle}
             />
           ))}
         </SortableContext>

@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { Plus, HelpCircle, Clipboard, Command, Tag, Archive, Trash2, Edit3, Heart, Columns3 } from 'lucide-react';
+import { Plus, HelpCircle, Clipboard, Command, Tag, Archive, Trash2, Edit3, Heart, Columns3, CheckSquare, XSquare } from 'lucide-react';
 
 import CommandPalette from "./CommandPalette";
 import TagView from "./TagView";
@@ -276,6 +276,8 @@ function KanbanBoard() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'board' | 'priorities'>('board');
   const DEFAULT_TOP_BOARD_TITLE = "Sunjay's Post-OpenAI Action Plan";
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   // Enhanced undo system
   interface UndoAction {
     type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
@@ -419,7 +421,13 @@ function KanbanBoard() {
       label: 'Toggle Column Move Mode',
       action: () => setColumnMoveMode(!columnMoveMode),
       icon: Edit3
-    }
+    },
+    {
+      id: 'select-mode',
+      label: 'Toggle Select Mode',
+      action: () => setSelectMode(!selectMode),
+      icon: CheckSquare
+    },
   ];
 
   const handleKeyboardNavigation = (key: string) => {
@@ -1411,6 +1419,9 @@ function KanbanBoard() {
                         columnMoveMode={columnMoveMode}
                         onTagClick={handleTagClick}
                         duplicateTask={duplicateTask}
+                        selectMode={selectMode}
+                        selectedTaskIds={selectedTaskIds}
+                        onSelectToggle={toggleTaskSelected}
                       />
                     ))}
                   </SortableContext>
@@ -1505,13 +1516,37 @@ function KanbanBoard() {
           </div>
         )}
 
-        {/* Bottom Right Corner Icons */}
-        <div className="fixed bottom-4 right-4 flex gap-2 z-10">
-          {/* Minimized Board Selector */}
-          {boardSelectorMinimized && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="group relative">
+          {/* Bottom Right Corner Icons */}
+          <div className="fixed bottom-4 right-4 flex gap-2 z-10">
+            {/* Selection mode toolbar */}
+            {selectMode && (
+              <div className="flex items-center gap-2 mr-4 bg-white/90 border border-gray-200 rounded-full px-3 py-1.5 shadow-sm">
+                <span className="text-sm text-gray-700">{selectedTaskIds.size} selected</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 border-red-300 text-red-700 hover:bg-red-50"
+                  onClick={() => setSelectMode(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 border-red-500 text-white bg-red-600 hover:bg-red-700"
+                  onClick={deleteSelectedTasks}
+                  disabled={selectedTaskIds.size === 0}
+                >
+                  Delete
+                </Button>
+              </div>
+            )}
+
+            {/* Minimized Board Selector */}
+            {boardSelectorMinimized && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="group relative">
                   <Button
                     onClick={() => setBoardSelectorMinimized(false)}
                     size="icon"
@@ -1542,6 +1577,25 @@ function KanbanBoard() {
                 </Button>
                 <TooltipContent side="left">
                   Add Column
+                </TooltipContent>
+              </div>
+            </TooltipTrigger>
+          </Tooltip>
+
+          {/* Toggle Select Mode */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="group relative">
+                <Button
+                  onClick={() => setSelectMode(!selectMode)}
+                  size="icon"
+                  variant="outline"
+                  className={`h-10 w-10 rounded-full shadow-lg ${selectMode ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}`}
+                >
+                  <CheckSquare className="h-4 w-4" />
+                </Button>
+                <TooltipContent side="left">
+                  {selectMode ? 'Exit Select Mode' : 'Select Tasks'}
                 </TooltipContent>
               </div>
             </TooltipTrigger>
@@ -1609,6 +1663,27 @@ function KanbanBoard() {
 
     // Auto-focus the new task
     setFocusedTaskId(newTask.id);
+  }
+
+  function toggleTaskSelected(id: Id) {
+    setSelectedTaskIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedTaskIds(new Set());
+  }
+
+  function deleteSelectedTasks() {
+    if (selectedTaskIds.size === 0) return;
+    const ids = Array.from(selectedTaskIds);
+    ids.forEach(id => deleteTask(id));
+    clearSelection();
+    setSelectMode(false);
   }
 
   function deleteTask(id: Id) {

@@ -31,6 +31,9 @@ interface Props {
   setFocusedTaskId: (id: Id | null) => void;
   columnMoveMode?: boolean;
   onTagClick?: (tag: string) => void;
+  selectMode?: boolean;
+  selectedTaskIds?: Set<Id>;
+  onSelectToggle?: (id: Id) => void;
 }
 
 function ColumnContainer({
@@ -51,6 +54,9 @@ function ColumnContainer({
   setFocusedTaskId,
   columnMoveMode,
   onTagClick,
+  selectMode,
+  selectedTaskIds,
+  onSelectToggle,
 }: Props) {
   const [editMode, setEditMode] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -307,6 +313,9 @@ function ColumnContainer({
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
               duplicateTask={duplicateTask}
+              selectMode={selectMode}
+              selectedTaskIds={selectedTaskIds}
+              onSelectToggle={onSelectToggle}
             />
           ))}
           
@@ -323,6 +332,9 @@ function ColumnContainer({
               setFocusedTaskId={setFocusedTaskId}
               onTagClick={onTagClick}
               duplicateTask={duplicateTask}
+              selectMode={selectMode}
+              selected={selectedTaskIds?.has(task.id)}
+              onSelectToggle={onSelectToggle}
             />
           ))}
         </SortableContext>
