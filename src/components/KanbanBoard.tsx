@@ -33,6 +33,7 @@ import GroupContainer from "./GroupContainer";
 import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
+import TopPriorities from "./TopPriorities";
 
 const DATA_VERSION = 2;
 
@@ -270,6 +271,7 @@ function KanbanBoard() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'board' | 'priorities'>('board');
   // Enhanced undo system
   interface UndoAction {
     type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
@@ -1288,6 +1290,23 @@ function KanbanBoard() {
             WebkitScrollbar: { display: 'none' }
           }}
         >
+        {/* Top nav: view switcher */}
+        <div className="w-full max-w-5xl mx-auto mt-6 mb-2 flex items-center gap-2">
+          <button
+            className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+            onClick={() => setActiveView('board')}
+          >
+            Board
+          </button>
+          <button
+            className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'priorities' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+            onClick={() => setActiveView('priorities')}
+          >
+            Priorities
+          </button>
+        </div>
+
+        {activeView === 'board' && (
         <DndContext
           sensors={sensors}
           onDragStart={onDragStart}
@@ -1444,6 +1463,17 @@ function KanbanBoard() {
             document.body
           )}
         </DndContext>
+        )}
+
+        {activeView === 'priorities' && (
+          <TopPriorities
+            board={board}
+            onSelectTask={(id) => {
+              setFocusedTaskId(id);
+              setActiveView('board');
+            }}
+          />
+        )}
         
         {/* Undo Notification */}
         {undoStack.length > 0 && (
