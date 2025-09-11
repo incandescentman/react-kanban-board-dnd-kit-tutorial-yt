@@ -73,17 +73,16 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
   if (hidden && items.length > 0) {
     return (
       <div className="w-64">
-        <div className="w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-4 shadow-lg">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-violet-900">Top Priorities</h3>
-            <button
-              className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50"
-              onClick={() => setHidden(false)}
-              aria-label="Show priorities"
-            >
-              <Plus className="h-4 w-4 text-violet-700" />
-            </button>
-          </div>
+        <div className="relative w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-3 shadow-sm">
+          <div className="text-[12px] font-semibold text-violet-900/90">Top Priorities</div>
+          <button
+            className="absolute top-2 right-2 inline-flex items-center justify-center h-5 w-5 rounded hover:bg-violet-100/70"
+            onClick={() => setHidden(false)}
+            aria-label="Show priorities"
+            title="Show"
+          >
+            <Plus className="h-3 w-3 text-violet-700" />
+          </button>
         </div>
       </div>
     );
@@ -93,31 +92,34 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   return (
     <div className="w-64">
-      <div className="w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-4 shadow-lg">
-        <div className="flex-1">
-          <div className="text-sm font-bold text-violet-900 mb-2">Top Priorities</div>
+      <div className="relative w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-3 shadow-sm">
+        <div className="flex-1 pr-8">
+          <div className="text-[12px] font-semibold text-violet-900 mb-1">Top Priorities</div>
           <ul className="list-disc pl-5 space-y-1 text-violet-900/90">
             {items.map((line, i) => (
               <li key={i} className="text-sm text-gray-800 leading-6">{line}</li>
             ))}
           </ul>
         </div>
-        <div className="flex items-center gap-2 ml-4">
+        {/* Tiny minimal symbols at the top-right */}
+        <div className="absolute top-2 right-2 flex items-center gap-1.5">
           {onOpenPriorities && (
             <button
               onClick={onOpenPriorities}
-              className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+              className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-violet-100/70"
               aria-label="Open priorities view"
+              title="Open"
             >
-              <ArrowUpRight className="h-4 w-4 text-violet-700" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-violet-700" />
             </button>
           )}
           <button
             onClick={() => setHidden(true)}
-            className="p-1.5 rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
+            className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-violet-100/70"
             aria-label="Hide priorities"
+            title="Hide"
           >
-            <Minus className="h-4 w-4 text-violet-700" />
+            <Minus className="h-3.5 w-3.5 text-violet-700" />
           </button>
         </div>
       </div>
