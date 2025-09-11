@@ -1898,7 +1898,12 @@ function KanbanBoard() {
       const raw = localStorage.getItem('kanban-pinned-priorities');
       if (!raw) return;
       const pinned: string[] = JSON.parse(raw);
-      const items = pinned.map(s => s.trim()).filter(Boolean);
+      const cleanLine = (s: string) =>
+        s
+          .trim()
+          .replace(/^\s*(?:[\u25A9\u2022\u2023\u25E6\u2043\u2219\-\u2013\u2014\*]+|\d+[.)])\s+/, '')
+          .replace(/^[-•\s]+/, '');
+      const items = pinned.map(cleanLine).filter(Boolean);
       if (items.length === 0) return;
 
       // Find board key by title

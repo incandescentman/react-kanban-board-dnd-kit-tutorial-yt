@@ -39,6 +39,13 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
     } catch {}
   }, [pinned]);
 
+  const cleanLine = (s: string) =>
+    s
+      .trim()
+      // remove common leading bullets/hyphens/numeric markers
+      .replace(/^\s*(?:[\u25A9\u2022\u2023\u25E6\u2043\u2219\-\u2013\u2014\*]+|\d+[.)])\s+/, '')
+      .replace(/^[-•\s]+/, '');
+
   const startEdit = () => {
     setDraft(pinned.join("\n"));
     setEditing(true);
@@ -46,9 +53,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
   const saveEdit = () => {
     const next = draft
       .split(/\r?\n/)
-      .map(s => s.trim())
-      // strip common bullets/hyphens/numeric list markers
-      .map(s => s.replace(/^\s*(?:[▌•*–—-]+|\d+[.)])\s+/, ''))
+      .map(cleanLine)
       .filter(Boolean);
     setPinned(next);
     setEditing(false);
@@ -143,22 +148,22 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
           )}
           </div>
         </div>
-        <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm p-4">
+        <div className="rounded-2xl border border-gray-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm p-5 max-w-xl mx-auto">
           {editing ? (
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="One priority per line"
-              className="w-full min-h-[160px] text-sm border border-gray-300 rounded-md p-3 shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="w-full min-h-[180px] text-base border border-gray-300 rounded-md p-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-gray-300 leading-7"
             />
           ) : pinned.length === 0 ? (
             <div className="text-sm text-gray-500">
               No pinned priorities yet. Click Edit to paste your list (one per line).
             </div>
           ) : (
-            <ul className="list-disc pl-6 space-y-2">
+            <ul className="list-disc pl-6 space-y-3">
               {pinned.map((p, i) => (
-                <li key={i} className="text-base text-gray-900">{p}</li>
+                <li key={i} className="text-lg text-gray-900 leading-7">{cleanLine(p)}</li>
               ))}
             </ul>
           )}
