@@ -1332,8 +1332,6 @@ function KanbanBoard() {
           onDragOver={onDragOver}
           collisionDetection={closestCorners}
         >
-          {/* Compact priorities at top */}
-          <CompactPriorities onOpenPriorities={() => setActiveView('priorities')} />
           <div className="m-auto flex gap-6">
             {/* Sidebar */}
             <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>
@@ -1375,6 +1373,9 @@ function KanbanBoard() {
                 intentions={intentions}
                 setIntentions={setIntentions}
               />
+
+              {/* Compact Top Priorities */}
+              <CompactPriorities onOpenPriorities={() => setActiveView('priorities')} />
               
               {/* Legend */}
               {!legendMinimized && (
