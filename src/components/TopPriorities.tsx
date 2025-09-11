@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Board, Id, Task } from "../types";
 import { extractTags, getTagColor } from "../utils/tags";
 
@@ -19,6 +19,36 @@ type TaskItem = {
 };
 
 export default function TopPriorities({ board, onSelectTask }: Props) {
+  const [pinned, setPinned] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('kanban-pinned-priorities');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<string>("");
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanban-pinned-priorities', JSON.stringify(pinned));
+    } catch {}
+  }, [pinned]);
+
+  const startEdit = () => {
+    setDraft(pinned.join("\n"));
+    setEditing(true);
+  };
+  const saveEdit = () => {
+    const next = draft
+      .split(/\r?\n/)
+      .map(s => s.trim())
+      .filter(Boolean);
+    setPinned(next);
+    setEditing(false);
+  };
+
   const items = useMemo<TaskItem[]>(() => {
     const out: TaskItem[] = [];
     for (const col of board.columns || []) {
@@ -74,6 +104,39 @@ export default function TopPriorities({ board, onSelectTask }: Props) {
         <div className="text-sm text-gray-500">{items.length} item{items.length === 1 ? "" : "s"}</div>
       </div>
 
+      {/* Pinned priorities (manual) */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-800">Pinned</h3>
+          {editing ? (
+            <div className="flex gap-2">
+              <button className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50" onClick={saveEdit}>Save</button>
+              <button className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50" onClick={() => setEditing(false)}>Cancel</button>
+            </div>
+          ) : (
+            <button className="px-2 py-1 text-sm rounded border border-gray-300 hover:bg-gray-50" onClick={startEdit}>Edit</button>
+          )}
+        </div>
+        {editing ? (
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="One priority per line"
+            className="w-full min-h-[120px] text-sm border border-gray-300 rounded p-2"
+          />
+        ) : pinned.length === 0 ? (
+          <div className="text-sm text-gray-500">
+            No pinned priorities yet. Click Edit to paste your list (one per line).
+          </div>
+        ) : (
+          <ul className="list-disc pl-5 space-y-1">
+            {pinned.map((p, i) => (
+              <li key={i} className="text-sm text-gray-800">{p}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       {items.length === 0 ? (
         <div className="text-gray-500">Add #top or #priority to any card to show it here.</div>
       ) : (
@@ -104,4 +167,3 @@ export default function TopPriorities({ board, onSelectTask }: Props) {
     </div>
   );
 }
-
