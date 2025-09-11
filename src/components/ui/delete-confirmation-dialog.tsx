@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,6 +8,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 interface DeleteConfirmationDialogProps {
@@ -27,19 +28,12 @@ export function DeleteConfirmationDialog({
   confirmText = "Delete",
   cancelText = "Cancel"
 }: DeleteConfirmationDialogProps) {
-  const [open, setOpen] = useState(false)
-
-  const handleConfirm = () => {
-    onConfirm()
-    setOpen(false)
-  }
-
   return (
     <AlertDialog>
-      <div onClick={() => setOpen(true)}>
+      <AlertDialogTrigger asChild>
         {trigger}
-      </div>
-      <AlertDialogContent open={open} onClose={() => setOpen(false)}>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>
@@ -47,11 +41,11 @@ export function DeleteConfirmationDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setOpen(false)}>
+          <AlertDialogCancel>
             {cancelText}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={handleConfirm}
+            onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {confirmText}

@@ -34,6 +34,7 @@ import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
 import TopPriorities from "./TopPriorities";
+import CompactPriorities from "./CompactPriorities";
 
 const DATA_VERSION = 2;
 
@@ -1331,6 +1332,8 @@ function KanbanBoard() {
           onDragOver={onDragOver}
           collisionDetection={closestCorners}
         >
+          {/* Compact priorities at top */}
+          <CompactPriorities onOpenPriorities={() => setActiveView('priorities')} />
           <div className="m-auto flex gap-6">
             {/* Sidebar */}
             <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>

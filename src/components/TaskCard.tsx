@@ -7,7 +7,6 @@ import { renderContentWithTags } from "../utils/tags";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { cn } from "@/lib/utils";
 import { Copy } from 'lucide-react';
@@ -136,7 +135,6 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
   }
 
   return (
-    <TooltipProvider>
       <Card
         ref={setNodeRef}
         style={style}
@@ -183,8 +181,6 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
               )}
             </button>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
@@ -204,11 +200,6 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
                   <div className="w-4 h-4 border border-gray-400 rounded bg-white hover:bg-gray-100 hover:border-gray-500 transition-colors duration-150"></div>
                 )}
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {task.completed ? "Mark as incomplete" : "Mark as complete"}
-            </TooltipContent>
-          </Tooltip>
 
           <div className="flex-1 flex flex-col gap-1">
             <div className={cn(
@@ -231,14 +222,13 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
             </div>
           </div>
 
-          {mouseIsOver && !selectMode && (
-            <>
+          {!selectMode && (
             <DeleteConfirmationDialog
               trigger={
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                  className="absolute right-2 top-2 h-8 w-8 z-10 opacity-80 hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <TrashIcon />
@@ -248,11 +238,9 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
               description="Are you sure you want to delete this task? This action cannot be undone."
               onConfirm={() => deleteTask(task.id)}
             />
-            </>
           )}
         </CardContent>
       </Card>
-    </TooltipProvider>
   );
 }
 
