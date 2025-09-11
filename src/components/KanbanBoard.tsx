@@ -205,6 +205,9 @@ function KanbanBoard() {
     
     setAvailableBoards(orderedBoards);
     setBoardOrder(orderedBoards);
+    if (orderedBoards.length > 0 && orderedBoards[0] !== currentBoardName) {
+      switchToBoard(orderedBoards[0]);
+    }
   }, []);
 
   // Function to find all boards in localStorage
@@ -380,6 +383,10 @@ function KanbanBoard() {
     
     // Save the new order to localStorage
     localStorage.setItem('kanban-board-order', JSON.stringify(newOrder));
+    // Switch to top-most board as default
+    if (newOrder.length > 0 && newOrder[0] !== currentBoardName) {
+      switchToBoard(newOrder[0]);
+    }
   };
 
   const commands = [
