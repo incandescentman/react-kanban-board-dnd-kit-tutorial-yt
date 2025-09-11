@@ -888,8 +888,28 @@ function KanbanBoard() {
     setTagViewOpen(true);
   };
 
-  const updateBoardTitle = (newTitle: string) => {
+  const updateCurrentBoardTitle = (newTitle: string) => {
     setBoard(prev => ({ ...prev, title: newTitle }));
+  };
+
+  const updateBoardTitle = (boardName: string, newTitle: string) => {
+    try {
+      const boardData = localStorage.getItem(boardName);
+      if (boardData) {
+        const parsed = JSON.parse(boardData);
+        parsed.title = newTitle;
+        localStorage.setItem(boardName, JSON.stringify(parsed));
+
+        if (boardName === currentBoardName) {
+          setBoard(prev => ({ ...prev, title: newTitle }));
+        }
+        
+        // Force a re-render to update the board list
+        setAvailableBoards(prev => [...prev]);
+      }
+    } catch (error) {
+      console.error('Error updating board title:', error);
+    }
   };
 
   const createTaskWithContent = (columnId: Id, content: string): Id => {
@@ -1365,6 +1385,7 @@ function KanbanBoard() {
                   onBoardChange={switchToBoard}
                   onBoardDelete={deleteOrArchiveBoard}
                   onBoardReorder={handleBoardReorder}
+                  onBoardUpdateTitle={updateBoardTitle}
                   minimized={boardSelectorMinimized}
                   onMinimize={() => setBoardSelectorMinimized(true)}
                 />
@@ -1377,9 +1398,6 @@ function KanbanBoard() {
                 setIntentions={setIntentions}
               />
 
-              {/* Compact Top Priorities */}
-              <CompactPriorities board={board} onOpenPriorities={() => setActiveView('priorities')} />
-              
               {/* Legend */}
               {!legendMinimized && (
                 <Legend onMinimize={() => setLegendMinimized(true)} />
@@ -1392,7 +1410,7 @@ function KanbanBoard() {
               <div className="flex items-center gap-2 mb-4">
                 <Input
                   value={board.title}
-                  onChange={(e) => updateBoardTitle(e.target.value)}
+                  onChange={(e) => updateCurrentBoardTitle(e.target.value)}
                   className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
                 />
                 {columnMoveMode && (
