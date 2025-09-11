@@ -69,14 +69,32 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     return tagDerived.slice(0, 6);
   }, [pinned, tagDerived]);
 
+  if (hidden && items.length > 0) {
+    return (
+      <div className="w-64">
+        <div className="w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-4 shadow-lg">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-violet-900">Top Priorities</h3>
+            <button
+              className="text-xs px-2 py-1 rounded-md border border-violet-300 bg-white hover:bg-gray-50"
+              onClick={() => setHidden(false)}
+            >
+              Show
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (hidden || items.length === 0) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto mb-6">
-      <div className="rounded-2xl border border-gray-200 bg-white/80 shadow-sm p-4 flex items-start justify-between">
+    <div className="w-64">
+      <div className="w-64 bg-gradient-to-br from-violet-50 to-fuchsia-100 border-2 border-violet-200 rounded-2xl p-4 shadow-lg">
         <div className="flex-1">
-          <div className="text-sm font-semibold text-gray-900 mb-2">Top Priorities</div>
-          <ul className="list-disc pl-5 space-y-1">
+          <div className="text-sm font-bold text-violet-900 mb-2">Top Priorities</div>
+          <ul className="list-disc pl-5 space-y-1 text-violet-900/90">
             {items.map((line, i) => (
               <li key={i} className="text-sm text-gray-800 leading-6">{line}</li>
             ))}
@@ -86,14 +104,14 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
           {onOpenPriorities && (
             <button
               onClick={onOpenPriorities}
-              className="px-3 py-1.5 text-xs rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm"
+              className="px-3 py-1.5 text-xs rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
             >
               Open
             </button>
           )}
           <button
             onClick={() => setHidden(true)}
-            className="px-3 py-1.5 text-xs rounded-md border border-gray-300 bg-white hover:bg-gray-50 shadow-sm"
+            className="px-3 py-1.5 text-xs rounded-md border border-violet-300 bg-white hover:bg-gray-50 shadow-sm"
           >
             Hide
           </button>
