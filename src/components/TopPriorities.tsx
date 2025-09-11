@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { IconCircle } from '@tabler/icons-react';
 import { Star } from 'lucide-react';
 import { Board, Id } from "../types";
 
@@ -34,7 +35,8 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
       .trim()
       // remove common leading bullets/hyphens/numeric markers
       .replace(/^\s*(?:[\u25A9\u2022\u2023\u25E6\u2043\u2219\-\u2013\u2014\*]+|\d+[.)])\s+/, '')
-      .replace(/^[-•\s]+/, '');
+      .replace(/^[-•\s]+/, '')
+      .replace(/^(.)/, (_, c: string) => c.toUpperCase());
 
   const startEdit = () => {
     setDraft(pinned.join("\n"));
@@ -105,11 +107,14 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
               No pinned priorities yet. Click Edit to paste your list (one per line).
             </div>
           ) : (
-            <ul className="list-disc pl-6 space-y-3">
+            <div className="space-y-2">
               {pinned.map((p, i) => (
-                <li key={i} className="text-lg text-gray-900 leading-7">{cleanLine(p)}</li>
+                <div key={i} className="flex items-start gap-2">
+                  <IconCircle size={16} className="mt-1 text-blue-700" />
+                  <div className="text-lg text-gray-900 leading-7">{cleanLine(p)}</div>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </div>

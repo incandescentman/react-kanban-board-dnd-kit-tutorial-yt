@@ -1335,6 +1335,9 @@ function KanbanBoard() {
           <div className="m-auto flex gap-6">
             {/* Sidebar */}
             <div className={`flex flex-col gap-4 transition-all duration-300 ${boardSelectorMinimized ? 'mt-0' : ''}`}>
+              {/* Compact Top Priorities */}
+              <CompactPriorities board={board} onOpenPriorities={() => setActiveView('priorities')} />
+
               {/* Board Selector */}
               {!boardSelectorMinimized && (
                 <BoardSelector 

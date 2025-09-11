@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
+import { IconCircle } from '@tabler/icons-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
 
 function cleanLine(s: string) {
-  return s
+  const base = s
     .trim()
     .replace(/^\s*(?:[\u25A9\u2022\u2023\u25E6\u2043\u2219\-\u2013\u2014\*]+|\d+[.)])\s+/, '')
     .replace(/^[-•\s]+/, '');
+  return base.length ? base[0].toUpperCase() + base.slice(1) : base;
 }
 
 interface Props {
@@ -102,9 +104,10 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
             {items.map((line, i) => (
               <div
                 key={i}
-                className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors"
+                className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2"
                 title={line}
               >
+                <IconCircle size={14} className="mt-0.5 text-blue-600" />
                 <span className="text-sm text-blue-900">{line}</span>
               </div>
             ))}
