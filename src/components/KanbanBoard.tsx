@@ -1380,8 +1380,8 @@ function KanbanBoard() {
               </div>
 
               {/* Columns */}
-              <div className="flex gap-4">
-                <div className="flex gap-4">
+              <div className="flex gap-6">
+                <div className="flex gap-6">
                   <SortableContext items={columnsId}>
                     {board.columns?.map((col) => (
                       <ColumnContainer
