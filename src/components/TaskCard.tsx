@@ -223,21 +223,17 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
           </div>
 
           {!selectMode && mouseIsOver && (
-            <DeleteConfirmationDialog
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-2 top-2 h-8 w-8 z-10 opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <TrashIcon />
-                </Button>
-              }
-              title="Delete Task"
-              description="Are you sure you want to delete this task? This action cannot be undone."
-              onConfirm={() => deleteTask(task.id)}
-            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2 h-8 w-8 z-10 opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteTask(task.id);
+              }}
+            >
+              <TrashIcon />
+            </Button>
           )}
         </CardContent>
       </Card>
