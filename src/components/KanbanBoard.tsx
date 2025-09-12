@@ -1,5 +1,5 @@
 import PlusIcon from "../icons/PlusIcon";
-import { useMemo, useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { useMemo, useState, useEffect, useCallback, lazy, Suspense, useRef } from "react";
 import { Board, Column, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -317,6 +317,8 @@ function KanbanBoard() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<any | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const [titleEditing, setTitleEditing] = useState(false);
 
   // Keyboard shortcuts: Cmd/Ctrl + 1/2/3 to switch views
   useEffect(() => {
@@ -1815,6 +1817,32 @@ function KanbanBoard() {
                   onChange={(e) => updateCurrentBoardTitle(e.target.value)}
                   className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
                   tabIndex={-1}
+                  ref={titleInputRef}
+                  readOnly={!titleEditing}
+                  onDoubleClick={() => {
+                    setTitleEditing(true);
+                    // focus after state updates
+                    setTimeout(() => {
+                      const el = titleInputRef.current;
+                      if (el) {
+                        el.focus();
+                        const len = el.value.length;
+                        try { el.setSelectionRange(len, len); } catch {}
+                      }
+                    }, 0);
+                  }}
+                  onMouseDown={(e) => {
+                    // prevent focus on single click when not editing
+                    if (!titleEditing) {
+                      e.preventDefault();
+                    }
+                  }}
+                  onBlur={() => setTitleEditing(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === 'Escape') {
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
                 />
                   {columnMoveMode && (
                     <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
