@@ -262,7 +262,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
           onClick={handleAdd}
           aria-label="Add intention"
           title="Add intention"
-          className="w-full min-h-24 flex-1 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors border-t border-blue-200/60"
+          className="w-full min-h-28 flex-1 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
         >
           <span className="text-blue-900 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             + Add intention
