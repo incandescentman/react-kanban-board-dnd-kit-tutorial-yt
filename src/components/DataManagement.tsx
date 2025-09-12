@@ -24,18 +24,18 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
         <span className="text-xl">🗂️</span>
         <h4 className="text-base font-bold text-blue-900">Data Management</h4>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={onExport} variant="outline" size="sm" className="border-blue-200">Export JSON</Button>
-        <Button onClick={handleImportClick} variant="outline" size="sm" className="border-blue-200">Import JSON</Button>
-        <Button onClick={onPublish} variant="outline" size="sm" className="border-blue-200">Publish HTML</Button>
+      <div className="grid grid-cols-2 gap-2">
+        <Button onClick={onExport} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Export</Button>
+        <Button onClick={handleImportClick} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Import</Button>
+        <Button onClick={onPublish} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Publish</Button>
         {onPreview && (
-          <Button onClick={onPreview} variant="outline" size="sm" className="border-blue-200">Preview HTML</Button>
+          <Button onClick={onPreview} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Preview</Button>
         )}
         {onPublishAll && (
-          <Button onClick={onPublishAll} variant="outline" size="sm" className="border-blue-200">Publish All</Button>
+          <Button onClick={onPublishAll} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Publish All</Button>
         )}
         {onPreviewAll && (
-          <Button onClick={onPreviewAll} variant="outline" size="sm" className="border-blue-200">Preview All</Button>
+          <Button onClick={onPreviewAll} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Preview All</Button>
         )}
         <input
           type="file"
