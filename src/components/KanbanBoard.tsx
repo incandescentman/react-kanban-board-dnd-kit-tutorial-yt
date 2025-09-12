@@ -1,5 +1,5 @@
 import PlusIcon from "../icons/PlusIcon";
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { Board, Column, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
@@ -40,6 +40,7 @@ import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
 import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconCalendarStats } from '@tabler/icons-react';
+const ImplementationView = lazy(() => import('./ImplementationIntentions'));
 
 const DATA_VERSION = 2;
 
@@ -1637,38 +1638,47 @@ function KanbanBoard() {
             <div className="flex flex-col min-w-0 flex-1">
               {/* Top Controls Row: Board tabs */}
               <div className="mt-8 mb-4 w-full">
-                {/* Boards tabs - moved to the left */}
-                <div className="overflow-x-auto">
-                  <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
-                      {availableBoards.map((boardName) => {
-                        let title = boardName;
-                        try {
-                          const raw = localStorage.getItem(boardName);
-                          if (raw) {
-                            const parsed = JSON.parse(raw);
-                            title = parsed.title || boardName;
-                          }
-                        } catch {}
-                        const isActive = currentBoardName === boardName;
-                        return (
-                          <button
-                            key={boardName}
-                            onClick={() => switchToBoard(boardName)}
-                          className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
-                            isActive
-                              ? 'bg-indigo-700 text-white shadow'
-                              : 'text-indigo-700 hover:bg-indigo-100'
-                          }`}
-                          title={title}
-                        >
-                          {getBoardIcon(title, 16)}
-                          {title}
-                        </button>
-                        );
-                      })}
+                <div className="flex items-center justify-between gap-3">
+                  {/* View Tabs on the left */}
+                  <ViewTabs />
+                  {/* Boards tabs on the right */}
+                  <div className="overflow-x-auto">
+                    <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+                        {availableBoards.map((boardName) => {
+                          let title = boardName;
+                          try {
+                            const raw = localStorage.getItem(boardName);
+                            if (raw) {
+                              const parsed = JSON.parse(raw);
+                              title = parsed.title || boardName;
+                            }
+                          } catch {}
+                          const isActive = currentBoardName === boardName;
+                          return (
+                            <button
+                              key={boardName}
+                              onClick={() => switchToBoard(boardName)}
+                            className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                              isActive
+                                ? 'bg-indigo-700 text-white shadow'
+                                : 'text-indigo-700 hover:bg-indigo-100'
+                            }`}
+                            title={title}
+                          >
+                            {getBoardIcon(title, 16)}
+                            {title}
+                          </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
+              </div>
+              {/* View Tabs */}
+              <div className="mb-2">
+                <ViewTabs />
+              </div>
+
               {/* Title */}
               <div className="flex items-center gap-2 mb-4">
                 <Input
@@ -1730,7 +1740,9 @@ function KanbanBoard() {
                 </>
               ) : (
                 <div className="mt-2">
-                  {React.createElement(require('./ImplementationIntentions').default)}
+                  <Suspense fallback={<div className="text-sm text-gray-600">Loading…</div>}>
+                    <ImplementationView />
+                  </Suspense>
                 </div>
               )}
             </div>
