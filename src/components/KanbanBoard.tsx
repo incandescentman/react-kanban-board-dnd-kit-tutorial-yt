@@ -1810,11 +1810,12 @@ function KanbanBoard() {
               {/* Title (hidden in Implementation view) */}
               {activeView === 'board' && (
                 <div className="flex items-center gap-2 mb-4">
-                  <Input
-                    value={board.title}
-                    onChange={(e) => updateCurrentBoardTitle(e.target.value)}
-                    className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
-                  />
+                <Input
+                  value={board.title}
+                  onChange={(e) => updateCurrentBoardTitle(e.target.value)}
+                  className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
+                  tabIndex={-1}
+                />
                   {columnMoveMode && (
                     <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
                       Column Move Mode
