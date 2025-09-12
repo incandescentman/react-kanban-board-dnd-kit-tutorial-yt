@@ -340,36 +340,53 @@ function KanbanBoard() {
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
     <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">
-      <button
-        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-          activeView === 'board'
-            ? 'bg-blue-900 text-white shadow'
-            : 'text-blue-900 hover:bg-blue-100'
-        }`}
-        onClick={() => setActiveView('board')}
-      >
-        Boards
-      </button>
-      <button
-        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-          activeView === 'implementation'
-            ? 'bg-blue-900 text-white shadow'
-            : 'text-blue-900 hover:bg-blue-100'
-        }`}
-        onClick={() => setActiveView('implementation')}
-      >
-        If-Then
-      </button>
-      <button
-        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-          activeView === 'triggers'
-            ? 'bg-blue-900 text-white shadow'
-            : 'text-blue-900 hover:bg-blue-100'
-        }`}
-        onClick={() => setActiveView('triggers')}
-      >
-        Thought → Reframe
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              activeView === 'board'
+                ? 'bg-blue-900 text-white shadow'
+                : 'text-blue-900 hover:bg-blue-100'
+            }`}
+            onClick={() => setActiveView('board')}
+          >
+            Boards
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">⌘1 / Ctrl+1</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              activeView === 'implementation'
+                ? 'bg-blue-900 text-white shadow'
+                : 'text-blue-900 hover:bg-blue-100'
+            }`}
+            onClick={() => setActiveView('implementation')}
+          >
+            If-Then
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">⌘2 / Ctrl+2</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+              activeView === 'triggers'
+                ? 'bg-blue-900 text-white shadow'
+                : 'text-blue-900 hover:bg-blue-100'
+            }`}
+            onClick={() => setActiveView('triggers')}
+          >
+            Thought → Reframe
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">⌘3 / Ctrl+3</TooltipContent>
+      </Tooltip>
     </div>
   );
 

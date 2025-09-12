@@ -73,40 +73,53 @@ export default function ImplementationIntentions() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sections.map((sec) => (
-          <section
-            key={sec.title}
-            className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-4 shadow-sm"
-          >
-            <div className="flex items-center gap-3 mb-2 text-indigo-900">
-              {iconFor(sec.title)}
-              <h3 className="font-semibold text-base">{prettyTitle(sec.title)}</h3>
-            </div>
-            <ul className="space-y-2">
-              {sec.items.map((it, idx) => {
-                const { ifPart, thenPart } = parseIfThen(stripOrgArtifacts(it))
-                return (
-                  <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-sm text-gray-800">
-                    <div className="flex items-start gap-3">
-                      <div className="shrink-0 mt-0.5 text-blue-900"><IconMessageCircle size={20} /></div>
-                      <div className="flex-1">
-                        <div className="text-xs font-semibold text-gray-900 mb-0.5">If</div>
-                        <div className="text-sm text-gray-800">{ifPart || '—'}</div>
+        {sections.map((sec) => {
+          const titlePretty = prettyTitle(sec.title)
+          const isMantras = titlePretty === 'Master Mantras'
+          return (
+            <section
+              key={sec.title}
+              className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-4 shadow-sm"
+            >
+              <div className="flex items-center gap-3 mb-2 text-indigo-900">
+                {iconFor(sec.title)}
+                <h3 className="font-semibold text-base">{titlePretty}</h3>
+              </div>
+              <ul className="space-y-2">
+                {sec.items.map((it, idx) => {
+                  const clean = stripOrgArtifacts(it)
+                  if (isMantras) {
+                    return (
+                      <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-sm text-gray-800 flex items-start gap-3">
+                        <div className="shrink-0 mt-0.5 text-indigo-700"><IconSparkles size={18} /></div>
+                        <div className="flex-1">{clean}</div>
+                      </li>
+                    )
+                  }
+                  const { ifPart, thenPart } = parseIfThen(clean)
+                  return (
+                    <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-sm text-gray-800">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0 mt-0.5 text-blue-900"><IconMessageCircle size={20} /></div>
+                        <div className="flex-1">
+                          <div className="text-xs font-semibold text-gray-900 mb-0.5">If</div>
+                          <div className="text-sm text-gray-800">{ifPart || '—'}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-start gap-3 mt-3">
-                      <div className="shrink-0 mt-0.5 text-indigo-700"><IconTarget size={20} /></div>
-                      <div className="flex-1">
-                        <div className="text-xs font-semibold text-gray-900 mb-0.5">Then</div>
-                        <div className="text-sm text-gray-800">{thenPart || stripOrgArtifacts(it)}</div>
+                      <div className="flex items-start gap-3 mt-3">
+                        <div className="shrink-0 mt-0.5 text-indigo-700"><IconTarget size={20} /></div>
+                        <div className="flex-1">
+                          <div className="text-xs font-semibold text-gray-900 mb-0.5">Then</div>
+                          <div className="text-sm text-gray-800">{thenPart || clean}</div>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          </section>
-        ))}
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )
+        })}
       </div>
     </div>
   )
