@@ -423,11 +423,19 @@ function KanbanBoard() {
 
   const [intentions, setIntentions] = useState<string[]>(() => {
     const saved = localStorage.getItem('kanban-intentions');
-    return saved ? JSON.parse(saved) : [
-      "Focus on high-impact tasks",
-      "Complete one thing at a time",
-      "Take breaks when needed"
-    ];
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      if (typeof parsed === 'string') {
+        return parsed.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      }
+    } catch {
+      // Legacy plain text support
+      const lines = saved.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (lines.length) return lines;
+    }
+    return [];
   });
 
   const [showValuesCard, setShowValuesCard] = useState(false);
