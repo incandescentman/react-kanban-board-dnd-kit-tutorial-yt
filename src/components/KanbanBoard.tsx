@@ -321,13 +321,21 @@ function KanbanBoard() {
   const ViewTabs = () => (
     <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">
       <button
-        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${activeView === 'board' ? 'bg-indigo-700 text-white shadow' : 'text-indigo-700 hover:bg-indigo-100'}`}
+        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+          activeView === 'board'
+            ? 'bg-white text-blue-900 border border-blue-900 shadow'
+            : 'text-blue-900 hover:bg-blue-100'
+        }`}
         onClick={() => setActiveView('board')}
       >
         Board
       </button>
       <button
-        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${activeView === 'implementation' ? 'bg-indigo-700 text-white shadow' : 'text-indigo-700 hover:bg-indigo-100'}`}
+        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+          activeView === 'implementation'
+            ? 'bg-white text-blue-900 border border-blue-900 shadow'
+            : 'text-blue-900 hover:bg-blue-100'
+        }`}
         onClick={() => setActiveView('implementation')}
       >
         Implementation Intentions
