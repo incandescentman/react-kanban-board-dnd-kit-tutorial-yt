@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { IconTarget, IconMoonStars, IconNotebook, IconSparkles } from '@tabler/icons-react'
+import { IconTarget, IconMoonStars, IconNotebook, IconSparkles, IconScale } from '@tabler/icons-react'
 
 // Import the .org file content as raw text at build-time
 // Vite supports ?raw to import file contents as string
@@ -65,8 +65,8 @@ export default function ImplementationIntentions() {
   return (
     <div className="flex flex-col min-w-0 flex-1">
       <div className="mt-8 mb-4 w-full">
-        <div className="flex items-center gap-2 text-indigo-800">
-          <IconTarget size={22} />
+        <div className="flex items-center gap-3 text-indigo-800">
+          <IconTarget size={28} />
           <h2 className="text-xl font-bold">Goals Over Urges</h2>
         </div>
         {/* subtitle intentionally removed per request */}
@@ -78,9 +78,9 @@ export default function ImplementationIntentions() {
             key={sec.title}
             className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-4 shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-2 text-indigo-900">
+            <div className="flex items-center gap-3 mb-2 text-indigo-900">
               {iconFor(sec.title)}
-              <h3 className="font-semibold">{sec.title}</h3>
+              <h3 className="font-semibold text-base">{prettyTitle(sec.title)}</h3>
             </div>
             <ul className="space-y-2">
               {sec.items.map((it, idx) => (
@@ -106,7 +106,18 @@ function stripOrgArtifacts(s: string): string {
 
 function iconFor(title: string): React.ReactNode {
   const t = title.toLowerCase()
-  if (/(sleep|night|bed)/.test(t)) return <IconMoonStars size={18} className="text-indigo-700" />
-  if (/(write|product)/.test(t)) return <IconNotebook size={18} className="text-indigo-700" />
-  return <IconSparkles size={18} className="text-indigo-700" />
+  if (/(food|sugar|nutrition)/.test(t)) return <IconScale size={24} className="text-indigo-700" />
+  if (/(sleep|night|bed)/.test(t)) return <IconMoonStars size={24} className="text-indigo-700" />
+  if (/(write|writing|product)/.test(t)) return <IconNotebook size={24} className="text-indigo-700" />
+  if (/(reframe|mantra|notes)/.test(t)) return <IconSparkles size={24} className="text-indigo-700" />
+  return <IconSparkles size={24} className="text-indigo-700" />
+}
+
+function prettyTitle(title: string): string {
+  const t = title.trim()
+  const lower = t.toLowerCase()
+  if (/(food|sugar)/.test(lower)) return 'Nutrition'
+  if (/^notes$/i.test(t) || /(reframe|mantra)/i.test(t)) return 'Master Mantras'
+  if (/(write|writing)/.test(lower)) return 'Writing'
+  return t
 }
