@@ -42,6 +42,7 @@ import DataManagement from "./DataManagement";
 import { showToast } from "@/lib/toast";
 import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconCalendarStats } from '@tabler/icons-react';
 import { AppSnapshotSchema } from "@/state/schema";
+import { useAppHotkeys } from "@/hooks/useAppHotkeys";
 const ImplementationView = lazy(() => import('./ImplementationIntentions'));
 const TriggersView = lazy(() => import('./TriggersResponses'));
 

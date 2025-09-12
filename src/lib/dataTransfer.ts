@@ -65,6 +65,44 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   if (!data || typeof data !== 'object') throw new Error('Invalid data')
   if (!('boards' in data) || !('boardOrder' in data)) throw new Error('Invalid data format')
 
+  // Normalize snapshot: coerce IDs and map legacy status->completed
+  const snap = JSON.parse(JSON.stringify(data)) as ExportedData
+  try {
+    Object.keys(snap.boards || {}).forEach((k) => {
+      const b = (snap.boards as any)[k]
+      if (!b || !Array.isArray(b.columns)) return
+      b.columns.forEach((col: any) => {
+        // normalize id to string
+        if (col && col.id != null) col.id = String(col.id)
+        // tasks at column level
+        if (Array.isArray(col.tasks)) {
+          col.tasks.forEach((t: any) => {
+            if (t && t.id != null) t.id = String(t.id)
+            if (typeof t.completed === 'undefined' && typeof t.status === 'string') {
+              const s = (t.status || '').toString().toLowerCase()
+              t.completed = s === 'done' || s === 'completed'
+            }
+          })
+        }
+        // tasks inside groups
+        if (Array.isArray(col.groups)) {
+          col.groups.forEach((g: any) => {
+            if (g && g.id != null) g.id = String(g.id)
+            if (Array.isArray(g.tasks)) {
+              g.tasks.forEach((t: any) => {
+                if (t && t.id != null) t.id = String(t.id)
+                if (typeof t.completed === 'undefined' && typeof t.status === 'string') {
+                  const s = (t.status || '').toString().toLowerCase()
+                  t.completed = s === 'done' || s === 'completed'
+                }
+              })
+            }
+          })
+        }
+      })
+    })
+  } catch {}
+
   // Clear existing relevant keys
   const toRemove: string[] = []
   for (let i = 0; i < store.length; i++) {
@@ -85,30 +123,30 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   toRemove.forEach((k) => store.removeItem(k))
 
   // Write new data
-  for (const boardKey of Object.keys(data.boards || {})) {
-    store.setItem(boardKey, JSON.stringify((data.boards as any)[boardKey]))
+  for (const boardKey of Object.keys(snap.boards || {})) {
+    store.setItem(boardKey, JSON.stringify((snap.boards as any)[boardKey]))
   }
-  store.setItem('kanban-board-order', JSON.stringify(data.boardOrder || []))
-  if (data.notes) store.setItem('kanban-notes', data.notes)
-  if (data.intentions) store.setItem('kanban-intentions', JSON.stringify(data.intentions))
+  store.setItem('kanban-board-order', JSON.stringify(snap.boardOrder || []))
+  if (snap.notes) store.setItem('kanban-notes', snap.notes)
+  if (snap.intentions) store.setItem('kanban-intentions', JSON.stringify(snap.intentions))
   // Accept both topPriorities and legacy pinnedPriorities
-  const incomingTop = (data as any).topPriorities as any
-  const incomingPinned = (data as any).pinnedPriorities as any
+  const incomingTop = (snap as any).topPriorities as any
+  const incomingPinned = (snap as any).pinnedPriorities as any
   const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
   // Write to new canonical key
   store.setItem('kanban-top-priorities', JSON.stringify(finalTop))
   // Also write legacy key for backward compatibility
   store.setItem('kanban-pinned-priorities', JSON.stringify(finalTop))
-  store.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0')
+  store.setItem('kanban-compact-priorities-hidden', snap.compactPrioritiesHidden ? '1' : '0')
   // Hydrate Zustand store (no reload)
   const st = useAppStore.getState()
-  st.setNotes?.(data.notes || '')
-  st.setIntentions?.(Array.isArray(data.intentions) ? data.intentions : [])
+  st.setNotes?.(snap.notes || '')
+  st.setIntentions?.(Array.isArray(snap.intentions) ? snap.intentions : [])
   {
-    const incomingTop = (data as any).topPriorities as any
-    const incomingPinned = (data as any).pinnedPriorities as any
+    const incomingTop = (snap as any).topPriorities as any
+    const incomingPinned = (snap as any).pinnedPriorities as any
     const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
     st.setTopPriorities?.(finalTop)
   }
-  st.setCompactPrioritiesHidden?.(!!data.compactPrioritiesHidden)
+  st.setCompactPrioritiesHidden?.(!!snap.compactPrioritiesHidden)
 }
