@@ -1,0 +1,57 @@
+#+title: Rising Action Kanban — Instructions
+
+* Overview
+This app is a local‑first Kanban board with multiple views to help organize tasks and mindset. All data is stored in your browser’s localStorage. No accounts, no servers.
+
+* Install & Run
+1. Install Node LTS (18+). 
+2. Install dependencies:
+   #+BEGIN_SRC shell
+   npm install
+   #+END_SRC
+3. Start dev server (auto‑opens browser):
+   #+BEGIN_SRC shell
+   npm run dev
+   #+END_SRC
+4. Build production bundle:
+   #+BEGIN_SRC shell
+   npm run build && npm run preview
+   #+END_SRC
+
+* Views
+- Boards (⌘/Ctrl+1): Main Kanban with columns, groups, drag & drop, notes.
+- If‑Then (⌘/Ctrl+2): Implementation intentions parsed from =implementation-intentions.org=. Each item renders as “If … Then …”. The “Master Mantras” section remains a simple list.
+- Thought → Reframe (⌘/Ctrl+3): Common thoughts paired with mantras to deploy in the moment.
+
+Switch tabs using the top‑left tab row, or use the shortcuts above. The board picker shows on the right side only in the Boards view.
+
+* Data Management (Sidebar)
+Icon buttons with hover labels:
+- Download (Export): saves a JSON backup of all boards, order, notes, intentions, pinned priorities, and flags.
+- Upload (Import): loads a JSON backup and replaces existing data (confirmation shown).
+- Rocket (Publish): exports the current view as a standalone HTML file (styles inlined).
+- Eye (Preview): opens a preview of the publish HTML in a new tab.
+- Globe (Publish All): exports all boards as a single navigable HTML.
+- Layers (Preview All): preview the all‑boards publish.
+
+* Keyboard Shortcuts (selected)
+- Tabs: ⌘/Ctrl+1 Boards • ⌘/Ctrl+2 If‑Then • ⌘/Ctrl+3 Thought → Reframe
+- Undo last delete: ⌘Z (also a visible Undo toast appears after deletions)
+- Many task/board actions are available via the Command Palette (⌘K)
+
+* Backup & Restore
+1. Export to JSON from Data Management. Keep the file safe (it contains everything).
+2. To restore or edit:
+   - Edit the JSON by hand (board titles, columns, tasks) if desired.
+   - Import via Data Management → Upload. Confirm to overwrite and reload.
+
+* Testing
+Run unit tests (Vitest) for data export/import and publish HTML generation:
+#+BEGIN_SRC shell
+npm run test
+#+END_SRC
+
+* Notes
+- Data is saved per browser origin. If you switch browsers/profiles, export/import to transfer.
+- The app migrates older saved structures to the latest format when needed.
+

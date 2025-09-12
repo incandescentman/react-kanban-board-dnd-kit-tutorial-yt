@@ -21,10 +21,9 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
 
   return (
     <div className="w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">🗂️</span>
-        <h4 className="text-base font-bold text-blue-900">Data Management</h4>
+      {/* Header (match mini panel style) */}
+      <div className="mb-3 pb-2 border-b border-blue-200">
+        <h3 className="text-lg font-bold text-blue-900 text-center">Data Management</h3>
       </div>
       <div className="grid grid-cols-3 gap-2">
         <Tooltip>

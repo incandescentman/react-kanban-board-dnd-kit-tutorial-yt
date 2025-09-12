@@ -29,10 +29,12 @@
 
 * Views & Routing (UI‑level)
 - =KanbanBoard= manages a simple view state: 'board' | 'implementation' (and legacy 'priorities' placeholder).
+- View state now includes: 'board' | 'implementation' (If‑Then) | 'triggers' (Thought → Reframe).
 - A top row shows:
   - Left: ViewTabs (Board | Implementation Intentions)
   - Right: Board picker (multi‑board tabs)
 - Selected tabs share a unified style (white on navy: =bg-blue-900 text-white=) and inactive tabs use =text-blue-900 hover:bg-blue-100=.
+- Keyboard shortcuts: ⌘/Ctrl+1..3 to switch tabs, with tooltip hints on the tabs.
 
 * Data Export / Import
 - Logic extracted to =src/lib/dataTransfer.ts= for testability:
@@ -92,6 +94,7 @@
   - Files: =src/types.ts= (set =Id= to =string=, add =tags?= to =Task=), =src/components/KanbanBoard.tsx= (default seed IDs to strings; =generateId()= uses =crypto.randomUUID()=).
 - Added Implementation Intentions page and view tabs on top row; lazy load the page and align selected tab styling with the Top Priorities navy.
 - Extracted export/import to =src/lib/dataTransfer.ts= and added Vitest tests for export/import and publish flows.
+- Added Thought → Reframe page and If‑Then rendering (splits lines into If/Then; leaves Master Mantras as plain list). Data Management panel uses icon buttons and standardized header.
 
 * Suggested Next Steps
 - Implement tag aggregation from content and (optionally) persist tags onto tasks.

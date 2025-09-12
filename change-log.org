@@ -67,3 +67,14 @@
 ** UI Polish
 - Moved the Implementation Intentions view tabs to the same top row as the board picker (left side) for a cohesive layout.
 - Unified selection styling: both view tabs and the board picker use white‑on‑navy for the active state (bg-blue-900 text-white), and text-blue-900 with light hover for inactive.
+
+** New Views
+- If‑Then (formerly “Goals Over Urges” tab label): renders implementation intentions with explicit If/Then sections and larger icons; “Master Mantras” shows as simple list.
+- Thought → Reframe: pairs common self‑talk with corrective mantras for in‑the‑moment reframing.
+
+** Shortcuts
+- Added keyboard shortcuts for top view tabs: ⌘/Ctrl+1 → Boards, ⌘/Ctrl+2 → If‑Then, ⌘/Ctrl+3 → Thought → Reframe. Tooltips added to tabs.
+
+** Data Management
+- Swapped text buttons for icon buttons with tooltips (Export, Import, Publish, Preview, Publish All, Preview All).
+- Panel header now matches other mini panels (centered title with subtle divider).

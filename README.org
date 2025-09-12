@@ -33,7 +33,8 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 
 *** Views & Panels
 - *Board View*: The primary kanban interface.
-- *Implementation Intentions*: A dedicated page that renders "Goals over Urges" implementation intentions from =implementation-intentions.org=. Switch via the view tabs (left of the board picker).
+- *If‑Then*: A dedicated page that renders implementation intentions from =implementation-intentions.org=. Each line is split into explicit "If" and "Then" sections (except "Master Mantras", which remains a simple list).
+- *Thought → Reframe*: A companion page pairing common thoughts with reframes/mantras to deploy on the spot.
 - *Priorities View*: A dedicated view to manage and import top priorities (currently hidden but component preserved - Board/Priorities toggle code commented out but intact).
 - *Values View*: A space to keep your personal or project values front and center.
 - *Intentions Panel*: A sidebar panel with timeline-style layout to list and manage your daily intentions or habits. Features drag-and-drop reordering and inline editing.
@@ -64,6 +65,7 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 ** UI Notes
 
 - View tabs and board picker share a unified selection style (white on navy). Inactive tabs are navy text with a soft blue hover.
+- Keyboard shortcuts: ⌘/Ctrl+1 → Boards, ⌘/Ctrl+2 → If‑Then, ⌘/Ctrl+3 → Thought → Reframe.
 
 ** Backup & Restore (JSON)
 
@@ -79,7 +81,7 @@ A powerful, local-first kanban board application for managing tasks, projects, a
   #+END_SRC
 - What’s covered:
   - Export/Import data round‑trip via =src/lib/dataTransfer.ts= using a fake =localStorage=.
-  - Publish HTML generation for single and multi‑board exports.
+  - Publish HTML generation for single and multi-board exports.
 
 ** Troubleshooting
 
