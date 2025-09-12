@@ -3,7 +3,7 @@
 #+options: toc:2
 
 * Overview
-- App: React 18 + TypeScript + Vite + TailwindCSS + dnd-kit
+- App: React 18 + TypeScript + Vite + TailwindCSS + dnd-kit + Zustand + Zod
 - Purpose: Kanban board with columns, grouped tasks, keyboard shortcuts, localStorage persistence, and multi‑board management.
 - Entrypoint: =src/components/KanbanBoard.tsx= mounted from =src/App.tsx=.
 
@@ -25,7 +25,7 @@
   - =ImplementationIntentions=: parses =implementation-intentions.org= at build time and renders sections; lazy‑loaded in =KanbanBoard=.
   - Utilities: =src/utils/tags.tsx= (tag parsing/colour), =src/utils/dataRecovery.ts= (migration/recovery).
 - Types: =src/types.ts= defines =Task=, =Group=, =Column=, =Board=.
-- Storage: localStorage with per‑board keys (default =~kanban-board-state~=) and =kanban-board-order= for ordering.
+- Storage: localStorage with per‑board keys (default =~kanban-board-state~=) and =kanban-board-order= for ordering. Global app data (notes, intentions, top priorities) is managed via a persisted Zustand store (single snapshot under =kanban-app=).
 
 * Views & Routing (UI‑level)
 - =KanbanBoard= manages a simple view state: 'board' | 'implementation' (and legacy 'priorities' placeholder).
@@ -37,10 +37,10 @@
 - Keyboard shortcuts: ⌘/Ctrl+1..3 to switch tabs, with tooltip hints on the tabs.
 
 * Data Export / Import
-- Logic extracted to =src/lib/dataTransfer.ts= for testability:
-  - =exportAllDataFromStorage(store)= returns all boards, order, notes, intentions, pinned priorities, and flags.
-  - =importAllDataToStorage(store, data)= clears relevant keys and restores a full snapshot.
-- UI wires these functions in Data Management panel.
+- Logic lives in =src/lib/dataTransfer.ts=.
+  - Export prefers the Zustand store for app data (notes, intentions, top priorities) and enumerates board keys.
+  - Import validates JSON with Zod (=AppSnapshotSchema=), maps legacy =pinnedPriorities= → =topPriorities=, writes to storage, and hydrates the Zustand store in place (no reload).
+  - UI wires these functions in the Data Management panel and shows a brief summary on success.
 
 * Testing
 - Test runner: Vitest.
@@ -94,6 +94,7 @@
   - Files: =src/types.ts= (set =Id= to =string=, add =tags?= to =Task=), =src/components/KanbanBoard.tsx= (default seed IDs to strings; =generateId()= uses =crypto.randomUUID()=).
 - Added Implementation Intentions page and view tabs on top row; lazy load the page and align selected tab styling with the Top Priorities navy.
 - Extracted export/import to =src/lib/dataTransfer.ts= and added Vitest tests for export/import and publish flows.
+- Added Zustand store (=src/state/store.ts=) and Zod schemas (=src/state/schema.ts=); made Top Priorities canonical and removed the concept of "pinned".
 - Added Thought → Reframe page and If‑Then rendering (splits lines into If/Then; leaves Master Mantras as plain list). Data Management panel uses icon buttons and standardized header.
 
 * Suggested Next Steps
