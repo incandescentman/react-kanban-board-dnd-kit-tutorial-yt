@@ -1567,9 +1567,9 @@ function KanbanBoard() {
           onDragOver={onDragOver}
           collisionDetection={closestCorners}
         >
-          <div className="m-auto flex gap-6">
+          <div className="flex w-full">
             {/* Sidebar */}
-            <div className={`flex flex-col gap-4 transition-all duration-300 pt-8`}>
+            <div className={`w-64 flex-shrink-0 flex flex-col gap-4 transition-all duration-300 pt-8`}>
               {/* Compact Top Priorities */}
               <CompactPriorities board={board} onOpenPriorities={() => setActiveView('priorities')} />
 
@@ -1629,7 +1629,7 @@ function KanbanBoard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               {/* Top nav: view switcher (main content only) */}
               <div className="mt-6 mb-4 flex items-center gap-2">
                 <button
