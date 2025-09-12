@@ -335,6 +335,22 @@ function KanbanBoard() {
         return t.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       };
 
+      // Shift+Tab: focus the last task card on Boards view
+      if (activeView === 'board' && e.key === 'Tab' && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditableTarget()) {
+        const cards = Array.from(document.querySelectorAll('[data-task-id]')) as HTMLElement[];
+        const last = cards[cards.length - 1] || null;
+        if (last) {
+          e.preventDefault();
+          const id = last.getAttribute('data-task-id');
+          if (id) {
+            // @ts-ignore runtime id
+            setFocusedTaskId(id as Id);
+          }
+          last.focus();
+          return;
+        }
+      }
+
       // Make Tab focus the first task card (not the title) when on Boards view
       if (activeView === 'board' && e.key === 'Tab' && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditableTarget()) {
         const first = document.querySelector('[data-task-id]') as HTMLElement | null;
