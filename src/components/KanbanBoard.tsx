@@ -323,7 +323,7 @@ function KanbanBoard() {
       <button
         className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
           activeView === 'board'
-            ? 'bg-white text-blue-900 border border-blue-900 shadow'
+            ? 'bg-blue-900 text-white shadow'
             : 'text-blue-900 hover:bg-blue-100'
         }`}
         onClick={() => setActiveView('board')}
@@ -333,7 +333,7 @@ function KanbanBoard() {
       <button
         className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
           activeView === 'implementation'
-            ? 'bg-white text-blue-900 border border-blue-900 shadow'
+            ? 'bg-blue-900 text-white shadow'
             : 'text-blue-900 hover:bg-blue-100'
         }`}
         onClick={() => setActiveView('implementation')}
