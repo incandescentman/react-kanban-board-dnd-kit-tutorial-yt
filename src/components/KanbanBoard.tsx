@@ -41,6 +41,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
 import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconCalendarStats } from '@tabler/icons-react';
 const ImplementationView = lazy(() => import('./ImplementationIntentions'));
+const TriggersView = lazy(() => import('./TriggersResponses'));
 
 const DATA_VERSION = 2;
 
@@ -310,7 +311,7 @@ function KanbanBoard() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'board' | 'priorities' | 'implementation'>('board');
+  const [activeView, setActiveView] = useState<'board' | 'priorities' | 'implementation' | 'triggers'>('board');
   const DEFAULT_TOP_BOARD_TITLE = "Sunjay's Post-OpenAI Action Plan";
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
@@ -339,6 +340,16 @@ function KanbanBoard() {
         onClick={() => setActiveView('implementation')}
       >
         Goals Over Urges
+      </button>
+      <button
+        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+          activeView === 'triggers'
+            ? 'bg-blue-900 text-white shadow'
+            : 'text-blue-900 hover:bg-blue-100'
+        }`}
+        onClick={() => setActiveView('triggers')}
+      >
+        Triggers → Responses
       </button>
     </div>
   );
@@ -1745,10 +1756,16 @@ function KanbanBoard() {
                     />
                   </div>
                 </>
-              ) : (
+              ) : activeView === 'implementation' ? (
                 <div className="mt-2">
                   <Suspense fallback={<div className="text-sm text-gray-600">Loading…</div>}>
                     <ImplementationView />
+                  </Suspense>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <Suspense fallback={<div className="text-sm text-gray-600">Loading…</div>}>
+                    <TriggersView />
                   </Suspense>
                 </div>
               )}
