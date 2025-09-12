@@ -262,7 +262,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
         title="Add intention"
         className="w-full h-16 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
       >
-        <span className="text-blue-600 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <span className="text-blue-900 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           + Add intention
         </span>
       </div>
