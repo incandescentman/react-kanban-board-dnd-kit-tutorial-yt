@@ -1500,7 +1500,6 @@ function KanbanBoard() {
                       <ColumnContainer
                         key={col.id}
                         column={col}
-                        deleteColumn={deleteColumn}
                         updateColumn={updateColumn}
                         createTask={createTask}
                         tasks={col.tasks || []}
@@ -1545,7 +1544,6 @@ function KanbanBoard() {
               {activeColumn && (
                 <ColumnContainer
                   column={activeColumn}
-                  deleteColumn={deleteColumn}
                   updateColumn={updateColumn}
                   createTask={createTask}
                   tasks={activeColumn.tasks || []}
