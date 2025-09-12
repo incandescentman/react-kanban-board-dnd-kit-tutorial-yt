@@ -25,7 +25,7 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
       <div className="mb-3 pb-2 border-b border-blue-200">
         <h3 className="text-lg font-bold text-blue-900 text-center">Data Management</h3>
       </div>
-      <div className="grid grid-cols-6 gap-1">
+      <div className="grid grid-cols-3 gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="group relative inline-block">
