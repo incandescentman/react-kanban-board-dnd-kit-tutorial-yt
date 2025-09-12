@@ -49,6 +49,8 @@ export const useAppStore = create<AppState & AppActions>()(
 // One-time hydration from legacy/local keys if store is empty.
 // This recovers user data (intentions and top priorities) after migrations.
 try {
+  // Lazy import to avoid issues in non-DOM contexts
+  const { showToast } = require('@/lib/toast') as { showToast: (msg: string, opts?: { durationMs?: number }) => void };
   const st = useAppStore.getState();
   // Recover top priorities
   if (!st.topPriorities || st.topPriorities.length === 0) {
@@ -82,5 +84,16 @@ try {
       useAppStore.setState({ intentions: ints });
     }
   }
+  // If we recovered anything, show a brief toast once
+  const s2 = useAppStore.getState();
+  const recoveredTops = (s2.topPriorities?.length || 0) - (st.topPriorities?.length || 0);
+  const recoveredInts = (s2.intentions?.length || 0) - (st.intentions?.length || 0);
+  if ((s2.topPriorities?.length || 0) > 0 || (s2.intentions?.length || 0) > 0) {
+    try {
+      const parts: string[] = [];
+      if (s2.topPriorities?.length) parts.push(`${s2.topPriorities.length} priorities`);
+      if (s2.intentions?.length) parts.push(`${s2.intentions.length} intentions`);
+      if (parts.length) showToast(`Restored ${parts.join(' • ')}`);
+    } catch {}
+  }
 } catch {}
-
