@@ -106,11 +106,11 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   return (
     <div className="w-64">
-      <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
+      <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
         <div className="flex-1 pr-8">
           <div className="flex items-center gap-2 mb-3">
-            <IconTarget size={20} className="text-red-600" />
-            <h3 className="text-base font-bold text-blue-900">Top Priorities</h3>
+            <IconTarget size={18} className="text-red-600" />
+            <h3 className="text-base font-semibold text-blue-900">Top Priorities</h3>
           </div>
           <div className="space-y-2">
             {items.map((line, i) => {
@@ -128,7 +128,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
               return (
                 <div
                   key={i}
-                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-3 hover:bg-white/90 transition-colors flex items-start gap-2 w-full"
+                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-md p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2 w-full"
                   title={line}
                 >
                   {icons[i] || <IconPointFilled size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />}

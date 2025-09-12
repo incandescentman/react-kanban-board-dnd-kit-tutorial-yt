@@ -1602,9 +1602,9 @@ function KanbanBoard() {
               {/* Top Controls Row: View toggle + Board tabs */}
               <div className="mt-8 mb-4 w-full flex items-center justify-between gap-4">
                 {/* Segmented view toggle */}
-                <div className="flex items-center bg-gray-100/70 border border-gray-200 rounded-full p-1 shadow-sm">
+                <div className="flex items-center bg-gray-100/70 border border-gray-200 rounded-md p-1.5 shadow-sm">
                   <button
-                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                       activeView === 'board'
                         ? 'bg-white text-gray-900 shadow'
                         : 'text-gray-600 hover:text-gray-900'
@@ -1614,7 +1614,7 @@ function KanbanBoard() {
                     Board
                   </button>
                   <button
-                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
                       activeView === 'priorities'
                         ? 'bg-white text-gray-900 shadow'
                         : 'text-gray-600 hover:text-gray-900'
@@ -1627,7 +1627,7 @@ function KanbanBoard() {
 
                 {/* Boards tabs */}
                 <div className="flex-1 overflow-x-auto">
-                  <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
                     {availableBoards.map((boardName) => {
                       let title = boardName;
                       try {
@@ -1642,7 +1642,7 @@ function KanbanBoard() {
                         <button
                           key={boardName}
                           onClick={() => switchToBoard(boardName)}
-                          className={`px-3 py-1.5 rounded-full text-sm transition-colors border ${
+                        className={`px-3 py-1.5 rounded-md text-sm transition-colors border ${
                             isActive
                               ? 'bg-white text-gray-900 border-gray-300 shadow-sm'
                               : 'bg-gray-100/70 text-gray-700 border-gray-200 hover:bg-gray-100'
