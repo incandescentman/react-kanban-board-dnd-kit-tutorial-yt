@@ -5,9 +5,10 @@ interface Props {
   onExport: () => void;
   onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onPublish: () => void;
+  onPreview?: () => void;
 }
 
-function DataManagement({ onExport, onImport, onPublish }: Props) {
+function DataManagement({ onExport, onImport, onPublish, onPreview }: Props) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleImportClick = () => {
@@ -21,6 +22,9 @@ function DataManagement({ onExport, onImport, onPublish }: Props) {
         <Button onClick={onExport} variant="outline" size="sm">Export JSON</Button>
         <Button onClick={handleImportClick} variant="outline" size="sm">Import JSON</Button>
         <Button onClick={onPublish} variant="outline" size="sm">Publish HTML</Button>
+        {onPreview && (
+          <Button onClick={onPreview} variant="outline" size="sm">Preview HTML</Button>
+        )}
         <input
           type="file"
           ref={fileInputRef}

@@ -957,41 +957,52 @@ function KanbanBoard() {
     URL.revokeObjectURL(url);
   };
 
+  const buildPublishHtml = async (): Promise<string> => {
+    // Collect CSS from the current document (works in dev and prod hashed builds)
+    const inlineStyles = Array.from(document.querySelectorAll('style'))
+      .map((s) => s.textContent || '')
+      .join('\n');
+    const linkHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map((l) => (l as HTMLLinkElement).href)
+      .filter(Boolean);
+    const linkedCssParts: string[] = [];
+    for (const href of linkHrefs) {
+      try {
+        const resp = await fetch(href, { cache: 'no-store' });
+        if (resp.ok) {
+          linkedCssParts.push(await resp.text());
+        }
+      } catch (e) {
+        console.warn('Failed to fetch stylesheet:', href, e);
+      }
+    }
+    const css = [inlineStyles, ...linkedCssParts].join('\n');
+    const boardData = board;
+    const pinned = (() => {
+      try { return JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]'); } catch { return []; }
+    })();
+    const html = generatePublicationHtml(boardData, css, {
+      notes,
+      intentions,
+      priorities: pinned,
+    });
+    return html;
+  };
+
   const handlePublish = async () => {
     try {
-      // Collect CSS from the current document (works in dev and prod hashed builds)
-      const inlineStyles = Array.from(document.querySelectorAll('style'))
-        .map((s) => s.textContent || '')
-        .join('\n');
-      const linkHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-        .map((l) => (l as HTMLLinkElement).href)
-        .filter(Boolean);
-      const linkedCssParts: string[] = [];
-      for (const href of linkHrefs) {
-        try {
-          const resp = await fetch(href, { cache: 'no-store' });
-          if (resp.ok) {
-            linkedCssParts.push(await resp.text());
-          }
-        } catch (e) {
-          // Ignore failed CSS fetches; proceed with what we have
-          console.warn('Failed to fetch stylesheet:', href, e);
-        }
-      }
-      const css = [inlineStyles, ...linkedCssParts].join('\n');
-
-      const boardData = board;
-      const html = generatePublicationHtml(boardData, css);
+      const html = await buildPublishHtml();
 
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const safe = boardData.title
+      const safe = board.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '') || 'board';
-      a.download = `${safe}.html`;
+      const date = new Date().toISOString().split('T')[0];
+      a.download = `${safe}-${date}.html`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1000,6 +1011,21 @@ function KanbanBoard() {
     } catch (error) {
       console.error('Error publishing board:', error);
       alert('Could not publish board. See console for details.');
+    }
+  };
+
+  const handlePreview = async () => {
+    try {
+      const html = await buildPublishHtml();
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const w = window.open(url, '_blank');
+      if (!w) alert('Popup blocked. Allow popups to preview export.');
+      // Revoke after a short delay to allow the new tab to load
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (error) {
+      console.error('Error previewing board:', error);
+      alert('Could not preview board. See console for details.');
     }
   };
 
@@ -1529,7 +1555,7 @@ function KanbanBoard() {
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
 
-              <DataManagement onExport={exportAllData} onImport={handleImport} onPublish={handlePublish} />
+              <DataManagement onExport={exportAllData} onImport={handleImport} onPublish={handlePublish} onPreview={handlePreview} />
             </div>
 
             {/* Main Content */}
