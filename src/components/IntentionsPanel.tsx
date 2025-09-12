@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconFocus } from '@tabler/icons-react';
 
 interface Props {
   intentions: string[];
@@ -9,7 +10,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const [editingFooter, setEditingFooter] = useState(false);
-  const [footerText, setFooterText] = useState("Stay focused! 💫");
+  const [footerText, setFooterText] = useState("Stay focused!");
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
@@ -56,7 +57,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
     <div className="w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">🎯</span>
+        <IconFocus size={20} className="text-blue-700" />
         <h3 className="text-base font-bold text-blue-900">
           Current Intentions
         </h3>

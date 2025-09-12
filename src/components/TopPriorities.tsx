@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IconPointFilled } from '@tabler/icons-react';
-import { Star } from 'lucide-react';
+import { IconPointFilled, IconTarget } from '@tabler/icons-react';
 import { Board, Id } from "../types";
 
 interface Props {
@@ -77,7 +76,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white flex items-center justify-center shadow-sm">
-            <Star className="h-5 w-5" />
+            <IconTarget size={24} />
           </div>
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-gray-900">Top Priorities</h2>
@@ -98,7 +97,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
               onClick={() => onImportPinnedToBoard(preferredBoardTitle || board.title)}
               title={`Create #top cards in \"${preferredBoardTitle || board.title}\"`}
             >
-              <Star className="h-4 w-4 text-amber-500" />
+              <IconTarget size={16} className="text-amber-500" />
               Add as #top cards{preferredBoardTitle ? ` in \"${preferredBoardTitle}\"` : ''}
             </button>
           )}

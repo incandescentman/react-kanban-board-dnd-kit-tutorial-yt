@@ -1,6 +1,5 @@
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
-import TrashIcon from "../icons/TrashIcon";
 import { Column, Id, Task, Group } from "../types";
 import { CSS } from "@dnd-kit/utilities";
 import { useMemo, useState, useEffect, useRef } from "react";
@@ -11,10 +10,16 @@ import { Button } from "@/components/ui/button";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Palette } from 'lucide-react';
+import { 
+  IconSparkles,
+  IconChecklist,
+  IconRun,
+  IconCircleCheck,
+  IconFolder
+} from '@tabler/icons-react';
 
 interface Props {
   column: Column;
-  deleteColumn: (id: Id) => void;
   updateColumn: (id: Id, updates: Partial<Column>) => void;
 
   createTask: (columnId: Id) => void;
@@ -38,7 +43,6 @@ interface Props {
 
 function ColumnContainer({
   column,
-  deleteColumn,
   updateColumn,
   createTask,
   tasks,
@@ -82,11 +86,11 @@ function ColumnContainer({
 
   const getColumnIcon = () => {
     const title = column.title.toLowerCase();
-    if (title.includes('idea')) return <span className="text-3xl">🧠</span>;
-    if (title.includes('todo') || title.includes('to do')) return <span className="text-3xl">📝</span>;
-    if (title.includes('progress') || title.includes('doing')) return <span className="text-3xl">🏃🏻‍♂️</span>;
-    if (title.includes('done') || title.includes('complete')) return <span className="text-3xl">✅</span>;
-    return null;
+    if (title.includes('idea')) return <IconSparkles size={28} className="text-purple-600" />;
+    if (title.includes('todo') || title.includes('to do')) return <IconChecklist size={28} className="text-blue-600" />;
+    if (title.includes('progress') || title.includes('doing')) return <IconRun size={28} className="text-orange-600" />;
+    if (title.includes('done') || title.includes('complete')) return <IconCircleCheck size={28} className="text-green-600" />;
+    return <IconFolder size={28} className="text-gray-600" />;
   };
 
   const {
@@ -257,36 +261,6 @@ function ColumnContainer({
               </button>
             </div>
           )}
-        
-        {!editMode && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="group">
-                <DeleteConfirmationDialog
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 opacity-60 hover:opacity-100 hover:bg-red-100"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <TrashIcon />
-                    </Button>
-                  }
-                  title="Delete Column"
-                  description={`Are you sure you want to delete the "${column.title}" column? This will permanently delete the column and all its tasks.`}
-                  onConfirm={() => deleteColumn(column.id)}
-                  confirmText="Delete Column"
-                />
-                <TooltipContent side="bottom">
-                  Delete column
-                </TooltipContent>
-              </div>
-            </TooltipTrigger>
-          </Tooltip>
-        )}
         </div>
       </div>
 

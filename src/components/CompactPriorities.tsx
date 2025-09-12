@@ -1,6 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
-import { IconPointFilled } from '@tabler/icons-react';
+import { 
+  IconPointFilled, 
+  IconTarget,
+  IconRocket,
+  IconSparkles,
+  IconFlag,
+  IconStar,
+  IconTrendingUp,
+  IconBolt,
+  IconFlame,
+  IconCircleCheck,
+  IconActivity
+} from '@tabler/icons-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
 
@@ -97,20 +109,33 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
       <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
         <div className="flex-1 pr-8">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl">⭐️</span>
+            <IconTarget size={20} className="text-red-600" />
             <h3 className="text-base font-bold text-blue-900">Top Priorities</h3>
           </div>
           <div className="space-y-1.5">
-            {items.map((line, i) => (
-              <div
-                key={i}
-                className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2"
-                title={line}
-              >
-                <IconPointFilled size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />
-                <span className="text-sm text-blue-900">{line}</span>
-              </div>
-            ))}
+            {items.map((line, i) => {
+              // Manually assign icons based on index/content
+              // You can customize these based on your actual priorities
+              const icons = [
+                <IconTarget size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+                <IconRocket size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+                <IconSparkles size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+                <IconFlag size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+                <IconStar size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+                <IconBolt size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />
+              ];
+              
+              return (
+                <div
+                  key={i}
+                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2"
+                  title={line}
+                >
+                  {icons[i] || <IconPointFilled size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />}
+                  <span className="text-sm text-blue-900">{line}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
         {/* Tiny minimal symbols at the top-right */}

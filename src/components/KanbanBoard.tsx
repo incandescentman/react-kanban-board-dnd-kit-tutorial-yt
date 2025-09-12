@@ -35,6 +35,7 @@ import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
 import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
 
 const DATA_VERSION = 2;
@@ -280,6 +281,8 @@ function KanbanBoard() {
   const DEFAULT_TOP_BOARD_TITLE = "Sunjay's Post-OpenAI Action Plan";
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
+  const [importOpen, setImportOpen] = useState(false);
+  const [pendingImport, setPendingImport] = useState<any | null>(null);
   // Enhanced undo system
   interface UndoAction {
     type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
@@ -948,7 +951,7 @@ function KanbanBoard() {
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) { event.target.value = ''; return; }
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -966,36 +969,17 @@ function KanbanBoard() {
           return;
         }
 
-        const confirmed = window.confirm('Are you sure you want to import this file? This will overwrite all existing data.');
-        if (confirmed) {
-          // Clear existing data
-          Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('kanban-board-state') || key === 'kanban-board-order' || key === 'kanban-notes' || key === 'kanban-intentions') {
-              localStorage.removeItem(key);
-            }
-          });
-
-          // Import new data
-          for (const boardKey in data.boards) {
-            localStorage.setItem(boardKey, JSON.stringify(data.boards[boardKey]));
-          }
-          localStorage.setItem('kanban-board-order', JSON.stringify(data.boardOrder));
-          if (data.notes) {
-            localStorage.setItem('kanban-notes', data.notes);
-          }
-          if (data.intentions) {
-            localStorage.setItem('kanban-intentions', JSON.stringify(data.intentions));
-          }
-
-          alert('Import successful! The application will now reload.');
-          window.location.reload();
-        }
+        // Stage data and open confirm modal
+        setPendingImport(data);
+        setImportOpen(true);
       } catch (error) {
         alert('An error occurred while importing the file.');
         console.error('Import error:', error);
       }
     };
     reader.readAsText(file);
+    // Reset file input so selecting the same file again works
+    event.target.value = '';
   };
 
   const createTaskWithContent = (columnId: Id, content: string): Id => {
@@ -1628,6 +1612,43 @@ function KanbanBoard() {
             </div>
           </div>
         )}
+
+        {/* Import confirmation modal */}
+        <ConfirmModal
+          open={importOpen}
+          title="Import data from JSON?"
+          description={"This will overwrite all existing boards, notes, and intentions.\nMake sure you have an export/backup before proceeding."}
+          confirmText="Import"
+          cancelText="Cancel"
+          onCancel={() => { setImportOpen(false); setPendingImport(null); }}
+          onConfirm={() => {
+            try {
+              const data = pendingImport;
+              if (!data) { setImportOpen(false); return; }
+              // Clear existing data
+              Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('kanban-board-state') || key === 'kanban-board-order' || key === 'kanban-notes' || key === 'kanban-intentions') {
+                  localStorage.removeItem(key);
+                }
+              });
+              // Import new data
+              for (const boardKey in data.boards) {
+                localStorage.setItem(boardKey, JSON.stringify(data.boards[boardKey]));
+              }
+              localStorage.setItem('kanban-board-order', JSON.stringify(data.boardOrder));
+              if (data.notes) localStorage.setItem('kanban-notes', data.notes);
+              if (data.intentions) localStorage.setItem('kanban-intentions', JSON.stringify(data.intentions));
+              setImportOpen(false);
+              setPendingImport(null);
+              window.location.reload();
+            } catch (e) {
+              console.error('Failed to import data:', e);
+              alert('Failed to import data.');
+              setImportOpen(false);
+              setPendingImport(null);
+            }
+          }}
+        />
 
           {/* Bottom Right Corner Icons */}
           <div className="fixed bottom-4 right-4 flex gap-2 z-10">

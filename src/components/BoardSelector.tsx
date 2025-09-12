@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IconLayoutKanban } from '@tabler/icons-react';
 import {
   DndContext,
   closestCenter,
@@ -32,6 +33,7 @@ interface Props {
   onBoardChange: (boardName: string) => void;
   onBoardDelete: (boardName: string) => void;
   onBoardReorder: (reorderedBoards: Board[]) => void;
+  onBoardUpdateTitle: (boardName: string, newTitle: string) => void;
   minimized: boolean;
   onMinimize: () => void;
 }
@@ -135,7 +137,7 @@ function SortableBoardItem({
   );
 }
 
-function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoardChange, onBoardDelete, onBoardReorder, minimized, onMinimize }: Props) {
+function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoardChange, onBoardDelete, onBoardReorder, onBoardUpdateTitle, minimized, onMinimize }: Props) {
   const [isCreating, setIsCreating] = useState(false);
   const [newBoardName, setNewBoardName] = useState("");
   const [editingBoard, setEditingBoard] = useState<string | null>(null);
@@ -165,10 +167,7 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
 
   const handleSaveEdit = () => {
     if (editingBoard && editingTitle.trim()) {
-      // If editing the current board, switch to the new title
-      if (editingBoard === currentBoard) {
-        onBoardChange(editingTitle.trim());
-      }
+      onBoardUpdateTitle(editingBoard, editingTitle.trim());
       setEditingBoard(null);
       setEditingTitle("");
     }
@@ -203,7 +202,7 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">📋</span>
+          <IconLayoutKanban size={24} className="text-purple-700" />
           <h3 className="text-lg font-bold text-purple-900">
             Boards
           </h3>

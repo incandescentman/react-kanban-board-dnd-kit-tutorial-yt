@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+// Function to rename boards in localStorage
+function renameBoards() {
+  const renameMappings = {
+    'rising-action': 'socratic',
+    'writing': 'substack'
+  };
+  
+  let renamed = [];
+  
+  for (const [oldName, newName] of Object.entries(renameMappings)) {
+    const data = localStorage.getItem(oldName);
+    if (data) {
+      // Copy to new name
+      localStorage.setItem(newName, data);
+      // Remove old name
+      localStorage.removeItem(oldName);
+      renamed.push(`${oldName} -> ${newName}`);
+    }
+  }
+  
+  // Update board order if it exists
+  const boardOrder = localStorage.getItem('kanban-board-order');
+  if (boardOrder) {
+    try {
+      let order = JSON.parse(boardOrder);
+      order = order.map(name => renameMappings[name] || name);
+      localStorage.setItem('kanban-board-order', JSON.stringify(order));
+      console.log('Updated board order:', order);
+    } catch (e) {
+      console.error('Error updating board order:', e);
+    }
+  }
+  
+  if (renamed.length > 0) {
+    console.log('Renamed boards:', renamed);
+    alert('Boards renamed successfully:\n' + renamed.join('\n'));
+  } else {
+    alert('No boards found to rename');
+  }
+}
+
+// Run the rename function
+renameBoards();
+</script>
+<h1>Board Renaming Utility</h1>
+<p>This page has renamed your boards in localStorage.</p>
+<p>You can close this page and return to your kanban board.</p>
+</body>
+</html>
