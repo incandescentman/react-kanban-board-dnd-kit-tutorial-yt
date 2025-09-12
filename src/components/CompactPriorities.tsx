@@ -89,27 +89,27 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   const getIconForPriority = (line: string, i: number) => {
     const l = line.toLowerCase();
-    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/food|urge/.test(l)) return <IconFlame size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/185|pound|weight/.test(l)) return <IconScale size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={16} className="text-blue-900" aria-hidden="true" />;
+    if (/food|urge/.test(l)) return <IconFlame size={16} className="text-blue-900" aria-hidden="true" />;
+    if (/185|pound|weight/.test(l)) return <IconScale size={16} className="text-blue-900" aria-hidden="true" />;
+    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={16} className="text-blue-900" aria-hidden="true" />;
+    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={16} className="text-blue-900" aria-hidden="true" />;
+    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={16} className="text-blue-900" aria-hidden="true" />;
     // fallback by index to keep variety
     const fallback = [
-      <IconTarget key="t" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconSparkles key="s" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconStar key="st" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconBolt key="b" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconActivity key="a" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconTarget key="t" size={16} className="text-blue-900" aria-hidden="true" />,
+      <IconSparkles key="s" size={16} className="text-blue-900" aria-hidden="true" />,
+      <IconStar key="st" size={16} className="text-blue-900" aria-hidden="true" />,
+      <IconBolt key="b" size={16} className="text-blue-900" aria-hidden="true" />,
+      <IconActivity key="a" size={16} className="text-blue-900" aria-hidden="true" />,
     ];
-    return fallback[i % fallback.length] || <IconPointFilled size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    return fallback[i % fallback.length] || <IconPointFilled size={16} className="text-blue-900" aria-hidden="true" />;
   };
 
   if (hidden && items.length > 0) {
     return (
-      <div className="w-64">
-        <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-3 shadow-sm">
+      <div className="w-72">
+        <div className="relative w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-3 shadow-sm">
           <div className="text-[12px] font-semibold text-blue-900/90">Top Priorities</div>
           <button
             className="absolute top-2 right-2 inline-flex items-center justify-center h-5 w-5 rounded hover:bg-blue-100/70"
@@ -127,25 +127,35 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
   if (hidden || items.length === 0) return null;
 
   return (
-    <div className="w-64">
-      <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
+    <div className="w-72">
+      <div className="relative w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
         <div className="flex-1 pr-8">
           <div className="flex items-center gap-2 mb-3">
             <IconTarget size={20} className="text-red-600" />
             <h3 className="text-base font-semibold text-blue-900">Top Priorities</h3>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-0">
             {items.map((line, i) => {
+              const isLast = i === items.length - 1;
               return (
                 <div
                   key={i}
-                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-md p-2.5 hover:bg-white/90 transition-colors flex items-center gap-2 w-full"
+                  className="relative flex gap-3"
                   title={line}
                 >
-                  <div className="w-7 h-7 flex items-start justify-center shrink-0">
-                    {getIconForPriority(line, i)}
+                  {/* Icon with timeline */}
+                  <div className="relative flex flex-col items-center">
+                    <div className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full bg-white border border-blue-900 p-1 z-10">
+                      {getIconForPriority(line, i)}
+                    </div>
+                    {!isLast && (
+                      <div className="w-px h-full bg-gray-300 absolute top-7" />
+                    )}
                   </div>
-                  <span className="text-base text-blue-900 leading-6 flex-1">{line}</span>
+                  {/* Text content */}
+                  <div className="flex-1 pb-4">
+                    <span className="text-base text-blue-900 leading-6">{line}</span>
+                  </div>
                 </div>
               );
             })}

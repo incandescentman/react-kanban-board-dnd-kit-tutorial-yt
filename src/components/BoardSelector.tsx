@@ -198,7 +198,7 @@ function BoardSelector({ currentBoard, currentBoardTitle, availableBoards, onBoa
   };
 
   return (
-    <div className="w-64 bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-2xl p-4 shadow-lg">
+    <div className="w-72 bg-gradient-to-br from-purple-50 to-pink-100 border-2 border-purple-200 rounded-2xl p-4 shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

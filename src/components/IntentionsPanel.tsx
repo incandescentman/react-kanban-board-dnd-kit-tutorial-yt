@@ -54,7 +54,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
   };
 
   return (
-    <div className="w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
+    <div className="w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <IconFocus size={20} className="text-blue-700" />
