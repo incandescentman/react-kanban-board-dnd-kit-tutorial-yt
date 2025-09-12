@@ -33,6 +33,7 @@ import GroupContainer from "./GroupContainer";
 import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
+import { generatePublicationHtml } from "../lib/publish";
 import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -926,7 +927,6 @@ function KanbanBoard() {
       intentions: [],
     };
 
-    // Get all board keys
     const boardKeys = Object.keys(localStorage).filter(key => key.startsWith('kanban-board-state'));
 
     boardKeys.forEach(key => {
@@ -948,6 +948,54 @@ function KanbanBoard() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  const handlePublish = async () => {
+    try {
+      // Collect CSS from the current document (works in dev and prod hashed builds)
+      const inlineStyles = Array.from(document.querySelectorAll('style'))
+        .map((s) => s.textContent || '')
+        .join('\n');
+      const linkHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map((l) => (l as HTMLLinkElement).href)
+        .filter(Boolean);
+      const linkedCssParts: string[] = [];
+      for (const href of linkHrefs) {
+        try {
+          const resp = await fetch(href, { cache: 'no-store' });
+          if (resp.ok) {
+            linkedCssParts.push(await resp.text());
+          }
+        } catch (e) {
+          // Ignore failed CSS fetches; proceed with what we have
+          console.warn('Failed to fetch stylesheet:', href, e);
+        }
+      }
+      const css = [inlineStyles, ...linkedCssParts].join('\n');
+
+      const boardData = board;
+      const html = generatePublicationHtml(boardData, css);
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safe = boardData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'board';
+      a.download = `${safe}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error('Error publishing board:', error);
+      alert('Could not publish board. See console for details.');
+    }
+  };
+
+  // duplicate handleExport removed
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -1473,7 +1521,7 @@ function KanbanBoard() {
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
 
-              <DataManagement onExport={handleExport} onImport={handleImport} />
+              <DataManagement onExport={handleExport} onImport={handleImport} onPublish={handlePublish} />
             </div>
 
             {/* Main Content */}
