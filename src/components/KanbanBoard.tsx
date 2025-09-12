@@ -349,7 +349,7 @@ function KanbanBoard() {
         }`}
         onClick={() => setActiveView('triggers')}
       >
-        Triggers → Responses
+        Thought → Reframe
       </button>
     </div>
   );

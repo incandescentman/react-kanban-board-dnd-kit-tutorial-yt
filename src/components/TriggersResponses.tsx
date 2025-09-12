@@ -42,7 +42,7 @@ export default function TriggersResponses() {
       <div className="mt-0 mb-4 w-full">
         <div className="flex items-center gap-3 text-indigo-800">
           <IconAlertTriangle size={28} />
-          <h2 className="text-xl font-bold">Triggers → Responses</h2>
+          <h2 className="text-xl font-bold">Thought → Reframe</h2>
         </div>
       </div>
 
@@ -77,4 +77,3 @@ export default function TriggersResponses() {
     </div>
   )
 }
-
