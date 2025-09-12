@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Download, Upload, Globe, Eye, Rocket, Layers } from 'lucide-react';
 
 interface Props {
   onExport: () => void;
@@ -24,18 +26,65 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
         <span className="text-xl">🗂️</span>
         <h4 className="text-base font-bold text-blue-900">Data Management</h4>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <Button onClick={onExport} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Export</Button>
-        <Button onClick={handleImportClick} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Import</Button>
-        <Button onClick={onPublish} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Publish</Button>
+      <div className="grid grid-cols-3 gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={onExport} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Download className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Export</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={handleImportClick} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Upload className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Import</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={onPublish} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Rocket className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Publish</TooltipContent>
+        </Tooltip>
+
         {onPreview && (
-          <Button onClick={onPreview} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Preview</Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onPreview} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Eye className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Preview</TooltipContent>
+          </Tooltip>
         )}
+
         {onPublishAll && (
-          <Button onClick={onPublishAll} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Publish All</Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onPublishAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Globe className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Publish All</TooltipContent>
+          </Tooltip>
         )}
+
         {onPreviewAll && (
-          <Button onClick={onPreviewAll} variant="outline" size="sm" className="border-blue-200 w-full justify-center">Preview All</Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onPreviewAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Layers className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Preview All</TooltipContent>
+          </Tooltip>
         )}
         <input
           type="file"
