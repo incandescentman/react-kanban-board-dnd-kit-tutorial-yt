@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { IconGymnastics, IconMoonStars, IconNotebook, IconSparkles, IconScale } from '@tabler/icons-react'
+import { IconGymnastics, IconMoonStars, IconNotebook, IconSparkles, IconScale, IconMessageCircle, IconTarget } from '@tabler/icons-react'
 
 // Import the .org file content as raw text at build-time
 // Vite supports ?raw to import file contents as string
@@ -83,14 +83,27 @@ export default function ImplementationIntentions() {
               <h3 className="font-semibold text-base">{prettyTitle(sec.title)}</h3>
             </div>
             <ul className="space-y-2">
-              {sec.items.map((it, idx) => (
-                <li
-                  key={idx}
-                  className="bg-white/90 border border-indigo-100 rounded-md p-2 text-sm text-gray-800"
-                >
-                  {stripOrgArtifacts(it)}
-                </li>
-              ))}
+              {sec.items.map((it, idx) => {
+                const { ifPart, thenPart } = parseIfThen(stripOrgArtifacts(it))
+                return (
+                  <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-sm text-gray-800">
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 mt-0.5 text-blue-900"><IconMessageCircle size={20} /></div>
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-gray-900 mb-0.5">If</div>
+                        <div className="text-sm text-gray-800">{ifPart || '—'}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 mt-3">
+                      <div className="shrink-0 mt-0.5 text-indigo-700"><IconTarget size={20} /></div>
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-gray-900 mb-0.5">Then</div>
+                        <div className="text-sm text-gray-800">{thenPart || stripOrgArtifacts(it)}</div>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         ))}
@@ -120,4 +133,20 @@ function prettyTitle(title: string): string {
   if (/^notes$/i.test(t) || /(reframe|mantra)/i.test(t)) return 'Master Mantras'
   if (/(write|writing)/.test(lower)) return 'Writing'
   return t
+}
+
+function parseIfThen(text: string): { ifPart: string; thenPart: string } {
+  const t = text.trim()
+  // Common patterns: "If ... then ..." with optional comma/semicolon
+  const m = t.match(/^\s*if\s+(.+?)[,;]?\s+then\s+(.+)$/i)
+  if (m) {
+    return { ifPart: m[1].trim(), thenPart: m[2].trim() }
+  }
+  // Fallback: split on " then " if present
+  const idx = t.toLowerCase().indexOf(' then ')
+  if (idx > -1) {
+    return { ifPart: t.slice(0, idx).replace(/^if\s+/i, '').trim(), thenPart: t.slice(idx + 6).trim() }
+  }
+  // No match — treat whole line as the action
+  return { ifPart: '', thenPart: t }
 }

@@ -317,6 +317,25 @@ function KanbanBoard() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<any | null>(null);
+
+  // Keyboard shortcuts: Cmd/Ctrl + 1/2/3 to switch views
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      if (e.key === '1') {
+        e.preventDefault();
+        setActiveView('board');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        setActiveView('implementation');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        setActiveView('triggers');
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
