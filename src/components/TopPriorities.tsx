@@ -147,7 +147,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
             <div className="space-y-2">
               {pinned.map((p, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <div className="w-7 h-7 flex items-center justify-center shrink-0">{getIconForPriority(cleanLine(p), i)}</div>
+                  <div className="w-7 h-7 flex items-start justify-center shrink-0">{getIconForPriority(cleanLine(p), i)}</div>
                   <div className="text-lg text-gray-900 leading-7">{cleanLine(p)}</div>
                 </div>
               ))}

@@ -142,7 +142,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
                   className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-md p-2.5 hover:bg-white/90 transition-colors flex items-center gap-2 w-full"
                   title={line}
                 >
-                  <div className="w-7 h-7 flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 flex items-start justify-center shrink-0">
                     {getIconForPriority(line, i)}
                   </div>
                   <span className="text-base text-blue-900 leading-6 flex-1">{line}</span>
