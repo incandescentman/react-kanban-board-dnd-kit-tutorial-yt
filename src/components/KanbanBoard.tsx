@@ -38,7 +38,7 @@ import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
-import { IconLayoutKanban, IconStars, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconFolder, IconCalendarStats } from '@tabler/icons-react';
+import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconFolder, IconCalendarStats } from '@tabler/icons-react';
 
 const DATA_VERSION = 2;
 
@@ -1638,7 +1638,7 @@ function KanbanBoard() {
                     }`}
                     onClick={() => setActiveView('priorities')}
                   >
-                    <IconStars size={16} />
+                    <IconStarsTab size={16} />
                     Priorities
                   </button>
                 </div>
