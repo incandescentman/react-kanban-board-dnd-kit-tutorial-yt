@@ -387,7 +387,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
             onClick={handleAdd}
             aria-label="Add priority"
             title="Add priority"
-            className="w-full min-h-20 flex-1 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors mt-2"
+            className="w-full min-h-24 flex-1 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors mt-2 border-t border-blue-200/60"
           >
             <span className="text-blue-900 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               + Add priority
