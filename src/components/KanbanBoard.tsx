@@ -1666,13 +1666,13 @@ function KanbanBoard() {
                             <button
                               key={boardName}
                               onClick={() => switchToBoard(boardName)}
-                            className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
-                              isActive
-                                ? 'bg-indigo-700 text-white shadow'
-                                : 'text-indigo-700 hover:bg-indigo-100'
-                            }`}
-                            title={title}
-                          >
+                              className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                                isActive
+                                  ? 'bg-blue-900 text-white shadow'
+                                  : 'text-blue-900 hover:bg-blue-100'
+                              }`}
+                              title={title}
+                            >
                             {getBoardIcon(title, 16)}
                             {title}
                           </button>
