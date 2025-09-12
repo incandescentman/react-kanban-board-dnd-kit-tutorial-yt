@@ -12,15 +12,27 @@ export type ExportedData = {
 const BOARD_KEY_PREFIX = 'kanban-board-state'
 
 export function exportAllDataFromStorage(store: Storage): ExportedData {
+  // Try Zustand store first (if initialized)
+  let fromStore: { notes: string; intentions: string[]; topPriorities: string[]; ui?: { compactPrioritiesHidden: boolean } } | null = null
+  try {
+    // dynamic require to avoid cyclic deps in build
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@/state/store')
+    const st = mod?.useAppStore?.getState?.()
+    if (st) {
+      fromStore = { notes: st.notes, intentions: st.intentions, topPriorities: st.topPriorities, ui: st.ui }
+    }
+  } catch {}
+
   const data: ExportedData = {
     version: 1,
     exportedAt: new Date().toISOString(),
     boards: {},
     boardOrder: [],
-    notes: '',
-    intentions: [],
-    topPriorities: [],
-    compactPrioritiesHidden: false,
+    notes: fromStore?.notes ?? '',
+    intentions: fromStore?.intentions ?? [],
+    topPriorities: fromStore?.topPriorities ?? [],
+    compactPrioritiesHidden: fromStore?.ui?.compactPrioritiesHidden ?? false,
   }
 
   const boardKeys: string[] = []
@@ -42,17 +54,16 @@ export function exportAllDataFromStorage(store: Storage): ExportedData {
   } catch {
     data.boardOrder = []
   }
-  data.notes = store.getItem('kanban-notes') || ''
-  try {
-    data.intentions = JSON.parse(store.getItem('kanban-intentions') || '[]')
-  } catch { data.intentions = [] }
-  try {
-    // Prefer new canonical key; fallback to legacy pinned key
-    const top = store.getItem('kanban-top-priorities')
-    const legacy = store.getItem('kanban-pinned-priorities')
-    data.topPriorities = JSON.parse(top || legacy || '[]')
-  } catch { data.topPriorities = [] }
-  data.compactPrioritiesHidden = store.getItem('kanban-compact-priorities-hidden') === '1'
+  if (!fromStore) {
+    data.notes = store.getItem('kanban-notes') || ''
+    try { data.intentions = JSON.parse(store.getItem('kanban-intentions') || '[]') } catch {}
+    try {
+      const top = store.getItem('kanban-top-priorities')
+      const legacy = store.getItem('kanban-pinned-priorities')
+      data.topPriorities = JSON.parse(top || legacy || '[]')
+    } catch {}
+    data.compactPrioritiesHidden = store.getItem('kanban-compact-priorities-hidden') === '1'
+  }
   return data
 }
 
@@ -95,4 +106,19 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   // Also write legacy key for backward compatibility
   store.setItem('kanban-pinned-priorities', JSON.stringify(finalTop))
   store.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0')
+  // Hydrate Zustand store if available (no need to reload)
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mod = require('@/state/store')
+    const st = mod?.useAppStore?.getState?.()
+    if (st) {
+      st.setNotes?.(data.notes || '')
+      st.setIntentions?.(Array.isArray(data.intentions) ? data.intentions : [])
+      const incomingTop = (data as any).topPriorities as any
+      const incomingPinned = (data as any).pinnedPriorities as any
+      const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
+      st.setTopPriorities?.(finalTop)
+      st.setCompactPrioritiesHidden?.(!!data.compactPrioritiesHidden)
+    }
+  } catch {}
 }

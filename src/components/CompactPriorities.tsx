@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
 import {
   IconPointFilled,
@@ -155,11 +155,14 @@ interface UndoAction {
   timestamp: number;
 }
 
+import { useAppStore } from '@/state/store';
+
 export default function CompactPriorities({ board, onOpenPriorities }: Props) {
-  const [pinned, setPinned] = useState<string[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
   const [undoStack, setUndoStack] = useState<UndoAction[]>([]);
+  const priorities = useAppStore(s => s.topPriorities);
+  const setPriorities = useAppStore(s => s.setTopPriorities);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -169,59 +172,8 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     })
   );
 
-  useEffect(() => {
-    try {
-      // Prefer new canonical key; fallback to legacy pinned key
-      let list: string[] = [];
-      const rawTop = localStorage.getItem('kanban-top-priorities');
-      const rawLegacy = localStorage.getItem('kanban-pinned-priorities');
-      if (rawTop) {
-        list = JSON.parse(rawTop) as string[];
-      } else if (rawLegacy) {
-        list = JSON.parse(rawLegacy) as string[];
-        // migrate to new key
-        localStorage.setItem('kanban-top-priorities', JSON.stringify(list));
-      }
-
-      // If no saved priorities, use defaults
-      if (list.length === 0) {
-        const defaultPriorities = [
-          "Begin an SRS system for actions and intentions",
-          "Finish food urges implementation intentions and triggers -> answers",
-          "185 pounds and fitness routine",
-          "Launch, invite people, and publish Socratic Substack",
-          "Job search and career development",
-          "Dating and relationships"
-        ];
-        setPinned(defaultPriorities);
-      } else {
-        setPinned(list);
-      }
-    } catch {
-      // On error, use defaults
-      const defaultPriorities = [
-        "Begin an SRS system for actions and intentions",
-        "Finish food urges implementation intentions and triggers -> answers",
-        "185 pounds and fitness routine",
-        "Launch, invite people, and publish Socratic Substack",
-        "Job search and career development",
-        "Dating and relationships"
-      ];
-      setPinned(defaultPriorities);
-    }
-  }, []);
-
-  // Save pinned to localStorage whenever it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('kanban-top-priorities', JSON.stringify(pinned));
-    } catch (error) {
-      console.error('Failed to save priorities:', error);
-    }
-  }, [pinned]);
-
   // Handle keyboard shortcuts for undo
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
@@ -231,12 +183,12 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undoStack]);
+  }, [undoStack, priorities]); // Added priorities to dependency array
 
-  // Canonical priorities: use only the pinned list (no tag-derived fallback)
+  // Canonical priorities: use only the priorities list (no tag-derived fallback)
   const items = useMemo(() => {
-    return pinned.map(cleanLine).filter(Boolean).slice(0, 6);
-  }, [pinned]);
+    return priorities.map(cleanLine).filter(Boolean).slice(0, 6);
+  }, [priorities]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -247,7 +199,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
       
       if (oldIndex !== -1 && newIndex !== -1) {
         const newItems = arrayMove(items, oldIndex, newIndex);
-        setPinned(newItems);
+        setPriorities(newItems);
       }
     }
   };
@@ -259,16 +211,16 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   const handleSave = () => {
     if (editingIndex !== null) {
-      const newPinned = [...items];
+      const newPriorities = [...items];
       
       if (editingText.trim() === "") {
         // Remove if empty
-        newPinned.splice(editingIndex, 1);
+        newPriorities.splice(editingIndex, 1);
       } else {
-        newPinned[editingIndex] = editingText.trim();
+        newPriorities[editingIndex] = editingText.trim();
       }
       
-      setPinned(newPinned);
+      setPriorities(newPriorities);
       setEditingIndex(null);
       setEditingText("");
     }
@@ -276,8 +228,8 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   const handleDelete = (index: number) => {
     const deletedPriority = items[index];
-    const newPinned = items.filter((_, i) => i !== index);
-    setPinned(newPinned);
+    const newPriorities = items.filter((_, i) => i !== index);
+    setPriorities(newPriorities);
     
     // Add to undo stack
     setUndoStack([...undoStack, {
@@ -289,7 +241,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   const handleAdd = () => {
     const newPriority = "New priority";
-    setPinned([...items, newPriority]);
+    setPriorities([...items, newPriority]);
     setEditingIndex(items.length);
     setEditingText(newPriority);
   };
@@ -300,9 +252,9 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     const lastAction = undoStack[undoStack.length - 1];
     
     if (lastAction.type === 'DELETE_PRIORITY') {
-      const newPinned = [...items];
-      newPinned.splice(lastAction.data.index, 0, lastAction.data.priority);
-      setPinned(newPinned);
+      const newPriorities = [...items];
+      newPriorities.splice(lastAction.data.index, 0, lastAction.data.priority);
+      setPriorities(newPriorities);
       setUndoStack(undoStack.slice(0, -1));
     }
   };

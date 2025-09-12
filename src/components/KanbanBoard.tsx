@@ -33,13 +33,14 @@ import GroupContainer from "./GroupContainer";
 import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
+import { useAppStore } from "@/state/store";
 import { generatePublicationHtml } from "../lib/publish";
 import { exportAllDataFromStorage, importAllDataToStorage } from "../lib/dataTransfer";
-import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
 import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconCalendarStats } from '@tabler/icons-react';
+import { AppSnapshotSchema } from "@/state/schema";
 const ImplementationView = lazy(() => import('./ImplementationIntentions'));
 const TriggersView = lazy(() => import('./TriggersResponses'));
 
@@ -244,6 +245,21 @@ function KanbanBoard() {
     
     return boards;
   };
+
+  const refreshBoardsFromStorage = () => {
+    const recoveredBoards = findAllBoards();
+    let order: string[] = [];
+    try { order = JSON.parse(localStorage.getItem('kanban-board-order') || '[]') } catch {}
+    const ordered = [
+      ...order.filter((k) => recoveredBoards.includes(k)),
+      ...recoveredBoards.filter((k) => !order.includes(k)),
+    ];
+    setAvailableBoards(ordered);
+    setBoardOrder(ordered);
+    if (ordered.length > 0) {
+      switchToBoard(ordered[0]);
+    }
+  }
 
   // Safety net: if availableBoards ever becomes empty, repopulate from localStorage
   useEffect(() => {
@@ -501,39 +517,15 @@ function KanbanBoard() {
 
   const [columnMoveMode, setColumnMoveMode] = useState(false);
 
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem('kanban-notes');
-    return saved || '';
-  });
+  const notes = useAppStore(s => s.notes);
+  const setNotes = useAppStore(s => s.setNotes);
 
-  const [intentions, setIntentions] = useState<string[]>(() => {
-    const saved = localStorage.getItem('kanban-intentions');
-    if (!saved) return [];
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed.filter(Boolean);
-      if (typeof parsed === 'string') {
-        return parsed.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-      }
-    } catch {
-      // Legacy plain text support
-      const lines = saved.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-      if (lines.length) return lines;
-    }
-    return [];
-  });
+  const intentions = useAppStore(s => s.intentions);
+  const setIntentions = useAppStore(s => s.setIntentions);
 
   const [showValuesCard, setShowValuesCard] = useState(false);
 
-  // Auto-save notes to localStorage
-  useEffect(() => {
-    localStorage.setItem('kanban-notes', notes);
-  }, [notes]);
-
-  // Auto-save intentions to localStorage
-  useEffect(() => {
-    localStorage.setItem('kanban-intentions', JSON.stringify(intentions));
-  }, [intentions]);
+  // Store persistence is handled by Zustand; no local effects needed here
 
   // Auto-save board state to localStorage
   useEffect(() => {
@@ -2022,12 +2014,25 @@ function KanbanBoard() {
           onCancel={() => { setImportOpen(false); setPendingImport(null); }}
           onConfirm={() => {
             try {
-              const data = pendingImport;
-              if (!data) { setImportOpen(false); return; }
-              importAllDataToStorage(localStorage, data);
+              const raw = pendingImport;
+              if (!raw) { setImportOpen(false); return; }
+              const parsed = AppSnapshotSchema.safeParse(raw);
+              if (!parsed.success) {
+                console.error(parsed.error);
+                alert('Import failed: invalid file format.');
+                setImportOpen(false);
+                setPendingImport(null);
+                return;
+              }
+              const snap = parsed.data;
+              importAllDataToStorage(localStorage, snap);
+              refreshBoardsFromStorage();
               setImportOpen(false);
               setPendingImport(null);
-              window.location.reload();
+              const nBoards = Object.keys(snap.boards || {}).length;
+              const nTops = (snap.topPriorities?.length ?? (snap as any).pinnedPriorities?.length ?? 0) as number;
+              const nInt = snap.intentions?.length ?? 0;
+              alert(`Import complete: ${nBoards} boards • ${nTops} priorities • ${nInt} intentions`);
             } catch (e) {
               console.error('Failed to import data:', e);
               alert('Failed to import data.');
