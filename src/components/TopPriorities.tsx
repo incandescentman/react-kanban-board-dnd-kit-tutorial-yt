@@ -57,10 +57,10 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
 
   const getIconForPriority = (line: string, i: number) => {
     const l = line.toLowerCase();
-    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
-    if (/food|urge/.test(l)) return <IconFlame size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
-    if (/185|pound|weight/.test(l)) return <IconScale size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
-    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={20} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/food|urge/.test(l)) return <IconFlame size={20} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/185|pound|weight/.test(l)) return <IconScale size={18} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={20} className="mt-1 text-blue-700" aria-hidden="true" />;
     if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
     if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
     const fallback = [
