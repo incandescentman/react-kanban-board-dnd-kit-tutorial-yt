@@ -483,15 +483,7 @@ function KanbanBoard() {
     return () => window.removeEventListener('keydown', onKey);
   }, [activeView, availableBoards, currentBoardName]);
   
-  // Centralized hotkeys
-  useAppHotkeys({
-    activeView,
-    setActiveView: (v) => setActiveView(v),
-    availableBoards,
-    currentBoardName,
-    switchToBoard,
-    setFocusedTaskId,
-  });
+  // Centralized hotkeys will be attached after switchToBoard is defined
   
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
@@ -603,6 +595,16 @@ function KanbanBoard() {
       console.error('Error switching to board:', error);
     }
   };
+
+  // Centralized hotkeys
+  useAppHotkeys({
+    activeView,
+    setActiveView: (v) => setActiveView(v),
+    availableBoards,
+    currentBoardName,
+    switchToBoard,
+    setFocusedTaskId,
+  });
 
   const deleteOrArchiveBoard = (boardName: string) => {
     try {
