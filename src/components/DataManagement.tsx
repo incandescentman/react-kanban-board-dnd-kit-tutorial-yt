@@ -28,61 +28,73 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
       <div className="grid grid-cols-3 gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={onExport} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-              <Download className="h-4 w-4" />
-            </Button>
+            <div className="group relative inline-block">
+              <Button onClick={onExport} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Download className="h-4 w-4" />
+              </Button>
+              <TooltipContent side="top">Export</TooltipContent>
+            </div>
           </TooltipTrigger>
-          <TooltipContent side="top">Export</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={handleImportClick} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-              <Upload className="h-4 w-4" />
-            </Button>
+            <div className="group relative inline-block">
+              <Button onClick={handleImportClick} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Upload className="h-4 w-4" />
+              </Button>
+              <TooltipContent side="top">Import</TooltipContent>
+            </div>
           </TooltipTrigger>
-          <TooltipContent side="top">Import</TooltipContent>
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={onPublish} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-              <Rocket className="h-4 w-4" />
-            </Button>
+            <div className="group relative inline-block">
+              <Button onClick={onPublish} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Rocket className="h-4 w-4" />
+              </Button>
+              <TooltipContent side="top">Publish</TooltipContent>
+            </div>
           </TooltipTrigger>
-          <TooltipContent side="top">Publish</TooltipContent>
         </Tooltip>
 
         {onPreview && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onPreview} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                <Eye className="h-4 w-4" />
-              </Button>
+              <div className="group relative inline-block">
+                <Button onClick={onPreview} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <TooltipContent side="top">Preview</TooltipContent>
+              </div>
             </TooltipTrigger>
-            <TooltipContent side="top">Preview</TooltipContent>
           </Tooltip>
         )}
 
         {onPublishAll && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onPublishAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                <Globe className="h-4 w-4" />
-              </Button>
+              <div className="group relative inline-block">
+                <Button onClick={onPublishAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                  <Globe className="h-4 w-4" />
+                </Button>
+                <TooltipContent side="top">Publish All</TooltipContent>
+              </div>
             </TooltipTrigger>
-            <TooltipContent side="top">Publish All</TooltipContent>
           </Tooltip>
         )}
 
         {onPreviewAll && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onPreviewAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                <Layers className="h-4 w-4" />
-              </Button>
+              <div className="group relative inline-block">
+                <Button onClick={onPreviewAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                  <Layers className="h-4 w-4" />
+                </Button>
+                <TooltipContent side="top">Preview All</TooltipContent>
+              </div>
             </TooltipTrigger>
-            <TooltipContent side="top">Preview All</TooltipContent>
           </Tooltip>
         )}
         <input
