@@ -34,6 +34,7 @@ import IntentionsPanel from "./IntentionsPanel";
 import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
 import { generatePublicationHtml } from "../lib/publish";
+import { exportAllDataFromStorage, importAllDataToStorage } from "../lib/dataTransfer";
 import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -308,12 +309,30 @@ function KanbanBoard() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [tagViewOpen, setTagViewOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'board' | 'priorities'>('board');
+  const [activeView, setActiveView] = useState<'board' | 'priorities' | 'implementation'>('board');
   const DEFAULT_TOP_BOARD_TITLE = "Sunjay's Post-OpenAI Action Plan";
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<any | null>(null);
+  
+  // Small inline tabs to switch between Board and Implementation Intentions
+  const ViewTabs = () => (
+    <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">
+      <button
+        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${activeView === 'board' ? 'bg-indigo-700 text-white shadow' : 'text-indigo-700 hover:bg-indigo-100'}`}
+        onClick={() => setActiveView('board')}
+      >
+        Board
+      </button>
+      <button
+        className={`px-3 py-1.5 text-sm rounded-md transition-colors ${activeView === 'implementation' ? 'bg-indigo-700 text-white shadow' : 'text-indigo-700 hover:bg-indigo-100'}`}
+        onClick={() => setActiveView('implementation')}
+      >
+        Implementation Intentions
+      </button>
+    </div>
+  );
 
   const getBoardIcon = (title: string, size: number = 16) => {
     const l = (title || '').toLowerCase();
@@ -963,34 +982,7 @@ function KanbanBoard() {
   };
 
   const exportAllData = () => {
-    const dataToExport: any = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      boards: {},
-      boardOrder: [],
-      notes: '',
-      intentions: [],
-      pinnedPriorities: [],
-      compactPrioritiesHidden: false,
-    };
-
-    const boardKeys = Object.keys(localStorage).filter(key => key.startsWith('kanban-board-state'));
-
-    boardKeys.forEach(key => {
-      dataToExport.boards[key] = JSON.parse(localStorage.getItem(key) || '{}');
-    });
-
-    dataToExport.boardOrder = JSON.parse(localStorage.getItem('kanban-board-order') || '[]');
-    dataToExport.notes = localStorage.getItem('kanban-notes') || '';
-    dataToExport.intentions = JSON.parse(localStorage.getItem('kanban-intentions') || '[]');
-    try {
-      dataToExport.pinnedPriorities = JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]');
-    } catch {
-      dataToExport.pinnedPriorities = [];
-    }
-    dataToExport.compactPrioritiesHidden = localStorage.getItem('kanban-compact-priorities-hidden') === '1';
-
-    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const jsonString = JSON.stringify(exportAllDataFromStorage(localStorage), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1691,54 +1683,60 @@ function KanbanBoard() {
                 )}
               </div>
 
-              {/* Columns */}
-              <div className="flex gap-6">
-                <div className="flex gap-6">
-                  <SortableContext items={columnsId}>
-                    {board.columns?.map((col) => (
-                      <ColumnContainer
-                        key={col.id}
-                        column={col}
-                        updateColumn={updateColumn}
-                        createTask={createTask}
-                        tasks={col.tasks || []}
-                        deleteTask={deleteTask}
-                        updateTask={updateTask}
-                        toggleTaskComplete={toggleTaskComplete}
-                        toggleGroupComplete={toggleGroupComplete}
-                        updateGroup={updateGroup}
-                        deleteGroup={deleteGroup}
-                        convertTaskToHeading={convertTaskToHeading}
-                        focusedTaskId={focusedTaskId}
-                        setFocusedTaskId={setFocusedTaskId}
-                        columnMoveMode={columnMoveMode}
-                        onTagClick={handleTagClick}
-                        duplicateTask={duplicateTask}
-                        selectMode={selectMode}
-                        selectedTaskIds={selectedTaskIds}
-                        onSelectToggle={toggleTaskSelected}
-                      />
-                    ))}
-                  </SortableContext>
-                </div>
-              </div>
+              {activeView === 'board' ? (
+                <>
+                  {/* Columns */}
+                  <div className="flex gap-6">
+                    <div className="flex gap-6">
+                      <SortableContext items={columnsId}>
+                        {board.columns?.map((col) => (
+                          <ColumnContainer
+                            key={col.id}
+                            column={col}
+                            updateColumn={updateColumn}
+                            createTask={createTask}
+                            tasks={col.tasks || []}
+                            deleteTask={deleteTask}
+                            updateTask={updateTask}
+                            toggleTaskComplete={toggleTaskComplete}
+                            toggleGroupComplete={toggleGroupComplete}
+                            updateGroup={updateGroup}
+                            deleteGroup={deleteGroup}
+                            convertTaskToHeading={convertTaskToHeading}
+                            focusedTaskId={focusedTaskId}
+                            setFocusedTaskId={setFocusedTaskId}
+                            columnMoveMode={columnMoveMode}
+                            onTagClick={handleTagClick}
+                            duplicateTask={duplicateTask}
+                            selectMode={selectMode}
+                            selectedTaskIds={selectedTaskIds}
+                            onSelectToggle={toggleTaskSelected}
+                          />
+                        ))}
+                      </SortableContext>
+                    </div>
+                  </div>
 
-              {/* Notes Section - positioned below all columns */}
-              <div className="mt-6 w-full">
-                <h3 className="text-lg font-bold text-gray-900">
-                  Notes
-                </h3>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add your notes here..."
-                  className="min-h-[200px] resize-none border-gray-300 bg-white/90 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-500 w-full mt-1"
-                />
-              </div>
+                  {/* Notes Section - positioned below all columns */}
+                  <div className="mt-6 w-full">
+                    <h3 className="text-lg font-bold text-gray-900">Notes</h3>
+                    <Textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add your notes here..."
+                      className="min-h-[200px] resize-none border-gray-300 bg-white/90 text-gray-900 placeholder-gray-400 focus:border-gray-500 focus:ring-gray-500 w-full mt-1"
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="mt-2">
+                  {React.createElement(require('./ImplementationIntentions').default)}
+                </div>
+              )}
             </div>
           </div>
 
-          {createPortal(
+          {activeView === 'board' && createPortal(
             <DragOverlay>
               {activeColumn && (
                 <ColumnContainer
@@ -1822,25 +1820,7 @@ function KanbanBoard() {
             try {
               const data = pendingImport;
               if (!data) { setImportOpen(false); return; }
-              // Clear existing data
-              Object.keys(localStorage).forEach(key => {
-                if (key.startsWith('kanban-board-state') || key === 'kanban-board-order' || key === 'kanban-notes' || key === 'kanban-intentions') {
-                  localStorage.removeItem(key);
-                }
-              });
-              // Import new data
-              for (const boardKey in data.boards) {
-                localStorage.setItem(boardKey, JSON.stringify(data.boards[boardKey]));
-              }
-              localStorage.setItem('kanban-board-order', JSON.stringify(data.boardOrder));
-              if (data.notes) localStorage.setItem('kanban-notes', data.notes);
-              if (data.intentions) localStorage.setItem('kanban-intentions', JSON.stringify(data.intentions));
-              if (Array.isArray(data.pinnedPriorities)) {
-                localStorage.setItem('kanban-pinned-priorities', JSON.stringify(data.pinnedPriorities));
-              }
-              if (typeof data.compactPrioritiesHidden !== 'undefined') {
-                localStorage.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0');
-              }
+              importAllDataToStorage(localStorage, data);
               setImportOpen(false);
               setPendingImport(null);
               window.location.reload();

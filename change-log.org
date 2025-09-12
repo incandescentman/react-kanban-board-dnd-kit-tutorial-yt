@@ -58,3 +58,8 @@
 - Added a safety net to repopulate the board list from localStorage when `availableBoards` is empty (e.g., after hot reloads).
 - Preserves saved order from `kanban-board-order` and switches to a valid board if needed.
 - No data is lost; this only refreshes the in‑memory list.
+
+** New Page: Implementation Intentions
+- Added a new "Implementation Intentions" tab and page with the same styling and icon vibe.
+- Content is sourced from implementation-intentions.org and rendered into tidy sections.
+- Quick switcher added under the board tabs: Board | Implementation Intentions.
