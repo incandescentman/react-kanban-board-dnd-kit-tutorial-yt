@@ -217,7 +217,7 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
   };
 
   return (
-    <div className="w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-4 shadow-lg">
+    <div className="w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl pl-4 pr-2 py-4 shadow-lg">
       {/* Header */}
       <div className="mb-5 pb-3 border-b border-blue-200">
         <h3 className="text-lg font-bold text-blue-900 text-center">
