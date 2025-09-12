@@ -321,21 +321,36 @@ function KanbanBoard() {
   // Keyboard shortcuts: Cmd/Ctrl + 1/2/3 to switch views
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey)) return;
-      if (e.key === '1') {
-        e.preventDefault();
-        setActiveView('board');
-      } else if (e.key === '2') {
-        e.preventDefault();
-        setActiveView('implementation');
-      } else if (e.key === '3') {
-        e.preventDefault();
-        setActiveView('triggers');
+      const order: Array<typeof activeView> = ['board', 'implementation', 'triggers'];
+      const idx = order.indexOf(activeView as any);
+      const go = (delta: number) => {
+        const next = order[(idx + delta + order.length) % order.length];
+        setActiveView(next);
+      };
+
+      // Numeric shortcuts (Cmd/Ctrl+1/2/3)
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === '1') { e.preventDefault(); setActiveView('board'); return; }
+        if (e.key === '2') { e.preventDefault(); setActiveView('implementation'); return; }
+        if (e.key === '3') { e.preventDefault(); setActiveView('triggers'); return; }
+      }
+
+      // Navigation: Cmd+Option+ArrowLeft/Right (Mac) or Ctrl+Alt+ArrowLeft/Right
+      if ((e.metaKey || e.ctrlKey) && e.altKey) {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); return; }
+        if (e.key === 'ArrowRight') { e.preventDefault(); go(1); return; }
+      }
+
+      // Navigation: Option+K (left), Option+L (right)
+      if (e.altKey && !e.metaKey && !e.ctrlKey) {
+        const k = e.key.toLowerCase();
+        if (k === 'k') { e.preventDefault(); go(-1); return; }
+        if (k === 'l') { e.preventDefault(); go(1); return; }
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [activeView]);
   
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
@@ -353,7 +368,7 @@ function KanbanBoard() {
             Boards
           </button>
         </TooltipTrigger>
-        <TooltipContent side="bottom">⌘1 / Ctrl+1</TooltipContent>
+        <TooltipContent side="bottom">⌘1 / Ctrl+1 • ⌥K/⌥L or ⌘⌥←/→</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -369,7 +384,7 @@ function KanbanBoard() {
             If-Then
           </button>
         </TooltipTrigger>
-        <TooltipContent side="bottom">⌘2 / Ctrl+2</TooltipContent>
+        <TooltipContent side="bottom">⌘2 / Ctrl+2 • ⌥K/⌥L or ⌘⌥←/→</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -385,7 +400,7 @@ function KanbanBoard() {
             Thought → Reframe
           </button>
         </TooltipTrigger>
-        <TooltipContent side="bottom">⌘3 / Ctrl+3</TooltipContent>
+        <TooltipContent side="bottom">⌘3 / Ctrl+3 • ⌥K/⌥L or ⌘⌥←/→</TooltipContent>
       </Tooltip>
     </div>
   );
