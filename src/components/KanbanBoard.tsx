@@ -35,6 +35,7 @@ import ValuesCard from "./ValuesCard";
 import { extractTags } from "../utils/tags";
 import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
+import DataManagement from "./DataManagement";
 
 const DATA_VERSION = 2;
 
@@ -912,6 +913,91 @@ function KanbanBoard() {
     }
   };
 
+  const handleExport = () => {
+    const dataToExport: any = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      boards: {},
+      boardOrder: [],
+      notes: '',
+      intentions: [],
+    };
+
+    // Get all board keys
+    const boardKeys = Object.keys(localStorage).filter(key => key.startsWith('kanban-board-state'));
+
+    boardKeys.forEach(key => {
+      dataToExport.boards[key] = JSON.parse(localStorage.getItem(key) || '{}');
+    });
+
+    dataToExport.boardOrder = JSON.parse(localStorage.getItem('kanban-board-order') || '[]');
+    dataToExport.notes = localStorage.getItem('kanban-notes') || '';
+    dataToExport.intentions = JSON.parse(localStorage.getItem('kanban-intentions') || '[]');
+
+    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rising-action-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result;
+        if (typeof text !== 'string') {
+          alert('Error reading file.');
+          return;
+        }
+        const data = JSON.parse(text);
+
+        // Basic validation
+        if (!data.version || !data.boards || !data.boardOrder) {
+          alert('Invalid data file.');
+          return;
+        }
+
+        const confirmed = window.confirm('Are you sure you want to import this file? This will overwrite all existing data.');
+        if (confirmed) {
+          // Clear existing data
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('kanban-board-state') || key === 'kanban-board-order' || key === 'kanban-notes' || key === 'kanban-intentions') {
+              localStorage.removeItem(key);
+            }
+          });
+
+          // Import new data
+          for (const boardKey in data.boards) {
+            localStorage.setItem(boardKey, JSON.stringify(data.boards[boardKey]));
+          }
+          localStorage.setItem('kanban-board-order', JSON.stringify(data.boardOrder));
+          if (data.notes) {
+            localStorage.setItem('kanban-notes', data.notes);
+          }
+          if (data.intentions) {
+            localStorage.setItem('kanban-intentions', JSON.stringify(data.intentions));
+          }
+
+          alert('Import successful! The application will now reload.');
+          window.location.reload();
+        }
+      } catch (error) {
+        alert('An error occurred while importing the file.');
+        console.error('Import error:', error);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const createTaskWithContent = (columnId: Id, content: string): Id => {
     const newTask: Task = {
       id: generateId(),
@@ -1402,6 +1488,8 @@ function KanbanBoard() {
               {!legendMinimized && (
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
+
+              <DataManagement onExport={handleExport} onImport={handleImport} />
             </div>
 
             {/* Main Content */}

@@ -9,6 +9,10 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 - *Board Management*: Create, delete, rename, and reorder your boards.
 - *Persistent Storage*: All boards, tasks, and notes are automatically saved to your browser's =localStorage=.
 
+*** Data Portability
+- *Export to JSON*: Download all your boards, tasks, and notes into a single, human-readable JSON file for backups or manual editing.
+- *Import from JSON*: Load your entire workspace from a JSON file, with a confirmation step to prevent accidental data loss.
+
 *** Columns and Tasks
 - *Columns*: Create, delete, rename, and reorder columns. Customize columns with background colors.
 - *Tasks*: Create, edit, and delete tasks with full undo/redo support.

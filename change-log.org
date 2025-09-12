@@ -28,3 +28,10 @@
 
 ** Corrections
 - Previous note claiming the delete confirmation dialog was removed was inaccurate; the dialog is present and functional now.
+
+* 2025-09-11 — Data Portability
+
+** Feature: JSON Import/Export
+- Implemented a new "Data Management" panel in the sidebar.
+- Users can now export all application data (boards, tasks, notes, intentions) into a single, human-readable JSON file. This allows for easy backups and manual editing of the data.
+- Users can import a previously exported JSON file, which will overwrite the existing data in the browser and reload the application with the new state. This requires user confirmation to prevent accidental data loss.
