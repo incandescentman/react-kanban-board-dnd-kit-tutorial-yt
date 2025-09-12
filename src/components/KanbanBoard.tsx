@@ -1029,6 +1029,84 @@ function KanbanBoard() {
     }
   };
 
+  const captureCss = async (): Promise<string> => {
+    const inlineStyles = Array.from(document.querySelectorAll('style'))
+      .map((s) => s.textContent || '')
+      .join('\n');
+    const linkHrefs = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map((l) => (l as HTMLLinkElement).href)
+      .filter(Boolean);
+    const linkedCssParts: string[] = [];
+    for (const href of linkHrefs) {
+      try {
+        const resp = await fetch(href, { cache: 'no-store' });
+        if (resp.ok) linkedCssParts.push(await resp.text());
+      } catch {}
+    }
+    return [inlineStyles, ...linkedCssParts].join('\n');
+  };
+
+  const buildPublishAllHtml = async (): Promise<string> => {
+    const css = await captureCss();
+    const boards: Board[] = [];
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('kanban-board-state'));
+    for (const key of keys) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) boards.push(JSON.parse(raw));
+      } catch {}
+    }
+    // Keep order consistent with saved order
+    const order = JSON.parse(localStorage.getItem('kanban-board-order') || '[]') as string[];
+    const byKey = new Map<string, Board>();
+    keys.forEach((k, i) => { try { const b = localStorage.getItem(k); if (b) byKey.set(k, JSON.parse(b)); } catch {} });
+    const orderedBoards: Board[] = [];
+    order.forEach(k => { const b = byKey.get(k); if (b) orderedBoards.push(b); });
+    // Append any missing
+    byKey.forEach((b, k) => { if (!order.includes(k)) orderedBoards.push(b); });
+
+    const pinned = (() => { try { return JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]'); } catch { return []; } })();
+    const html = generateAllPublicationHtml(orderedBoards.length ? orderedBoards : boards, css, {
+      notes,
+      intentions,
+      priorities: pinned,
+    });
+    return html;
+  };
+
+  const handlePublishAll = async () => {
+    try {
+      const html = await buildPublishAllHtml();
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().split('T')[0];
+      a.download = `all-boards-${date}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Error publishing all boards:', e);
+      alert('Could not publish all boards. See console for details.');
+    }
+  };
+
+  const handlePreviewAll = async () => {
+    try {
+      const html = await buildPublishAllHtml();
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const w = window.open(url, '_blank');
+      if (!w) alert('Popup blocked. Allow popups to preview export.');
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (e) {
+      console.error('Error previewing all boards:', e);
+      alert('Could not preview all boards. See console for details.');
+    }
+  };
+
   // duplicate handleExport removed
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1555,7 +1633,14 @@ function KanbanBoard() {
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
 
-              <DataManagement onExport={exportAllData} onImport={handleImport} onPublish={handlePublish} onPreview={handlePreview} />
+              <DataManagement
+                onExport={exportAllData}
+                onImport={handleImport}
+                onPublish={handlePublish}
+                onPreview={handlePreview}
+                onPublishAll={handlePublishAll}
+                onPreviewAll={handlePreviewAll}
+              />
             </div>
 
             {/* Main Content */}
