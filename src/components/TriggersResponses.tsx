@@ -57,7 +57,7 @@ export default function TriggersResponses() {
                 <IconAlertTriangle size={22} />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900 mb-1">Trigger</div>
+                <div className="text-sm font-semibold text-gray-900 mb-1">Thought</div>
                 <div className="text-sm text-gray-800">{it.trigger}</div>
               </div>
             </div>
