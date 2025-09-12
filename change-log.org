@@ -49,3 +49,12 @@
 - Implemented a new "Data Management" panel in the sidebar.
 - Users can now export all application data (boards, tasks, notes, intentions) into a single, human-readable JSON file. This allows for easy backups and manual editing of the data.
 - Users can import a previously exported JSON file, which will overwrite the existing data in the browser and reload the application with the new state. This requires user confirmation to prevent accidental data loss.
+* 2025-09-12 — Stability Fixes
+
+** JSX Structure
+- Fixed a mismatched JSX tree in KanbanBoard that caused a Vite/SWC parse error (extra closing div around the main content). Parsing and builds now succeed.
+
+** Board Picker Resilience
+- Added a safety net to repopulate the board list from localStorage when `availableBoards` is empty (e.g., after hot reloads).
+- Preserves saved order from `kanban-board-order` and switches to a valid board if needed.
+- No data is lost; this only refreshes the in‑memory list.

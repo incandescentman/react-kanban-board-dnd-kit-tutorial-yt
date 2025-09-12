@@ -8,6 +8,7 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 - *Multi-Board Support*: Manage multiple, distinct kanban boards for different projects or contexts.
 - *Board Management*: Create, delete, rename, and reorder your boards.
 - *Persistent Storage*: All boards, tasks, and notes are automatically saved to your browser's =localStorage=.
+- *Resilient Board List*: If the board tabs ever appear empty (e.g., after a hot reload), the app auto-restores the list from =localStorage=, preserving your saved order.
 
 *** Data Portability
 - *Export to JSON*: Download all your boards, tasks, and notes into a single, human-readable JSON file for backups or manual editing.
@@ -58,3 +59,10 @@ A powerful, local-first kanban board application for managing tasks, projects, a
    npm run dev
    #+END_SRC
 4. Open your browser to =http://localhost:5173=
+
+** Troubleshooting
+
+- Board tabs disappeared after a reload
+  - Try a hard refresh (Cmd+Shift+R). The app will repopulate boards from =localStorage= if the in-memory list is empty.
+  - Validate your data: =Object.keys(localStorage).filter(k => k.startsWith('kanban-board-state'))=
+  - Check order list: =localStorage.getItem('kanban-board-order')= should be a JSON array of board keys.

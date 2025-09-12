@@ -242,6 +242,35 @@ function KanbanBoard() {
     return boards;
   };
 
+  // Safety net: if availableBoards ever becomes empty, repopulate from localStorage
+  useEffect(() => {
+    if (availableBoards.length === 0) {
+      const recoveredBoards = findAllBoards();
+      const savedOrderRaw = localStorage.getItem('kanban-board-order');
+      let savedOrder: string[] = [];
+      try {
+        if (savedOrderRaw) savedOrder = JSON.parse(savedOrderRaw);
+      } catch {}
+
+      // Keep order from savedOrder when possible, append any new boards
+      const ordered = [
+        ...savedOrder.filter((name) => recoveredBoards.includes(name)),
+        ...recoveredBoards.filter((name) => !savedOrder.includes(name)),
+      ];
+
+      if (ordered.length > 0) {
+        setAvailableBoards(ordered);
+        setBoardOrder(ordered);
+        // Ensure we're viewing a valid board
+        if (!ordered.includes(currentBoardName)) {
+          switchToBoard(ordered[0]);
+        }
+      }
+      // Debug aid
+      console.debug('Board list refreshed from localStorage:', ordered);
+    }
+  }, [availableBoards.length]);
+
   // Debug localStorage contents
   useEffect(() => {
     if (availableBoards.length > 0) {
