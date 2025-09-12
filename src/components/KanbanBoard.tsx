@@ -38,6 +38,7 @@ import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
+import { IconLayoutKanban, IconStars, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconFolder, IconCalendarStats } from '@tabler/icons-react';
 import { IconLayoutKanban, IconStars } from '@tabler/icons-react';
 
 const DATA_VERSION = 2;
@@ -285,6 +286,21 @@ function KanbanBoard() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<any | null>(null);
+
+  const getBoardIcon = (title: string, size: number = 16) => {
+    const l = (title || '').toLowerCase();
+    if (/\bidea|brain|spark|inspiration/.test(l)) return <IconBulb size={size} />;
+    if (/\bplan|notes|journal|notebook/.test(l)) return <IconNotebook size={size} />;
+    if (/\bwork|job|career|project/.test(l)) return <IconBriefcase size={size} />;
+    if (/\bhome|personal|life/.test(l)) return <IconHome size={size} />;
+    if (/\bhealth|fitness|weight|habit/.test(l)) return <IconHeartTab size={size} />;
+    if (/\bwrite|writing|blog|draft/.test(l)) return <IconPencil size={size} />;
+    if (/\bgoals|targets|focus/.test(l)) return <IconTargetTab size={size} />;
+    if (/\bpriority|now|today|urgent/.test(l)) return <IconCalendarStats size={size} />;
+    if (/\bstar|favorite/.test(l)) return <IconStar size={size} />;
+    if (/\bmagic|shiny|new/.test(l)) return <IconSparklesTab size={size} />;
+    return <IconLayoutKanban size={size} />;
+  };
   // Enhanced undo system
   interface UndoAction {
     type: 'DELETE_TASK' | 'DELETE_COLUMN' | 'DELETE_BOARD';
@@ -1603,12 +1619,12 @@ function KanbanBoard() {
               {/* Top Controls Row: View toggle + Board tabs */}
               <div className="mt-8 mb-4 w-full flex items-center justify-between gap-4">
                 {/* Segmented view toggle */}
-                <div className="flex items-center bg-blue-50/70 border border-blue-200 rounded-md p-1.5 shadow-sm">
+                <div className="flex items-center bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">
                   <button
                     className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
                       activeView === 'board'
-                        ? 'bg-blue-600 text-white shadow'
-                        : 'text-blue-700 hover:bg-blue-100'
+                        ? 'bg-indigo-700 text-white shadow'
+                        : 'text-indigo-700 hover:bg-indigo-100'
                     }`}
                     onClick={() => setActiveView('board')}
                   >
@@ -1618,8 +1634,8 @@ function KanbanBoard() {
                   <button
                     className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
                       activeView === 'priorities'
-                        ? 'bg-blue-600 text-white shadow'
-                        : 'text-blue-700 hover:bg-blue-100'
+                        ? 'bg-indigo-700 text-white shadow'
+                        : 'text-indigo-700 hover:bg-indigo-100'
                     }`}
                     onClick={() => setActiveView('priorities')}
                   >
@@ -1631,7 +1647,7 @@ function KanbanBoard() {
                 {/* Boards tabs */}
                 <div className="flex-1 overflow-x-auto">
                   <div className="w-full flex items-center justify-end">
-                    <div className="inline-flex items-center gap-1.5 bg-blue-50/70 border border-blue-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+                    <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
                       {availableBoards.map((boardName) => {
                         let title = boardName;
                         try {
@@ -1648,12 +1664,12 @@ function KanbanBoard() {
                             onClick={() => switchToBoard(boardName)}
                           className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
                             isActive
-                              ? 'bg-blue-600 text-white shadow'
-                              : 'text-blue-700 hover:bg-blue-100'
+                              ? 'bg-indigo-700 text-white shadow'
+                              : 'text-indigo-700 hover:bg-indigo-100'
                           }`}
                           title={title}
                         >
-                          <IconLayoutKanban size={16} />
+                          {getBoardIcon(title, 16)}
                           {title}
                         </button>
                         );
