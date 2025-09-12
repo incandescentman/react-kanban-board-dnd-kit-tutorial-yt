@@ -69,9 +69,7 @@ export default function ImplementationIntentions() {
           <IconTarget size={22} />
           <h2 className="text-xl font-bold">Goals Over Urges</h2>
         </div>
-        <p className="text-sm text-indigo-700/80 mt-1">
-          Goals over urges. Practical if-then plans for key situations.
-        </p>
+        {/* subtitle intentionally removed per request */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
