@@ -161,7 +161,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
         onMouseLeave={() => setMouseIsOver(false)}
         onFocus={() => setFocusedTaskId(task.id)}
       >
-        <CardContent className="p-2.5 h-full flex items-start">
+        <CardContent className="p-2.5 h-full flex items-center">
           {selectMode && (
             <button
               className={cn(
@@ -184,7 +184,7 @@ function TaskCard({ task, deleteTask, updateTask, toggleTaskComplete, convertTas
               <Button
                 variant="ghost"
                 size="icon"
-                className="mr-2 h-6 w-6 shrink-0 hover:bg-accent mt-1"
+                className="mr-2 h-6 w-6 shrink-0 hover:bg-accent"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleTaskComplete(task.id);
