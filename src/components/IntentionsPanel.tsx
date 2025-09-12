@@ -255,15 +255,13 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
         </SortableContext>
       </DndContext>
 
-      {/* Add Area */}
+      {/* Add Area (no text, large hit area) */}
       <div
         onClick={handleAdd}
-        className="w-full py-3 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
-      >
-        <span className="text-blue-600 text-sm opacity-60 group-hover:opacity-100 transition-opacity duration-200">
-          + Add intention
-        </span>
-      </div>
+        aria-label="Add intention"
+        title="Add intention"
+        className="w-full h-14 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
+      />
 
       {/* Cute Footer */}
       <div className="mt-4 text-center">

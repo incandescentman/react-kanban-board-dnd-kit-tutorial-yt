@@ -382,15 +382,13 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
             </SortableContext>
           </DndContext>
           
-          {/* Add Area */}
+          {/* Add Area (no text, large hit area) */}
           <div
             onClick={handleAdd}
-            className="w-full py-3 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors mt-2"
-          >
-            <span className="text-blue-600 text-sm opacity-60 group-hover:opacity-100 transition-opacity duration-200">
-              + Add priority
-            </span>
-          </div>
+            aria-label="Add priority"
+            title="Add priority"
+            className="w-full h-14 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors mt-2"
+          />
         </div>
       </div>
     </div>
