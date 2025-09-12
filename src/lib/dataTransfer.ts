@@ -90,6 +90,9 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   const incomingTop = (data as any).topPriorities as any
   const incomingPinned = (data as any).pinnedPriorities as any
   const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
+  // Write to new canonical key
   store.setItem('kanban-top-priorities', JSON.stringify(finalTop))
+  // Also write legacy key for backward compatibility
+  store.setItem('kanban-pinned-priorities', JSON.stringify(finalTop))
   store.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0')
 }
