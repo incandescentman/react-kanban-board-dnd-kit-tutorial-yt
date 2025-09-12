@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { IconTarget, IconMoonStars, IconNotebook, IconSparkles, IconScale } from '@tabler/icons-react'
+import { IconGymnastics, IconMoonStars, IconNotebook, IconSparkles, IconScale } from '@tabler/icons-react'
 
 // Import the .org file content as raw text at build-time
 // Vite supports ?raw to import file contents as string
@@ -64,9 +64,9 @@ export default function ImplementationIntentions() {
 
   return (
     <div className="flex flex-col min-w-0 flex-1">
-      <div className="mt-8 mb-4 w-full">
+      <div className="mt-0 mb-4 w-full">
         <div className="flex items-center gap-3 text-indigo-800">
-          <IconTarget size={28} />
+          <IconGymnastics size={28} />
           <h2 className="text-xl font-bold">Goals Over Urges</h2>
         </div>
         {/* subtitle intentionally removed per request */}
