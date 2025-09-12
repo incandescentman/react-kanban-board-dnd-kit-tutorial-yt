@@ -1,0 +1,1750 @@
+{
+  "$$data_type": "org-document",
+  "properties": {
+    "title": [
+      "Kanban Board"
+    ],
+    "filetags": [],
+    "author": [
+      "Jay Dixit"
+    ],
+    "creator": "Emacs 29.4 (Org mode 9.7.34)",
+    "date": [],
+    "description": [],
+    "email": "jay@Destroyer.local",
+    "language": "en"
+  },
+  "contents": [
+    {
+      "$$data_type": "org-node",
+      "type": "section",
+      "ref": "org88fd237",
+      "properties": {
+        "post-blank": 0,
+        "secondary": null,
+        "mode": "first-section",
+        "granularity": null,
+        "cached": null,
+        "true-level": null,
+        "deferred": null,
+        "structure": null
+      },
+      "contents": [
+        {
+          "$$data_type": "org-node",
+          "type": "keyword",
+          "ref": "orge00cdfd",
+          "properties": {
+            "post-blank": 1,
+            "secondary": null,
+            "mode": "top-comment",
+            "granularity": null,
+            "cached": null,
+            "true-level": null,
+            "deferred": null,
+            "structure": null,
+            "key": "TITLE",
+            "value": "Kanban Board"
+          },
+          "contents": []
+        },
+        {
+          "$$data_type": "org-node",
+          "type": "keyword",
+          "ref": "orge510964",
+          "properties": {
+            "post-blank": 1,
+            "secondary": null,
+            "mode": null,
+            "granularity": null,
+            "cached": null,
+            "true-level": null,
+            "deferred": null,
+            "structure": null,
+            "key": "EXCERPT",
+            "value": "One-liner: A crisp, quotable argument for faculty."
+          },
+          "contents": []
+        },
+        {
+          "$$data_type": "org-node",
+          "type": "keyword",
+          "ref": "org346c647",
+          "properties": {
+            "post-blank": 0,
+            "secondary": null,
+            "mode": null,
+            "granularity": null,
+            "cached": null,
+            "true-level": null,
+            "deferred": null,
+            "structure": null,
+            "key": "PUBLISH_DATE",
+            "value": "[2025-09-12 Fri 17:41]"
+          },
+          "contents": []
+        }
+      ]
+    },
+    {
+      "$$data_type": "org-node",
+      "type": "headline",
+      "ref": "orge60397e",
+      "drawer": {},
+      "properties": {
+        "tags-all": [],
+        "post-blank": 0,
+        "secondary": [
+          ":title"
+        ],
+        "mode": null,
+        "granularity": null,
+        "cached": null,
+        "true-level": 1,
+        "deferred": null,
+        "structure": null,
+        "pre-blank": 0,
+        "raw-value": "Boards",
+        "title": [
+          "Boards"
+        ],
+        "level": 1,
+        "priority": null,
+        "tags": [],
+        "todo-keyword": null,
+        "todo-type": null,
+        "footnote-section-p": true,
+        "archivedp": true,
+        "commentedp": false
+      },
+      "contents": [
+        {
+          "$$data_type": "org-node",
+          "type": "headline",
+          "ref": "org8bda3be",
+          "drawer": {},
+          "properties": {
+            "tags-all": [],
+            "post-blank": 0,
+            "secondary": [
+              ":title"
+            ],
+            "mode": "section",
+            "granularity": null,
+            "cached": null,
+            "true-level": 2,
+            "deferred": null,
+            "structure": null,
+            "pre-blank": 0,
+            "raw-value": "Substack [1/3]",
+            "title": [
+              "Substack ",
+              {
+                "$$data_type": "org-node",
+                "type": "statistics-cookie",
+                "ref": "org43defd0",
+                "properties": {
+                  "post-blank": 0,
+                  "secondary": null,
+                  "mode": null,
+                  "granularity": null,
+                  "cached": null,
+                  "true-level": null,
+                  "deferred": null,
+                  "structure": null,
+                  "value": "[1/3]"
+                },
+                "contents": []
+              }
+            ],
+            "level": 2,
+            "priority": null,
+            "tags": [],
+            "todo-keyword": null,
+            "todo-type": null,
+            "footnote-section-p": true,
+            "archivedp": true,
+            "commentedp": false
+          },
+          "contents": [
+            {
+              "$$data_type": "org-node",
+              "type": "headline",
+              "ref": "orgc504646",
+              "drawer": {},
+              "properties": {
+                "tags-all": [],
+                "post-blank": 0,
+                "secondary": [
+                  ":title"
+                ],
+                "mode": "section",
+                "granularity": null,
+                "cached": null,
+                "true-level": 3,
+                "deferred": null,
+                "structure": null,
+                "pre-blank": 0,
+                "raw-value": "💡 Ideas",
+                "title": [
+                  "💡 Ideas"
+                ],
+                "level": 3,
+                "priority": null,
+                "tags": [],
+                "todo-keyword": null,
+                "todo-type": null,
+                "footnote-section-p": true,
+                "archivedp": true,
+                "commentedp": false
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "headline",
+                  "ref": "orgab54fc1",
+                  "drawer": {},
+                  "properties": {
+                    "tags-all": [],
+                    "post-blank": 0,
+                    "secondary": [
+                      ":title"
+                    ],
+                    "mode": "section",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": 4,
+                    "deferred": null,
+                    "structure": null,
+                    "pre-blank": 0,
+                    "raw-value": "A hook-driven \"why ChatGPT still matters\" post",
+                    "title": [
+                      "A hook-driven \"why ChatGPT still matters\" post"
+                    ],
+                    "level": 4,
+                    "priority": null,
+                    "tags": [],
+                    "todo-keyword": null,
+                    "todo-type": null,
+                    "footnote-section-p": true,
+                    "archivedp": true,
+                    "commentedp": false
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "section",
+                      "ref": "org8084025",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": null,
+                        "mode": "section",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "structure": null
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "plain-list",
+                          "ref": "orgd3a7e55",
+                          "properties": {
+                            "post-blank": 1,
+                            "secondary": null,
+                            "mode": "planning",
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": [
+                              [
+                                220,
+                                0,
+                                "- ",
+                                null,
+                                null,
+                                null,
+                                273
+                              ],
+                              [
+                                273,
+                                0,
+                                "- ",
+                                null,
+                                null,
+                                null,
+                                311
+                              ]
+                            ],
+                            "type": "unordered"
+                          },
+                          "contents": [
+                            {
+                              "$$data_type": "org-node",
+                              "type": "item",
+                              "ref": "org89ca379",
+                              "properties": {
+                                "post-blank": 0,
+                                "secondary": [
+                                  ":tag"
+                                ],
+                                "mode": "item",
+                                "granularity": null,
+                                "cached": null,
+                                "true-level": null,
+                                "deferred": null,
+                                "bullet": "- ",
+                                "checkbox": null,
+                                "counter": null,
+                                "pre-blank": 0,
+                                "tag": []
+                              },
+                              "contents": [
+                                {
+                                  "$$data_type": "org-node",
+                                  "type": "paragraph",
+                                  "ref": "org5027608",
+                                  "properties": {
+                                    "post-blank": 0,
+                                    "secondary": null,
+                                    "mode": null,
+                                    "granularity": null,
+                                    "cached": null,
+                                    "true-level": null,
+                                    "deferred": null,
+                                    "structure": null
+                                  },
+                                  "contents": [
+                                    "One-liner: A crisp, quotable argument for faculty.\n"
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "$$data_type": "org-node",
+                              "type": "item",
+                              "ref": "orgef16b47",
+                              "properties": {
+                                "post-blank": 0,
+                                "secondary": [
+                                  ":tag"
+                                ],
+                                "mode": "item",
+                                "granularity": null,
+                                "cached": null,
+                                "true-level": null,
+                                "deferred": null,
+                                "bullet": "- ",
+                                "checkbox": null,
+                                "counter": null,
+                                "pre-blank": 0,
+                                "tag": []
+                              },
+                              "contents": [
+                                {
+                                  "$$data_type": "org-node",
+                                  "type": "paragraph",
+                                  "ref": "org84e08c6",
+                                  "properties": {
+                                    "post-blank": 0,
+                                    "secondary": null,
+                                    "mode": null,
+                                    "granularity": null,
+                                    "cached": null,
+                                    "true-level": null,
+                                    "deferred": null,
+                                    "structure": null
+                                  },
+                                  "contents": [
+                                    "Note: Link this to CSU Fresno deck.\n"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "$$data_type": "org-node",
+              "type": "headline",
+              "ref": "org6a5251f",
+              "drawer": {},
+              "properties": {
+                "tags-all": [],
+                "post-blank": 0,
+                "secondary": [
+                  ":title"
+                ],
+                "mode": null,
+                "granularity": null,
+                "cached": null,
+                "true-level": 3,
+                "deferred": null,
+                "structure": null,
+                "pre-blank": 0,
+                "raw-value": "📝 To Do",
+                "title": [
+                  "📝 To Do"
+                ],
+                "level": 3,
+                "priority": null,
+                "tags": [],
+                "todo-keyword": null,
+                "todo-type": null,
+                "footnote-section-p": true,
+                "archivedp": true,
+                "commentedp": false
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "headline",
+                  "ref": "orgc16ce7d",
+                  "drawer": {},
+                  "properties": {
+                    "tags-all": [],
+                    "post-blank": 0,
+                    "secondary": [
+                      ":title"
+                    ],
+                    "mode": "section",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": 4,
+                    "deferred": null,
+                    "structure": null,
+                    "pre-blank": 0,
+                    "raw-value": "Draft the \"ethical use in writing classes\" outline",
+                    "title": [
+                      "Draft the \"ethical use in writing classes\" outline"
+                    ],
+                    "level": 4,
+                    "priority": null,
+                    "tags": [],
+                    "todo-keyword": "TODO",
+                    "todo-type": "todo",
+                    "footnote-section-p": true,
+                    "archivedp": true,
+                    "commentedp": false
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "section",
+                      "ref": "orgf43beba",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": null,
+                        "mode": "section",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "structure": null
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "plain-list",
+                          "ref": "orgb65de44",
+                          "properties": {
+                            "post-blank": 1,
+                            "secondary": null,
+                            "mode": "planning",
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": [
+                              [
+                                386,
+                                0,
+                                "- ",
+                                null,
+                                null,
+                                null,
+                                430
+                              ]
+                            ],
+                            "type": "unordered"
+                          },
+                          "contents": [
+                            {
+                              "$$data_type": "org-node",
+                              "type": "item",
+                              "ref": "orgffa6f65",
+                              "properties": {
+                                "post-blank": 0,
+                                "secondary": [
+                                  ":tag"
+                                ],
+                                "mode": "item",
+                                "granularity": null,
+                                "cached": null,
+                                "true-level": null,
+                                "deferred": null,
+                                "bullet": "- ",
+                                "checkbox": null,
+                                "counter": null,
+                                "pre-blank": 0,
+                                "tag": []
+                              },
+                              "contents": [
+                                {
+                                  "$$data_type": "org-node",
+                                  "type": "paragraph",
+                                  "ref": "org18ed46a",
+                                  "properties": {
+                                    "post-blank": 0,
+                                    "secondary": null,
+                                    "mode": null,
+                                    "granularity": null,
+                                    "cached": null,
+                                    "true-level": null,
+                                    "deferred": null,
+                                    "structure": null
+                                  },
+                                  "contents": [
+                                    "Deliverable: 5-part outline + 3 examples.\n"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "$$data_type": "org-node",
+              "type": "headline",
+              "ref": "orgac532b1",
+              "drawer": {},
+              "properties": {
+                "tags-all": [],
+                "post-blank": 0,
+                "secondary": [
+                  ":title"
+                ],
+                "mode": null,
+                "granularity": null,
+                "cached": null,
+                "true-level": 3,
+                "deferred": null,
+                "structure": null,
+                "pre-blank": 0,
+                "raw-value": "🚀 In Progress",
+                "title": [
+                  "🚀 In Progress"
+                ],
+                "level": 3,
+                "priority": null,
+                "tags": [],
+                "todo-keyword": null,
+                "todo-type": null,
+                "footnote-section-p": true,
+                "archivedp": true,
+                "commentedp": false
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "headline",
+                  "ref": "org8c4c209",
+                  "drawer": {},
+                  "properties": {
+                    "tags-all": [],
+                    "post-blank": 0,
+                    "secondary": [
+                      ":title"
+                    ],
+                    "mode": "section",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": 4,
+                    "deferred": null,
+                    "structure": null,
+                    "pre-blank": 0,
+                    "raw-value": "Edit Substack About page",
+                    "title": [
+                      "Edit Substack About page"
+                    ],
+                    "level": 4,
+                    "priority": null,
+                    "tags": [],
+                    "todo-keyword": "STARTED",
+                    "todo-type": "todo",
+                    "footnote-section-p": true,
+                    "archivedp": true,
+                    "commentedp": false
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "section",
+                      "ref": "org02d3f9f",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": null,
+                        "mode": "section",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "structure": null
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "plain-list",
+                          "ref": "org7c4fe86",
+                          "properties": {
+                            "post-blank": 1,
+                            "secondary": null,
+                            "mode": "planning",
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": [
+                              [
+                                488,
+                                0,
+                                "- ",
+                                null,
+                                null,
+                                null,
+                                526
+                              ]
+                            ],
+                            "type": "unordered"
+                          },
+                          "contents": [
+                            {
+                              "$$data_type": "org-node",
+                              "type": "item",
+                              "ref": "orge722c18",
+                              "properties": {
+                                "post-blank": 0,
+                                "secondary": [
+                                  ":tag"
+                                ],
+                                "mode": "item",
+                                "granularity": null,
+                                "cached": null,
+                                "true-level": null,
+                                "deferred": null,
+                                "bullet": "- ",
+                                "checkbox": null,
+                                "counter": null,
+                                "pre-blank": 0,
+                                "tag": []
+                              },
+                              "contents": [
+                                {
+                                  "$$data_type": "org-node",
+                                  "type": "paragraph",
+                                  "ref": "org197fef7",
+                                  "properties": {
+                                    "post-blank": 0,
+                                    "secondary": null,
+                                    "mode": null,
+                                    "granularity": null,
+                                    "cached": null,
+                                    "true-level": null,
+                                    "deferred": null,
+                                    "structure": null
+                                  },
+                                  "contents": [
+                                    "Next: tighten first two paragraphs.\n"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "$$data_type": "org-node",
+              "type": "headline",
+              "ref": "org29e5a68",
+              "drawer": {},
+              "properties": {
+                "tags-all": [],
+                "post-blank": 0,
+                "secondary": [
+                  ":title"
+                ],
+                "mode": null,
+                "granularity": null,
+                "cached": null,
+                "true-level": 3,
+                "deferred": null,
+                "structure": null,
+                "pre-blank": 0,
+                "raw-value": "✅ Done",
+                "title": [
+                  "✅ Done"
+                ],
+                "level": 3,
+                "priority": null,
+                "tags": [],
+                "todo-keyword": null,
+                "todo-type": null,
+                "footnote-section-p": true,
+                "archivedp": true,
+                "commentedp": false
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "headline",
+                  "ref": "org0638d2c",
+                  "drawer": {},
+                  "properties": {
+                    "tags-all": [],
+                    "post-blank": 1,
+                    "secondary": [
+                      ":title"
+                    ],
+                    "mode": "section",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": 4,
+                    "deferred": null,
+                    "structure": null,
+                    "pre-blank": 0,
+                    "raw-value": "Create Substack publication + theme",
+                    "title": [
+                      "Create Substack publication + theme"
+                    ],
+                    "level": 4,
+                    "priority": null,
+                    "tags": [],
+                    "todo-keyword": "DONE",
+                    "todo-type": "done",
+                    "footnote-section-p": true,
+                    "archivedp": true,
+                    "commentedp": false
+                  },
+                  "contents": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$$data_type": "org-node",
+      "type": "headline",
+      "ref": "org0c7349f",
+      "drawer": {},
+      "properties": {
+        "tags-all": [],
+        "post-blank": 0,
+        "secondary": [
+          ":title"
+        ],
+        "mode": null,
+        "granularity": null,
+        "cached": null,
+        "true-level": 1,
+        "deferred": null,
+        "structure": null,
+        "pre-blank": 0,
+        "raw-value": "Foundation",
+        "title": [
+          "Foundation"
+        ],
+        "level": 1,
+        "priority": null,
+        "tags": [],
+        "todo-keyword": null,
+        "todo-type": null,
+        "footnote-section-p": true,
+        "archivedp": true,
+        "commentedp": false
+      },
+      "contents": [
+        {
+          "$$data_type": "org-node",
+          "type": "headline",
+          "ref": "orgb0fb641",
+          "drawer": {},
+          "properties": {
+            "tags-all": [],
+            "post-blank": 0,
+            "secondary": [
+              ":title"
+            ],
+            "mode": "section",
+            "granularity": null,
+            "cached": null,
+            "true-level": 2,
+            "deferred": null,
+            "structure": null,
+            "pre-blank": 0,
+            "raw-value": "Intentions",
+            "title": [
+              "Intentions"
+            ],
+            "level": 2,
+            "priority": null,
+            "tags": [],
+            "todo-keyword": null,
+            "todo-type": null,
+            "footnote-section-p": true,
+            "archivedp": true,
+            "commentedp": false
+          },
+          "contents": [
+            {
+              "$$data_type": "org-node",
+              "type": "section",
+              "ref": "org865a6c9",
+              "properties": {
+                "post-blank": 0,
+                "secondary": null,
+                "mode": "section",
+                "granularity": null,
+                "cached": null,
+                "true-level": null,
+                "deferred": null,
+                "structure": null
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "plain-list",
+                  "ref": "org2cd7f7b",
+                  "properties": {
+                    "post-blank": 1,
+                    "secondary": null,
+                    "mode": "planning",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": null,
+                    "deferred": null,
+                    "structure": [
+                      [
+                        614,
+                        3,
+                        "- ",
+                        null,
+                        null,
+                        null,
+                        663
+                      ],
+                      [
+                        663,
+                        3,
+                        "- ",
+                        null,
+                        null,
+                        null,
+                        691
+                      ],
+                      [
+                        691,
+                        3,
+                        "- ",
+                        null,
+                        null,
+                        null,
+                        711
+                      ],
+                      [
+                        711,
+                        3,
+                        "- ",
+                        null,
+                        null,
+                        null,
+                        738
+                      ],
+                      [
+                        738,
+                        3,
+                        "- ",
+                        null,
+                        null,
+                        null,
+                        757
+                      ]
+                    ],
+                    "type": "unordered"
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orgbce28cb",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "orga720eda",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Honor my bedtime and wake time (2am / 10am)\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orgbe6c795",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org7a6e3cd",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Beware the clever mind\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orgc329493",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org39613c7",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Track calories\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org4de8494",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org59b194f",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Work daily 10am - 4pm\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org36e4bd8",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org52d4958",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Gym every day\n"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$$data_type": "org-node",
+          "type": "headline",
+          "ref": "orgacc3c4a",
+          "drawer": {},
+          "properties": {
+            "tags-all": [],
+            "post-blank": 0,
+            "secondary": [
+              ":title"
+            ],
+            "mode": null,
+            "granularity": null,
+            "cached": null,
+            "true-level": 2,
+            "deferred": null,
+            "structure": null,
+            "pre-blank": 0,
+            "raw-value": "Top Priorities",
+            "title": [
+              "Top Priorities"
+            ],
+            "level": 2,
+            "priority": null,
+            "tags": [],
+            "todo-keyword": null,
+            "todo-type": null,
+            "footnote-section-p": true,
+            "archivedp": true,
+            "commentedp": false
+          },
+          "contents": [
+            {
+              "$$data_type": "org-node",
+              "type": "section",
+              "ref": "orge655faf",
+              "properties": {
+                "post-blank": 0,
+                "secondary": null,
+                "mode": "section",
+                "granularity": null,
+                "cached": null,
+                "true-level": null,
+                "deferred": null,
+                "structure": null
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "plain-list",
+                  "ref": "org5f5c35f",
+                  "properties": {
+                    "post-blank": 1,
+                    "secondary": null,
+                    "mode": "planning",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": null,
+                    "deferred": null,
+                    "structure": [
+                      [
+                        777,
+                        3,
+                        "1. ",
+                        null,
+                        null,
+                        null,
+                        826
+                      ],
+                      [
+                        826,
+                        3,
+                        "2. ",
+                        null,
+                        null,
+                        null,
+                        901
+                      ],
+                      [
+                        901,
+                        3,
+                        "3. ",
+                        null,
+                        null,
+                        null,
+                        946
+                      ],
+                      [
+                        946,
+                        3,
+                        "4. ",
+                        null,
+                        null,
+                        null,
+                        1004
+                      ],
+                      [
+                        1004,
+                        3,
+                        "5. ",
+                        null,
+                        null,
+                        null,
+                        1038
+                      ],
+                      [
+                        1038,
+                        3,
+                        "6. ",
+                        null,
+                        null,
+                        null,
+                        1057
+                      ]
+                    ],
+                    "type": "ordered"
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org24d0833",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "1. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org0118dc5",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Build an SRS loop for actions + intentions\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org257f52c",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "2. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org4586fd0",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Finish \"food urges\" implementation intentions (triggers → responses)\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orgfe232bf",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "3. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org32069ca",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Hit 185 lbs with a sustainable routine\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org5b16215",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "4. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org5a3fd66",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Launch Socratic Substack (invite list + first post)\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orga418711",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "5. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org6945648",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Job search & collaborations\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orge3404e9",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "6. ",
+                        "checkbox": null,
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "orgcd8c5eb",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Start dating\n"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$$data_type": "org-node",
+          "type": "headline",
+          "ref": "orgb00b945",
+          "drawer": {},
+          "properties": {
+            "tags-all": [],
+            "post-blank": 0,
+            "secondary": [
+              ":title"
+            ],
+            "mode": null,
+            "granularity": null,
+            "cached": null,
+            "true-level": 2,
+            "deferred": null,
+            "structure": null,
+            "pre-blank": 0,
+            "raw-value": "Daily [0/3]",
+            "title": [
+              "Daily ",
+              {
+                "$$data_type": "org-node",
+                "type": "statistics-cookie",
+                "ref": "orgff76dc5",
+                "properties": {
+                  "post-blank": 0,
+                  "secondary": null,
+                  "mode": null,
+                  "granularity": null,
+                  "cached": null,
+                  "true-level": null,
+                  "deferred": null,
+                  "structure": null,
+                  "value": "[0/3]"
+                },
+                "contents": []
+              }
+            ],
+            "level": 2,
+            "priority": null,
+            "tags": [],
+            "todo-keyword": null,
+            "todo-type": null,
+            "footnote-section-p": true,
+            "archivedp": true,
+            "commentedp": false
+          },
+          "contents": [
+            {
+              "$$data_type": "org-node",
+              "type": "section",
+              "ref": "org07f0561",
+              "properties": {
+                "post-blank": 0,
+                "secondary": null,
+                "mode": "section",
+                "granularity": null,
+                "cached": null,
+                "true-level": null,
+                "deferred": null,
+                "structure": null
+              },
+              "contents": [
+                {
+                  "$$data_type": "org-node",
+                  "type": "plain-list",
+                  "ref": "orgeba15ab",
+                  "properties": {
+                    "post-blank": 1,
+                    "secondary": null,
+                    "mode": "planning",
+                    "granularity": null,
+                    "cached": null,
+                    "true-level": null,
+                    "deferred": null,
+                    "structure": [
+                      [
+                        1073,
+                        0,
+                        "- ",
+                        null,
+                        "[ ]",
+                        null,
+                        1102
+                      ],
+                      [
+                        1102,
+                        0,
+                        "- ",
+                        null,
+                        "[ ]",
+                        null,
+                        1129
+                      ],
+                      [
+                        1129,
+                        0,
+                        "- ",
+                        null,
+                        "[ ]",
+                        null,
+                        1154
+                      ]
+                    ],
+                    "type": "unordered"
+                  },
+                  "contents": [
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org5d3b88c",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": "off",
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "org08074cd",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Outreach to one person\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "org309e18e",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": "off",
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "orgc09db95",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Ship something small\n"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "$$data_type": "org-node",
+                      "type": "item",
+                      "ref": "orge42f200",
+                      "properties": {
+                        "post-blank": 0,
+                        "secondary": [
+                          ":tag"
+                        ],
+                        "mode": "item",
+                        "granularity": null,
+                        "cached": null,
+                        "true-level": null,
+                        "deferred": null,
+                        "bullet": "- ",
+                        "checkbox": "off",
+                        "counter": null,
+                        "pre-blank": 0,
+                        "tag": []
+                      },
+                      "contents": [
+                        {
+                          "$$data_type": "org-node",
+                          "type": "paragraph",
+                          "ref": "orgee4f255",
+                          "properties": {
+                            "post-blank": 0,
+                            "secondary": null,
+                            "mode": null,
+                            "granularity": null,
+                            "cached": null,
+                            "true-level": null,
+                            "deferred": null,
+                            "structure": null
+                          },
+                          "contents": [
+                            "Review intentions \n"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "$$data_type": "org-node",
+      "type": "headline",
+      "ref": "orgef92c75",
+      "drawer": {},
+      "properties": {
+        "tags-all": [],
+        "post-blank": 0,
+        "secondary": [
+          ":title"
+        ],
+        "mode": null,
+        "granularity": null,
+        "cached": null,
+        "true-level": 1,
+        "deferred": null,
+        "structure": null,
+        "pre-blank": 0,
+        "raw-value": "Archive",
+        "title": [
+          "Archive"
+        ],
+        "level": 1,
+        "priority": null,
+        "tags": [
+          "ARCHIVE"
+        ],
+        "todo-keyword": null,
+        "todo-type": null,
+        "footnote-section-p": true,
+        "archivedp": true,
+        "commentedp": false
+      },
+      "contents": []
+    }
+  ]
+}
