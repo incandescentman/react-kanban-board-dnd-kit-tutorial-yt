@@ -917,7 +917,7 @@ function KanbanBoard() {
     }
   };
 
-  const handleExport = () => {
+  const exportAllData = () => {
     const dataToExport: any = {
       version: 1,
       exportedAt: new Date().toISOString(),
@@ -1521,7 +1521,7 @@ function KanbanBoard() {
                 <Legend onMinimize={() => setLegendMinimized(true)} />
               )}
 
-              <DataManagement onExport={handleExport} onImport={handleImport} onPublish={handlePublish} />
+              <DataManagement onExport={exportAllData} onImport={handleImport} onPublish={handlePublish} />
             </div>
 
             {/* Main Content */}
