@@ -22,7 +22,7 @@ describe('dataTransfer', () => {
     store.setItem('kanban-board-order', JSON.stringify(['kanban-board-state', 'kanban-board-state-work']))
     store.setItem('kanban-notes', 'hello')
     store.setItem('kanban-intentions', JSON.stringify(['Focus on impact']))
-    store.setItem('kanban-pinned-priorities', JSON.stringify(['Do X']))
+    store.setItem('kanban-top-priorities', JSON.stringify(['Do X']))
     store.setItem('kanban-compact-priorities-hidden', '1')
 
     const out = exportAllDataFromStorage(store)
@@ -31,7 +31,7 @@ describe('dataTransfer', () => {
     expect(out.boardOrder).toEqual(['kanban-board-state', 'kanban-board-state-work'])
     expect(out.notes).toBe('hello')
     expect(out.intentions).toEqual(['Focus on impact'])
-    expect(out.pinnedPriorities).toEqual(['Do X'])
+    expect(out.topPriorities).toEqual(['Do X'])
     expect(out.compactPrioritiesHidden).toBe(true)
   })
 
@@ -51,7 +51,7 @@ describe('dataTransfer', () => {
       boardOrder: ['kanban-board-state', 'kanban-board-state-work'],
       notes: 'hello',
       intentions: ['Focus on impact'],
-      pinnedPriorities: ['Do X'],
+      topPriorities: ['Do X'],
       compactPrioritiesHidden: false,
     }
 
@@ -60,10 +60,9 @@ describe('dataTransfer', () => {
     expect(store.getItem('kanban-board-order')).toBe(JSON.stringify(data.boardOrder))
     expect(store.getItem('kanban-notes')).toBe('hello')
     expect(store.getItem('kanban-intentions')).toBe(JSON.stringify(['Focus on impact']))
-    expect(store.getItem('kanban-pinned-priorities')).toBe(JSON.stringify(['Do X']))
+    expect(store.getItem('kanban-top-priorities')).toBe(JSON.stringify(['Do X']))
     expect(store.getItem('kanban-compact-priorities-hidden')).toBe('0')
     // Old board key should be gone
     expect(store.getItem('kanban-board-state-old')).toBeNull()
   })
 })
-

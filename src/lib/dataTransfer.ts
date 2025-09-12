@@ -5,7 +5,7 @@ export type ExportedData = {
   boardOrder: string[]
   notes: string
   intentions: string[]
-  pinnedPriorities: string[]
+  topPriorities: string[]
   compactPrioritiesHidden: boolean
 }
 
@@ -19,7 +19,7 @@ export function exportAllDataFromStorage(store: Storage): ExportedData {
     boardOrder: [],
     notes: '',
     intentions: [],
-    pinnedPriorities: [],
+    topPriorities: [],
     compactPrioritiesHidden: false,
   }
 
@@ -45,14 +45,13 @@ export function exportAllDataFromStorage(store: Storage): ExportedData {
   data.notes = store.getItem('kanban-notes') || ''
   try {
     data.intentions = JSON.parse(store.getItem('kanban-intentions') || '[]')
-  } catch {
-    data.intentions = []
-  }
+  } catch { data.intentions = [] }
   try {
-    data.pinnedPriorities = JSON.parse(store.getItem('kanban-pinned-priorities') || '[]')
-  } catch {
-    data.pinnedPriorities = []
-  }
+    // Prefer new canonical key; fallback to legacy pinned key
+    const top = store.getItem('kanban-top-priorities')
+    const legacy = store.getItem('kanban-pinned-priorities')
+    data.topPriorities = JSON.parse(top || legacy || '[]')
+  } catch { data.topPriorities = [] }
   data.compactPrioritiesHidden = store.getItem('kanban-compact-priorities-hidden') === '1'
   return data
 }
@@ -72,6 +71,7 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
       key === 'kanban-notes' ||
       key === 'kanban-intentions' ||
       key === 'kanban-pinned-priorities' ||
+      key === 'kanban-top-priorities' ||
       key === 'kanban-compact-priorities-hidden'
     ) {
       toRemove.push(key)
@@ -86,8 +86,10 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   store.setItem('kanban-board-order', JSON.stringify(data.boardOrder || []))
   if (data.notes) store.setItem('kanban-notes', data.notes)
   if (data.intentions) store.setItem('kanban-intentions', JSON.stringify(data.intentions))
-  if (Array.isArray(data.pinnedPriorities)) {
-    store.setItem('kanban-pinned-priorities', JSON.stringify(data.pinnedPriorities))
-  }
+  // Accept both topPriorities and legacy pinnedPriorities
+  const incomingTop = (data as any).topPriorities as any
+  const incomingPinned = (data as any).pinnedPriorities as any
+  const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
+  store.setItem('kanban-top-priorities', JSON.stringify(finalTop))
   store.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0')
 }

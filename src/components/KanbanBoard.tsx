@@ -1165,7 +1165,12 @@ function KanbanBoard() {
     const css = [inlineStyles, ...linkedCssParts].join('\n');
     const boardData = board;
     const pinned = (() => {
-      try { return JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]'); } catch { return []; }
+      try {
+        const top = localStorage.getItem('kanban-top-priorities');
+        if (top) return JSON.parse(top);
+        const legacy = localStorage.getItem('kanban-pinned-priorities');
+        return legacy ? JSON.parse(legacy) : [];
+      } catch { return []; }
     })();
     const html = generatePublicationHtml(boardData, css, {
       notes,
@@ -1251,7 +1256,14 @@ function KanbanBoard() {
     // Append any missing
     byKey.forEach((b, k) => { if (!order.includes(k)) orderedBoards.push(b); });
 
-    const pinned = (() => { try { return JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]'); } catch { return []; } })();
+    const pinned = (() => {
+      try {
+        const top = localStorage.getItem('kanban-top-priorities');
+        if (top) return JSON.parse(top);
+        const legacy = localStorage.getItem('kanban-pinned-priorities');
+        return legacy ? JSON.parse(legacy) : [];
+      } catch { return []; }
+    })();
     const html = generateAllPublicationHtml(orderedBoards.length ? orderedBoards : boards, css, {
       notes,
       intentions,
@@ -2482,7 +2494,7 @@ function KanbanBoard() {
 
   function importPinnedToBoard(targetTitle: string) {
     try {
-      const raw = localStorage.getItem('kanban-pinned-priorities');
+      const raw = localStorage.getItem('kanban-top-priorities') || localStorage.getItem('kanban-pinned-priorities');
       if (!raw) return;
       const pinned: string[] = JSON.parse(raw);
       const cleanLine = (s: string) =>

@@ -14,8 +14,11 @@ interface Props {
 export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoard, preferredBoardTitle }: Props) {
   const [pinned, setPinned] = useState<string[]>(() => {
     try {
-      const raw = localStorage.getItem('kanban-pinned-priorities');
-      return raw ? JSON.parse(raw) : [];
+      const rawTop = localStorage.getItem('kanban-top-priorities');
+      const rawLegacy = localStorage.getItem('kanban-pinned-priorities');
+      if (rawTop) return JSON.parse(rawTop);
+      if (rawLegacy) return JSON.parse(rawLegacy);
+      return [];
     } catch {
       return [];
     }
@@ -26,7 +29,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
 
   useEffect(() => {
     try {
-      localStorage.setItem('kanban-pinned-priorities', JSON.stringify(pinned));
+      localStorage.setItem('kanban-top-priorities', JSON.stringify(pinned));
     } catch {}
   }, [pinned]);
 

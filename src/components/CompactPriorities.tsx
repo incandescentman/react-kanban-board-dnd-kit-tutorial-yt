@@ -171,9 +171,18 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('kanban-pinned-priorities');
-      const list = raw ? (JSON.parse(raw) as string[]) : [];
-      
+      // Prefer new canonical key; fallback to legacy pinned key
+      let list: string[] = [];
+      const rawTop = localStorage.getItem('kanban-top-priorities');
+      const rawLegacy = localStorage.getItem('kanban-pinned-priorities');
+      if (rawTop) {
+        list = JSON.parse(rawTop) as string[];
+      } else if (rawLegacy) {
+        list = JSON.parse(rawLegacy) as string[];
+        // migrate to new key
+        localStorage.setItem('kanban-top-priorities', JSON.stringify(list));
+      }
+
       // If no saved priorities, use defaults
       if (list.length === 0) {
         const defaultPriorities = [
@@ -205,7 +214,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
   // Save pinned to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('kanban-pinned-priorities', JSON.stringify(pinned));
+      localStorage.setItem('kanban-top-priorities', JSON.stringify(pinned));
     } catch (error) {
       console.error('Failed to save priorities:', error);
     }
