@@ -112,7 +112,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
             <IconTarget size={20} className="text-red-600" />
             <h3 className="text-base font-bold text-blue-900">Top Priorities</h3>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {items.map((line, i) => {
               // Manually assign icons based on index/content
               // You can customize these based on your actual priorities
@@ -128,11 +128,11 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
               return (
                 <div
                   key={i}
-                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2"
+                  className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-lg p-3 hover:bg-white/90 transition-colors flex items-start gap-2 w-full"
                   title={line}
                 >
-                  {icons[i] || <IconPointFilled size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />}
-                  <span className="text-sm text-blue-900">{line}</span>
+                  {icons[i] || <IconPointFilled size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />}
+                  <span className="text-base text-blue-900 leading-6">{line}</span>
                 </div>
               );
             })}
