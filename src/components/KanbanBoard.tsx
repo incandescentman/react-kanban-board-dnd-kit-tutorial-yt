@@ -335,6 +335,14 @@ function KanbanBoard() {
         return t.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       };
 
+      const goBoards = (delta: number) => {
+        if (!availableBoards || availableBoards.length === 0) return;
+        const curIdx = availableBoards.indexOf(currentBoardName);
+        const nextIdx = ((curIdx === -1 ? 0 : curIdx) + delta + availableBoards.length) % availableBoards.length;
+        const next = availableBoards[nextIdx];
+        if (next && next !== currentBoardName) switchToBoard(next);
+      };
+
       // Numeric shortcuts (Cmd/Ctrl+1/2/3)
       if (e.metaKey || e.ctrlKey) {
         if (e.key === '1') { e.preventDefault(); setActiveView('board'); return; }
@@ -348,6 +356,13 @@ function KanbanBoard() {
         if (e.key === 'ArrowRight') { e.preventDefault(); go(1); return; }
       }
 
+      // Board switching: Option+Shift+K/L (left/right)
+      if (e.altKey && e.shiftKey && !e.metaKey && !e.ctrlKey && !isEditableTarget()) {
+        const code = e.code; // 'KeyK' / 'KeyL'
+        if (code === 'KeyK') { e.preventDefault(); goBoards(-1); return; }
+        if (code === 'KeyL') { e.preventDefault(); goBoards(1); return; }
+      }
+
       // Navigation: Option+K (left), Option+L (right)
       if (e.altKey && !e.metaKey && !e.ctrlKey && !isEditableTarget()) {
         const code = e.code; // 'KeyK', 'KeyL' is stable across layouts
@@ -357,7 +372,7 @@ function KanbanBoard() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activeView]);
+  }, [activeView, availableBoards, currentBoardName]);
   
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
