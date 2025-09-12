@@ -1599,50 +1599,61 @@ function KanbanBoard() {
 
             {/* Main Content */}
             <div className="flex flex-col min-w-0 flex-1">
-              {/* Top nav: view switcher (main content only) */}
-              <div className="mt-8 mb-4 flex items-center justify-center gap-2">
-                <button
-                  className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-                  onClick={() => setActiveView('board')}
-                >
-                  Board
-                </button>
-                <button
-                  className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'priorities' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-                  onClick={() => setActiveView('priorities')}
-                >
-                  Priorities
-                </button>
-              </div>
+              {/* Top Controls Row: View toggle + Board tabs */}
+              <div className="mt-8 mb-4 w-full flex items-center justify-between gap-4">
+                {/* Segmented view toggle */}
+                <div className="flex items-center bg-gray-100/70 border border-gray-200 rounded-full p-1 shadow-sm">
+                  <button
+                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                      activeView === 'board'
+                        ? 'bg-white text-gray-900 shadow'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setActiveView('board')}
+                  >
+                    Board
+                  </button>
+                  <button
+                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                      activeView === 'priorities'
+                        ? 'bg-white text-gray-900 shadow'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setActiveView('priorities')}
+                  >
+                    Priorities
+                  </button>
+                </div>
 
-              {/* Boards tabs (top) */}
-              <div className="mb-4 w-full overflow-x-auto">
-                <div className="inline-flex items-center gap-2 whitespace-nowrap">
-                  {availableBoards.map((boardName) => {
-                    let title = boardName;
-                    try {
-                      const raw = localStorage.getItem(boardName);
-                      if (raw) {
-                        const parsed = JSON.parse(raw);
-                        title = parsed.title || boardName;
-                      }
-                    } catch {}
-                    const isActive = currentBoardName === boardName;
-                    return (
-                      <button
-                        key={boardName}
-                        onClick={() => switchToBoard(boardName)}
-                        className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
-                          isActive
-                            ? 'bg-gray-900 text-white border-gray-900'
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                        }`}
-                        title={title}
-                      >
-                        {title}
-                      </button>
-                    );
-                  })}
+                {/* Boards tabs */}
+                <div className="flex-1 overflow-x-auto">
+                  <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+                    {availableBoards.map((boardName) => {
+                      let title = boardName;
+                      try {
+                        const raw = localStorage.getItem(boardName);
+                        if (raw) {
+                          const parsed = JSON.parse(raw);
+                          title = parsed.title || boardName;
+                        }
+                      } catch {}
+                      const isActive = currentBoardName === boardName;
+                      return (
+                        <button
+                          key={boardName}
+                          onClick={() => switchToBoard(boardName)}
+                          className={`px-3 py-1.5 rounded-full text-sm transition-colors border ${
+                            isActive
+                              ? 'bg-white text-gray-900 border-gray-300 shadow-sm'
+                              : 'bg-gray-100/70 text-gray-700 border-gray-200 hover:bg-gray-100'
+                          }`}
+                          title={title}
+                        >
+                          {title}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               {/* Title */}
