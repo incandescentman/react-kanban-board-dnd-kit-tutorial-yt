@@ -1,3 +1,5 @@
+import { useAppStore } from '@/state/store'
+
 export type ExportedData = {
   version: number
   exportedAt: string
@@ -12,17 +14,9 @@ export type ExportedData = {
 const BOARD_KEY_PREFIX = 'kanban-board-state'
 
 export function exportAllDataFromStorage(store: Storage): ExportedData {
-  // Try Zustand store first (if initialized)
-  let fromStore: { notes: string; intentions: string[]; topPriorities: string[]; ui?: { compactPrioritiesHidden: boolean } } | null = null
-  try {
-    // dynamic require to avoid cyclic deps in build
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require('@/state/store')
-    const st = mod?.useAppStore?.getState?.()
-    if (st) {
-      fromStore = { notes: st.notes, intentions: st.intentions, topPriorities: st.topPriorities, ui: st.ui }
-    }
-  } catch {}
+  // Prefer Zustand store (single source of truth)
+  const st = useAppStore.getState()
+  const fromStore: { notes: string; intentions: string[]; topPriorities: string[]; ui?: { compactPrioritiesHidden: boolean } } | null = st
 
   const data: ExportedData = {
     version: 1,
@@ -54,7 +48,7 @@ export function exportAllDataFromStorage(store: Storage): ExportedData {
   } catch {
     data.boardOrder = []
   }
-  if (!fromStore) {
+  if (!fromStore || (fromStore.intentions.length === 0 && fromStore.topPriorities.length === 0)) {
     data.notes = store.getItem('kanban-notes') || ''
     try { data.intentions = JSON.parse(store.getItem('kanban-intentions') || '[]') } catch {}
     try {
@@ -106,19 +100,15 @@ export function importAllDataToStorage(store: Storage, data: ExportedData) {
   // Also write legacy key for backward compatibility
   store.setItem('kanban-pinned-priorities', JSON.stringify(finalTop))
   store.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0')
-  // Hydrate Zustand store if available (no need to reload)
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require('@/state/store')
-    const st = mod?.useAppStore?.getState?.()
-    if (st) {
-      st.setNotes?.(data.notes || '')
-      st.setIntentions?.(Array.isArray(data.intentions) ? data.intentions : [])
-      const incomingTop = (data as any).topPriorities as any
-      const incomingPinned = (data as any).pinnedPriorities as any
-      const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
-      st.setTopPriorities?.(finalTop)
-      st.setCompactPrioritiesHidden?.(!!data.compactPrioritiesHidden)
-    }
-  } catch {}
+  // Hydrate Zustand store (no reload)
+  const st = useAppStore.getState()
+  st.setNotes?.(data.notes || '')
+  st.setIntentions?.(Array.isArray(data.intentions) ? data.intentions : [])
+  {
+    const incomingTop = (data as any).topPriorities as any
+    const incomingPinned = (data as any).pinnedPriorities as any
+    const finalTop = Array.isArray(incomingTop) ? incomingTop : (Array.isArray(incomingPinned) ? incomingPinned : [])
+    st.setTopPriorities?.(finalTop)
+  }
+  st.setCompactPrioritiesHidden?.(!!data.compactPrioritiesHidden)
 }
