@@ -1573,38 +1573,7 @@ function KanbanBoard() {
               {/* Compact Top Priorities */}
               <CompactPriorities board={board} onOpenPriorities={() => setActiveView('priorities')} />
 
-              {/* Board Selector */}
-              {!boardSelectorMinimized && (
-                <BoardSelector 
-                  currentBoard={currentBoardName}
-                  currentBoardTitle={board.title}
-                  availableBoards={availableBoards.map(boardName => {
-                    // Extract title from localStorage or use a default
-                    try {
-                      const boardData = localStorage.getItem(boardName);
-                      if (boardData) {
-                        const parsed = JSON.parse(boardData);
-                        return {
-                          name: boardName,
-                          title: parsed.title || boardName
-                        };
-                      }
-                    } catch (error) {
-                      // Fallback if parsing fails
-                    }
-                    return {
-                      name: boardName,
-                      title: boardName
-                    };
-                  })}
-                  onBoardChange={switchToBoard}
-                  onBoardDelete={deleteOrArchiveBoard}
-                  onBoardReorder={handleBoardReorder}
-                  onBoardUpdateTitle={updateBoardTitle}
-                  minimized={boardSelectorMinimized}
-                  onMinimize={() => setBoardSelectorMinimized(true)}
-                />
-              )}
+              {/* Board Selector moved to top tabs; sidebar space reclaimed */}
               
               
               {/* Intentions Panel */}
@@ -1644,6 +1613,37 @@ function KanbanBoard() {
                 >
                   Priorities
                 </button>
+              </div>
+
+              {/* Boards tabs (top) */}
+              <div className="mb-4 w-full overflow-x-auto">
+                <div className="inline-flex items-center gap-2 whitespace-nowrap">
+                  {availableBoards.map((boardName) => {
+                    let title = boardName;
+                    try {
+                      const raw = localStorage.getItem(boardName);
+                      if (raw) {
+                        const parsed = JSON.parse(raw);
+                        title = parsed.title || boardName;
+                      }
+                    } catch {}
+                    const isActive = currentBoardName === boardName;
+                    return (
+                      <button
+                        key={boardName}
+                        onClick={() => switchToBoard(boardName)}
+                        className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
+                          isActive
+                            ? 'bg-gray-900 text-white border-gray-900'
+                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                        title={title}
+                      >
+                        {title}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               {/* Title */}
               <div className="flex items-center gap-2 mb-4">
