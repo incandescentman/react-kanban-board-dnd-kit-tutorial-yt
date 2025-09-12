@@ -1,5 +1,5 @@
 import React from 'react'
-import { IconAlertTriangle, IconSparkles } from '@tabler/icons-react'
+import { IconAlertTriangle, IconSparkles, IconMessageCircle } from '@tabler/icons-react'
 
 const items: { trigger: string; response: string }[] = [
   {
@@ -53,8 +53,8 @@ export default function TriggersResponses() {
             className="bg-indigo-50/60 border border-indigo-200 rounded-lg p-4 shadow-sm"
           >
             <div className="flex items-start gap-3">
-              <div className="shrink-0 mt-0.5 text-red-600">
-                <IconAlertTriangle size={22} />
+              <div className="shrink-0 mt-0.5 text-blue-900">
+                <IconMessageCircle size={22} />
               </div>
               <div className="flex-1">
                 <div className="text-sm font-semibold text-gray-900 mb-1">Thought</div>
