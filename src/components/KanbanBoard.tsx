@@ -38,6 +38,7 @@ import TopPriorities from "./TopPriorities";
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
+import { IconLayoutKanban, IconStars } from '@tabler/icons-react';
 
 const DATA_VERSION = 2;
 
@@ -1602,25 +1603,27 @@ function KanbanBoard() {
               {/* Top Controls Row: View toggle + Board tabs */}
               <div className="mt-8 mb-4 w-full flex items-center justify-between gap-4">
                 {/* Segmented view toggle */}
-                <div className="flex items-center bg-gray-100/70 border border-gray-200 rounded-md p-1.5 shadow-sm">
+                <div className="flex items-center bg-blue-50/70 border border-blue-200 rounded-md p-1.5 shadow-sm">
                   <button
-                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
                       activeView === 'board'
-                        ? 'bg-white text-gray-900 shadow'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'text-blue-700 hover:bg-blue-100'
                     }`}
                     onClick={() => setActiveView('board')}
                   >
+                    <IconLayoutKanban size={16} />
                     Board
                   </button>
                   <button
-                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
                       activeView === 'priorities'
-                        ? 'bg-white text-gray-900 shadow'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'text-blue-700 hover:bg-blue-100'
                     }`}
                     onClick={() => setActiveView('priorities')}
                   >
+                    <IconStars size={16} />
                     Priorities
                   </button>
                 </div>
@@ -1628,7 +1631,7 @@ function KanbanBoard() {
                 {/* Boards tabs */}
                 <div className="flex-1 overflow-x-auto">
                   <div className="w-full flex items-center justify-end">
-                    <div className="inline-flex items-center gap-1.5 bg-white border border-gray-300 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+                    <div className="inline-flex items-center gap-1.5 bg-blue-50/70 border border-blue-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
                       {availableBoards.map((boardName) => {
                         let title = boardName;
                         try {
@@ -1643,15 +1646,16 @@ function KanbanBoard() {
                           <button
                             key={boardName}
                             onClick={() => switchToBoard(boardName)}
-                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-                              isActive
-                                ? 'bg-gray-900 text-white shadow'
-                                : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                            title={title}
-                          >
-                            {title}
-                          </button>
+                          className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                            isActive
+                              ? 'bg-blue-600 text-white shadow'
+                              : 'text-blue-700 hover:bg-blue-100'
+                          }`}
+                          title={title}
+                        >
+                          <IconLayoutKanban size={16} />
+                          {title}
+                        </button>
                         );
                       })}
                     </div>
