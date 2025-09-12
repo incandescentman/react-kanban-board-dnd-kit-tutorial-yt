@@ -1567,7 +1567,7 @@ function KanbanBoard() {
           onDragOver={onDragOver}
           collisionDetection={closestCorners}
         >
-          <div className="flex w-full gap-8">
+          <div className="flex w-full gap-10">
             {/* Sidebar */}
             <div className={`w-64 flex-shrink-0 flex flex-col gap-4 transition-all duration-300 pt-8`}>
               {/* Compact Top Priorities */}
