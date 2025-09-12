@@ -67,7 +67,7 @@ export default function ImplementationIntentions() {
       <div className="mt-8 mb-4 w-full">
         <div className="flex items-center gap-2 text-indigo-800">
           <IconTarget size={22} />
-          <h2 className="text-xl font-bold">Implementation Intentions</h2>
+          <h2 className="text-xl font-bold">Goals Over Urges</h2>
         </div>
         <p className="text-sm text-indigo-700/80 mt-1">
           Goals over urges. Practical if-then plans for key situations.
@@ -112,4 +112,3 @@ function iconFor(title: string): React.ReactNode {
   if (/(write|product)/.test(t)) return <IconNotebook size={18} className="text-indigo-700" />
   return <IconSparkles size={18} className="text-indigo-700" />
 }
-
