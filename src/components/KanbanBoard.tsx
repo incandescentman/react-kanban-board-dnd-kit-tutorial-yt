@@ -376,6 +376,8 @@ function KanbanBoard() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
+  const [diagOpen, setDiagOpen] = useState(false);
+  const [diagText, setDiagText] = useState('');
   const [pendingImport, setPendingImport] = useState<any | null>(null);
   const [importPreview, setImportPreview] = useState<{ boards: number; top: number; intentions: number; errors?: { path: string; message: string }[] } | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
