@@ -1567,7 +1567,7 @@ function KanbanBoard() {
           onDragOver={onDragOver}
           collisionDetection={closestCorners}
         >
-          <div className="flex w-full gap-3">
+          <div className="flex w-full gap-4">
             {/* Sidebar */}
             <div className={`w-64 flex-shrink-0 flex flex-col gap-4 transition-all duration-300 pt-8`}>
               {/* Compact Top Priorities */}
@@ -1631,7 +1631,7 @@ function KanbanBoard() {
             {/* Main Content */}
             <div className="flex flex-col min-w-0 flex-1">
               {/* Top nav: view switcher (main content only) */}
-              <div className="mt-6 mb-4 flex items-center gap-2">
+              <div className="mt-8 mb-4 flex items-center gap-2">
                 <button
                   className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
                   onClick={() => setActiveView('board')}
