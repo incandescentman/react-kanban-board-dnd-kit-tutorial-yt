@@ -337,6 +337,21 @@ function KanbanBoard() {
         return t.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       };
 
+      // Escape: remove focus from any focused task card
+      if (activeView === 'board' && e.key === 'Escape') {
+        const ae = document.activeElement as HTMLElement | null;
+        if (ae) {
+          // If the active element is (or is inside) a task card, blur it and clear focus state
+          const container = ae.closest('[data-task-id]') as HTMLElement | null;
+          if (container) {
+            e.preventDefault();
+            setFocusedTaskId(null);
+            (ae as HTMLElement).blur();
+            return;
+          }
+        }
+      }
+
       // Shift+Tab: focus the last task card on Boards view
       if (activeView === 'board' && e.key === 'Tab' && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditableTarget()) {
         const cards = Array.from(document.querySelectorAll('[data-task-id]')) as HTMLElement[];
