@@ -39,6 +39,7 @@ import { exportAllDataFromStorage, importAllDataToStorage } from "../lib/dataTra
 import CompactPriorities from "./CompactPriorities";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import DataManagement from "./DataManagement";
+import { showToast } from "@/lib/toast";
 import { IconLayoutKanban, IconStars as IconStarsTab, IconBulb, IconNotebook, IconTarget as IconTargetTab, IconBriefcase, IconHome, IconHeart as IconHeartTab, IconPencil, IconSparkles as IconSparklesTab, IconStar, IconCalendarStats } from '@tabler/icons-react';
 import { AppSnapshotSchema } from "@/state/schema";
 const ImplementationView = lazy(() => import('./ImplementationIntentions'));
@@ -260,6 +261,48 @@ function KanbanBoard() {
       switchToBoard(ordered[0]);
     }
   }
+
+  // Sync priorities/intentions from canonical storage to Zustand store
+  const syncFromStorage = () => {
+    try {
+      // Top priorities
+      let tops: string[] = [];
+      try {
+        const rawTop = localStorage.getItem('kanban-top-priorities');
+        const rawLegacy = localStorage.getItem('kanban-pinned-priorities');
+        if (rawTop) tops = JSON.parse(rawTop);
+        else if (rawLegacy) tops = JSON.parse(rawLegacy);
+      } catch {}
+      setTopPrioritiesSafe(tops);
+
+      // Intentions
+      let ints: string[] = [];
+      try {
+        const rawInt = localStorage.getItem('kanban-intentions') || '';
+        if (rawInt) {
+          try { const parsed = JSON.parse(rawInt); if (Array.isArray(parsed)) ints = parsed.filter(Boolean); }
+          catch { ints = rawInt.split(/\r?\n/).map(s => s.trim()).filter(Boolean); }
+        }
+      } catch {}
+      setIntentions(ints);
+
+      const parts: string[] = [];
+      if (tops && tops.length) parts.push(`${tops.length} priorities`);
+      if (ints && ints.length) parts.push(`${ints.length} intentions`);
+      showToast(parts.length ? `Synced ${parts.join(' • ')}` : 'Nothing to sync');
+    } catch (e) {
+      console.error('Sync from storage failed:', e);
+      showToast('Sync failed');
+    }
+  };
+
+  // safely set top priorities via store if available
+  const setTopPrioritiesSafe = (a: string[]) => {
+    try {
+      const st = (useAppStore as any)?.getState?.();
+      st?.setTopPriorities?.(Array.isArray(a) ? a : []);
+    } catch {}
+  };
 
   // Safety net: if availableBoards ever becomes empty, repopulate from localStorage
   useEffect(() => {
@@ -1783,6 +1826,7 @@ function KanbanBoard() {
                 onPreview={handlePreview}
                 onPublishAll={handlePublishAll}
                 onPreviewAll={handlePreviewAll}
+                onSyncFromStorage={syncFromStorage}
               />
             </div>
 
