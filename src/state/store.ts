@@ -97,3 +97,10 @@ try {
     } catch {}
   }
 } catch {}
+
+// Dev helper: expose store in the browser console for diagnostics
+try {
+  if (typeof window !== 'undefined') {
+    (window as any).__appStore = useAppStore;
+  }
+} catch {}

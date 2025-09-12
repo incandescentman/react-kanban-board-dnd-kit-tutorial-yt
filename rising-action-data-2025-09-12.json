@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportedAt": "2025-09-12T18:25:35.437Z",
+  "exportedAt": "2025-09-12T21:53:39.353Z",
   "boards": {
     "kanban-board-state-Creative": {
       "title": "Substack",
@@ -8,7 +8,6 @@
         {
           "id": "ideas",
           "title": "Ideas",
-          "groups": [],
           "tasks": [
             {
               "id": "964554a1-6af8-4590-834e-7bc81606622d",
@@ -16,12 +15,12 @@
               "completed": false,
               "tags": []
             }
-          ]
+          ],
+          "groups": []
         },
         {
           "id": "todo",
           "title": "To Do",
-          "groups": [],
           "tasks": [
             {
               "id": "f11eabea-1dca-45db-871c-36c07bb55262",
@@ -29,19 +28,20 @@
               "completed": false,
               "tags": []
             }
-          ]
+          ],
+          "groups": []
         },
         {
           "id": "doing",
           "title": "In Progress",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "done",
           "title": "Done",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         }
       ]
     },
@@ -51,26 +51,26 @@
         {
           "id": "ideas",
           "title": "Ideas",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "todo",
           "title": "To Do",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "doing",
           "title": "In Progress",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "done",
           "title": "Done",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         }
       ]
     },
@@ -80,23 +80,26 @@
         {
           "id": "ideas",
           "title": "Ideas",
-          "groups": [],
           "tasks": [
             {
-              "id": 6538,
+              "id": "6538",
               "content": "new task here #letsgo",
-              "status": "TODO"
+              "completed": false,
+              "tags": []
             },
             {
               "id": "idea1",
               "content": "Write job descriptions",
-              "status": "TODO"
+              "completed": false,
+              "tags": []
             }
-          ]
+          ],
+          "groups": []
         },
         {
           "id": "todo",
           "title": "To Do",
+          "tasks": [],
           "groups": [
             {
               "id": "8463",
@@ -105,55 +108,56 @@
                 {
                   "id": "2",
                   "content": "Develop user registration functionality #letsgo",
-                  "status": "TODO"
+                  "completed": false,
+                  "tags": []
                 },
                 {
                   "id": "1",
                   "content": "List admin APIs for dashboard",
-                  "status": "TODO"
+                  "completed": false,
+                  "tags": []
                 }
               ]
             }
-          ],
-          "tasks": []
+          ]
         },
         {
           "id": "doing",
           "title": "In Progress",
-          "groups": [],
           "tasks": [
             {
               "id": "3",
               "content": "Conduct security testing",
-              "status": "STARTED"
+              "completed": false,
+              "tags": []
             }
-          ]
+          ],
+          "groups": []
         },
         {
           "id": "done",
           "title": "Done",
-          "groups": [],
           "tasks": [
             {
               "id": "5",
               "content": "Create UI kit documentation",
-              "status": "DONE"
+              "completed": false,
+              "tags": []
             }
-          ]
+          ],
+          "groups": []
         }
-      ],
-      "archived": true,
-      "archivedDate": "2025-07-12T02:29:37.704Z"
+      ]
     },
     "kanban-board-state": {
       "title": "Post-OpenAI Action Plan",
       "columns": [
         {
-          "id": 7746,
+          "id": "7746",
           "title": "Ideas",
           "tasks": [
             {
-              "id": 9439,
+              "id": "9439",
               "content": "Write job descriptions",
               "completed": false,
               "tags": []
@@ -171,13 +175,13 @@
               "title": "July items",
               "tasks": [
                 {
-                  "id": 6263,
+                  "id": "6263",
                   "content": "Do project",
                   "completed": false,
                   "tags": []
                 },
                 {
-                  "id": 7350,
+                  "id": "7350",
                   "content": "Pick up laundry",
                   "completed": false,
                   "tags": []
@@ -192,7 +196,7 @@
           "title": "In Progress",
           "tasks": [
             {
-              "id": 5374,
+              "id": "5374",
               "content": "Write chapter",
               "completed": false,
               "tags": []
@@ -205,7 +209,7 @@
           "title": "Done",
           "tasks": [
             {
-              "id": 5056,
+              "id": "5056",
               "content": "Publish blog post",
               "completed": true,
               "tags": []
@@ -222,13 +226,12 @@
         {
           "id": "ideas",
           "title": "Ideas",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "todo",
           "title": "To Do",
-          "groups": [],
           "tasks": [
             {
               "id": "6df02061-fb74-4472-aaf1-fcba857b559d",
@@ -248,26 +251,27 @@
               "completed": false,
               "tags": []
             }
-          ]
+          ],
+          "groups": []
         },
         {
           "id": "doing",
           "title": "In Progress",
-          "groups": [],
-          "tasks": []
+          "tasks": [],
+          "groups": []
         },
         {
           "id": "done",
           "title": "Done",
-          "groups": [],
           "tasks": [
             {
-              "id": 9316,
+              "id": "9316",
               "content": "Check COBRA",
-              "status": "Done",
-              "completed": true
+              "completed": true,
+              "tags": []
             }
-          ]
+          ],
+          "groups": []
         }
       ]
     }
