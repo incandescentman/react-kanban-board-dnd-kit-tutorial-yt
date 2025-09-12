@@ -1,0 +1,34 @@
+* Changelog
+
+** [2025-09-12] UI Improvements and Bug Fixes
+
+*** Fixed
+- Resolved syntax error in KanbanBoard.tsx (missing closing brace in onDragOver function)
+- Fixed excessive spacing between sidebar and main kanban columns (reduced sidebar width from w-64 to w-72)
+- Fixed Top Priorities panel not displaying items after initial refactor
+- Fixed circular dependency in Top Priorities initialization logic
+
+*** Added
+- Timeline-style design for Top Priorities panel with vertical connector lines
+- Drag-and-drop reordering for Top Priorities
+- Inline editing for priorities (double-click to edit)
+- Delete button on hover for each priority
+- Add new priority button at bottom of panel
+- Undo support (Cmd+Z) for deleted priorities
+- Default priorities initialization when localStorage is empty
+- Timeline-style design for Current Intentions panel
+- Drag-and-drop reordering for Current Intentions
+- Tabler icons with variety for both panels
+
+*** Changed
+- Moved board tabs to the left where Board/Priorities toggle was
+- Standardized all sidebar components to w-72 width for consistency
+- Centered and styled titles for both Top Priorities and Current Intentions panels
+- Board/Priorities toggle hidden but code preserved (commented out)
+- Top Priorities panel is now always visible, never hidden
+
+*** Technical Details
+- Implemented SortableContext from @dnd-kit for drag-and-drop functionality
+- Added UndoAction interface for priority deletion tracking
+- Consolidated priority initialization in single useEffect to avoid circular dependencies
+- Fixed multiple syntax errors related to missing/extra braces

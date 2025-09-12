@@ -32,10 +32,10 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 
 *** Views & Panels
 - *Board View*: The primary kanban interface.
-- *Priorities View*: A dedicated view to manage and import top priorities (currently hidden but component preserved at lines 1620-1647 in KanbanBoard.tsx - uncomment to re-enable Board/Priorities toggle).
+- *Priorities View*: A dedicated view to manage and import top priorities (currently hidden but component preserved - Board/Priorities toggle code commented out but intact).
 - *Values View*: A space to keep your personal or project values front and center.
 - *Intentions Panel*: A sidebar panel with timeline-style layout to list and manage your daily intentions or habits. Features drag-and-drop reordering and inline editing.
-- *Top Priorities Panel*: Compact sidebar panel showing top 6 priorities with timeline design, drag-and-drop reordering, inline editing, and undo support.
+- *Top Priorities Panel*: Compact sidebar panel showing top 6 priorities with timeline design, drag-and-drop reordering, inline editing, delete on hover, add button, and undo support (Cmd+Z).
 - *Notes Section*: A dedicated space at the bottom of the board for general notes.
 - *Keyboard Shortcut Legend ( ? )*: A popup that displays all available keyboard shortcuts.
 
