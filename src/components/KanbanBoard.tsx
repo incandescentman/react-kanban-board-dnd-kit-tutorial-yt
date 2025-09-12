@@ -335,6 +335,21 @@ function KanbanBoard() {
         return t.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
       };
 
+      // Make Tab focus the first task card (not the title) when on Boards view
+      if (activeView === 'board' && e.key === 'Tab' && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && !isEditableTarget()) {
+        const first = document.querySelector('[data-task-id]') as HTMLElement | null;
+        if (first) {
+          e.preventDefault();
+          const id = first.getAttribute('data-task-id');
+          if (id) {
+            // @ts-ignore trust runtime Id string
+            setFocusedTaskId(id as Id);
+          }
+          first.focus();
+          return;
+        }
+      }
+
       const goBoards = (delta: number) => {
         if (!availableBoards || availableBoards.length === 0) return;
         const curIdx = availableBoards.indexOf(currentBoardName);
