@@ -227,9 +227,8 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     <div className="w-72">
       <div className="relative w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
         <div className="flex-1 pr-8">
-          <div className="flex items-center gap-2 mb-3">
-            <IconTarget size={20} className="text-red-600" />
-            <h3 className="text-base font-semibold text-blue-900">Top Priorities</h3>
+          <div className="mb-5 pb-3 border-b border-blue-200">
+            <h3 className="text-lg font-bold text-blue-900 text-center">Top Priorities</h3>
           </div>
           <DndContext
             sensors={sensors}
