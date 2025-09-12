@@ -481,6 +481,16 @@ function KanbanBoard() {
     return () => window.removeEventListener('keydown', onKey);
   }, [activeView, availableBoards, currentBoardName]);
   
+  // Centralized hotkeys
+  useAppHotkeys({
+    activeView,
+    setActiveView: (v) => setActiveView(v),
+    availableBoards,
+    currentBoardName,
+    switchToBoard,
+    setFocusedTaskId,
+  });
+  
   // Small inline tabs to switch between Board and Implementation Intentions
   const ViewTabs = () => (
     <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">

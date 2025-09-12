@@ -27,12 +27,32 @@ function Legend({ onMinimize }: LegendProps) {
             <h4 className="font-medium mb-1">Navigation</h4>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
+                <span className="text-gray-600">⌘/Ctrl+1,2,3</span>
+                <span>Switch tabs (Boards / If‑Then / Thought→Reframe)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">⌘⌥←/→ (Ctrl+Alt)</span>
+                <span>Cycle tabs</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">⌥K / ⌥L</span>
+                <span>Cycle tabs</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">⌥⇧K / ⌥⇧L</span>
+                <span>Prev/Next board</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-600">Arrow Keys</span>
                 <span>Navigate tasks</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Space</span>
                 <span>Toggle focus</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tab / ⇧Tab</span>
+                <span>Focus first/last task (Boards)</span>
               </div>
             </div>
           </div>
