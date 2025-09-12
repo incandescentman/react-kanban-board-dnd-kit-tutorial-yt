@@ -98,19 +98,19 @@ export default function ImplementationIntentions() {
                   }
                   const { ifPart, thenPart } = parseIfThen(clean)
                   return (
-                    <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-sm text-gray-800">
+                    <li key={idx} className="bg-white/90 border border-indigo-100 rounded-md p-3 text-gray-800">
                       <div className="flex items-start gap-3">
                         <div className="shrink-0 mt-0.5 text-blue-900"><IconMessageCircle size={20} /></div>
                         <div className="flex-1">
                           <div className="text-xs font-semibold text-gray-900 mb-0.5">If</div>
-                          <div className="text-sm text-gray-800">{ifPart || '—'}</div>
+                          <div className="text-base leading-6 text-gray-800">{ifPart || '—'}</div>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 mt-3">
                         <div className="shrink-0 mt-0.5 text-indigo-700"><IconTarget size={20} /></div>
                         <div className="flex-1">
                           <div className="text-xs font-semibold text-gray-900 mb-0.5">Then</div>
-                          <div className="text-sm text-gray-800">{thenPart || clean}</div>
+                          <div className="text-base leading-6 text-gray-800">{thenPart || clean}</div>
                         </div>
                       </div>
                     </li>
