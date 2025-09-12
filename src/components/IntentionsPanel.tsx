@@ -225,46 +225,49 @@ function IntentionsPanel({ intentions, setIntentions }: Props) {
         </h3>
       </div>
 
-      {/* Intentions List with Drag and Drop */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={intentions.map((_, i) => `intention-${i}`)}
-          strategy={verticalListSortingStrategy}
+      {/* List + Add wrapper to allow add area to fill remaining space */}
+      <div className="flex flex-col">
+        {/* Intentions List with Drag and Drop */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <div className="space-y-0">
-            {intentions.map((intention, index) => (
-              <SortableIntentionItem
-                key={`intention-${index}`}
-                intention={intention}
-                index={index}
-                isLast={index === intentions.length - 1}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                editingIndex={editingIndex}
-                editingText={editingText}
-                setEditingText={setEditingText}
-                handleSave={handleSave}
-                setEditingIndex={setEditingIndex}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={intentions.map((_, i) => `intention-${i}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-0">
+              {intentions.map((intention, index) => (
+                <SortableIntentionItem
+                  key={`intention-${index}`}
+                  intention={intention}
+                  index={index}
+                  isLast={index === intentions.length - 1}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  editingIndex={editingIndex}
+                  editingText={editingText}
+                  setEditingText={setEditingText}
+                  handleSave={handleSave}
+                  setEditingIndex={setEditingIndex}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
-      {/* Add Area (shows label on hover, larger hit area) */}
-      <div
-        onClick={handleAdd}
-        aria-label="Add intention"
-        title="Add intention"
-        className="w-full h-16 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
-      >
-        <span className="text-blue-900 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          + Add intention
-        </span>
+        {/* Add Area (shows label on hover, larger hit area, fills remaining space) */}
+        <div
+          onClick={handleAdd}
+          aria-label="Add intention"
+          title="Add intention"
+          className="w-full min-h-20 flex-1 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors"
+        >
+          <span className="text-blue-900 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            + Add intention
+          </span>
+        </div>
       </div>
 
       {/* Cute Footer */}
