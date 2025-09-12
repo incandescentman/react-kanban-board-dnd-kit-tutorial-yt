@@ -25,11 +25,11 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
       <div className="mb-3 pb-2 border-b border-blue-200">
         <h3 className="text-lg font-bold text-blue-900 text-center">Data Management</h3>
       </div>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-6 gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="group relative inline-block">
-              <Button onClick={onExport} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Button onClick={onExport} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
                 <Download className="h-4 w-4" />
               </Button>
               <TooltipContent side="top">Export</TooltipContent>
@@ -40,7 +40,7 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="group relative inline-block">
-              <Button onClick={handleImportClick} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Button onClick={handleImportClick} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
                 <Upload className="h-4 w-4" />
               </Button>
               <TooltipContent side="top">Import</TooltipContent>
@@ -51,7 +51,7 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="group relative inline-block">
-              <Button onClick={onPublish} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+              <Button onClick={onPublish} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
                 <Rocket className="h-4 w-4" />
               </Button>
               <TooltipContent side="top">Publish</TooltipContent>
@@ -63,9 +63,9 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group relative inline-block">
-                <Button onClick={onPreview} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                  <Eye className="h-4 w-4" />
-                </Button>
+              <Button onClick={onPreview} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Eye className="h-4 w-4" />
+              </Button>
                 <TooltipContent side="top">Preview</TooltipContent>
               </div>
             </TooltipTrigger>
@@ -76,9 +76,9 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group relative inline-block">
-                <Button onClick={onPublishAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                  <Globe className="h-4 w-4" />
-                </Button>
+              <Button onClick={onPublishAll} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Globe className="h-4 w-4" />
+              </Button>
                 <TooltipContent side="top">Publish All</TooltipContent>
               </div>
             </TooltipTrigger>
@@ -89,9 +89,9 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group relative inline-block">
-                <Button onClick={onPreviewAll} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                  <Layers className="h-4 w-4" />
-                </Button>
+              <Button onClick={onPreviewAll} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                <Layers className="h-4 w-4" />
+              </Button>
                 <TooltipContent side="top">Preview All</TooltipContent>
               </div>
             </TooltipTrigger>
