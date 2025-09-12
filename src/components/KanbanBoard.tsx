@@ -339,7 +339,7 @@ function KanbanBoard() {
         }`}
         onClick={() => setActiveView('implementation')}
       >
-        Goals Over Urges
+        If-Then
       </button>
       <button
         className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
