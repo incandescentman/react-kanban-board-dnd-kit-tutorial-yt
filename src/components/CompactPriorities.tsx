@@ -343,8 +343,8 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
 
   return (
-    <div className="w-72">
-      <div className="relative w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
+    <div className="w-80">
+      <div className="relative w-80 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
         <div className="flex-1 pr-8">
           <div className="mb-5 pb-3 border-b border-blue-200">
             <h3 className="text-lg font-bold text-blue-900 text-center">Top Priorities</h3>
