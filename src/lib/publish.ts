@@ -52,7 +52,7 @@ const getRendererScript = (board: Board) => `
 
   function renderColumn(column) {
     const colContainer = document.createElement('div');
-    colContainer.className = 'flex flex-col w-80 bg-gray-100 rounded-lg p-2';
+    colContainer.className = 'flex flex-col w-80 max-w-full bg-gray-100 rounded-lg p-2';
     
     const title = document.createElement('h3');
     title.className = 'font-bold text-lg p-2 rounded-md';
@@ -91,7 +91,7 @@ const getRendererScript = (board: Board) => `
   boardTitle.textContent = board.title;
   
   const columnsWrapper = document.createElement('div');
-  columnsWrapper.className = 'flex gap-4';
+  columnsWrapper.className = 'flex flex-wrap gap-4';
   
   board.columns.forEach(col => columnsWrapper.appendChild(renderColumn(col)));
   
@@ -101,6 +101,8 @@ const getRendererScript = (board: Board) => `
 `;
 
 export const generatePublicationHtml = (board: Board, css: string): string => {
+  const baseCss = `body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;background:#f8fafc;color:#0f172a} .rounded-lg{border-radius:.5rem} .rounded-md{border-radius:.375rem} .shadow{box-shadow:0 1px 2px rgba(0,0,0,.05)} .bg-gray-100{background:#f3f4f6} .text-gray-500{color:#6b7280} .text-sm{font-size:.875rem;line-height:1.25rem} .text-lg{font-size:1.125rem;line-height:1.75rem} .text-3xl{font-size:1.875rem;line-height:2.25rem} .font-bold{font-weight:700} .font-semibold{font-weight:600} .p-2{padding:.5rem} .p-2\.5{padding:.625rem} .p-4{padding:1rem} .mb-4{margin-bottom:1rem} .gap-2{gap:.5rem} .gap-4{gap:1rem} .flex{display:flex} .flex-col{flex-direction:column} .flex-wrap{flex-wrap:wrap}`;
+  const finalCss = (css && css.trim().length > 0) ? css : baseCss;
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -108,7 +110,7 @@ export const generatePublicationHtml = (board: Board, css: string): string => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${board.title}</title>
-      <style>${css}</style>
+      <style>${finalCss}</style>
     </head>
     <body>
       <div id="root"></div>

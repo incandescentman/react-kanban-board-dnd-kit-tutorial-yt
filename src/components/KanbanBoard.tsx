@@ -925,6 +925,8 @@ function KanbanBoard() {
       boardOrder: [],
       notes: '',
       intentions: [],
+      pinnedPriorities: [],
+      compactPrioritiesHidden: false,
     };
 
     const boardKeys = Object.keys(localStorage).filter(key => key.startsWith('kanban-board-state'));
@@ -936,6 +938,12 @@ function KanbanBoard() {
     dataToExport.boardOrder = JSON.parse(localStorage.getItem('kanban-board-order') || '[]');
     dataToExport.notes = localStorage.getItem('kanban-notes') || '';
     dataToExport.intentions = JSON.parse(localStorage.getItem('kanban-intentions') || '[]');
+    try {
+      dataToExport.pinnedPriorities = JSON.parse(localStorage.getItem('kanban-pinned-priorities') || '[]');
+    } catch {
+      dataToExport.pinnedPriorities = [];
+    }
+    dataToExport.compactPrioritiesHidden = localStorage.getItem('kanban-compact-priorities-hidden') === '1';
 
     const jsonString = JSON.stringify(dataToExport, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -1684,6 +1692,12 @@ function KanbanBoard() {
               localStorage.setItem('kanban-board-order', JSON.stringify(data.boardOrder));
               if (data.notes) localStorage.setItem('kanban-notes', data.notes);
               if (data.intentions) localStorage.setItem('kanban-intentions', JSON.stringify(data.intentions));
+              if (Array.isArray(data.pinnedPriorities)) {
+                localStorage.setItem('kanban-pinned-priorities', JSON.stringify(data.pinnedPriorities));
+              }
+              if (typeof data.compactPrioritiesHidden !== 'undefined') {
+                localStorage.setItem('kanban-compact-priorities-hidden', data.compactPrioritiesHidden ? '1' : '0');
+              }
               setImportOpen(false);
               setPendingImport(null);
               window.location.reload();
