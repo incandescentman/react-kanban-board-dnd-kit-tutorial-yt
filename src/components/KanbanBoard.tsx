@@ -328,6 +328,13 @@ function KanbanBoard() {
         setActiveView(next);
       };
 
+      const isEditableTarget = () => {
+        const t = e.target as HTMLElement | null;
+        if (!t) return false;
+        const tag = t.tagName;
+        return t.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+      };
+
       // Numeric shortcuts (Cmd/Ctrl+1/2/3)
       if (e.metaKey || e.ctrlKey) {
         if (e.key === '1') { e.preventDefault(); setActiveView('board'); return; }
@@ -342,10 +349,10 @@ function KanbanBoard() {
       }
 
       // Navigation: Option+K (left), Option+L (right)
-      if (e.altKey && !e.metaKey && !e.ctrlKey) {
-        const k = e.key.toLowerCase();
-        if (k === 'k') { e.preventDefault(); go(-1); return; }
-        if (k === 'l') { e.preventDefault(); go(1); return; }
+      if (e.altKey && !e.metaKey && !e.ctrlKey && !isEditableTarget()) {
+        const code = e.code; // 'KeyK', 'KeyL' is stable across layouts
+        if (code === 'KeyK') { e.preventDefault(); go(-1); return; }
+        if (code === 'KeyL') { e.preventDefault(); go(1); return; }
       }
     };
     window.addEventListener('keydown', onKey);
