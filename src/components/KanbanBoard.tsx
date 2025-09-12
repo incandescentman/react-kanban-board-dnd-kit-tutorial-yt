@@ -328,7 +328,7 @@ function KanbanBoard() {
         }`}
         onClick={() => setActiveView('board')}
       >
-        Board
+        Boards
       </button>
       <button
         className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
@@ -1649,52 +1649,56 @@ function KanbanBoard() {
                 <div className="flex items-center justify-between gap-3">
                   {/* View Tabs on the left */}
                   <ViewTabs />
-                  {/* Boards tabs on the right */}
-                  <div className="overflow-x-auto">
-                    <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
-                        {availableBoards.map((boardName) => {
-                          let title = boardName;
-                          try {
-                            const raw = localStorage.getItem(boardName);
-                            if (raw) {
-                              const parsed = JSON.parse(raw);
-                              title = parsed.title || boardName;
-                            }
-                          } catch {}
-                          const isActive = currentBoardName === boardName;
-                          return (
-                            <button
-                              key={boardName}
-                              onClick={() => switchToBoard(boardName)}
-                              className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
-                                isActive
-                                  ? 'bg-blue-900 text-white shadow'
-                                  : 'text-blue-900 hover:bg-blue-100'
-                              }`}
-                              title={title}
-                            >
-                            {getBoardIcon(title, 16)}
-                            {title}
-                          </button>
-                          );
-                        })}
+                  {/* Boards tabs on the right (hidden in Implementation view) */}
+                  {activeView === 'board' && (
+                    <div className="overflow-x-auto">
+                      <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+                          {availableBoards.map((boardName) => {
+                            let title = boardName;
+                            try {
+                              const raw = localStorage.getItem(boardName);
+                              if (raw) {
+                                const parsed = JSON.parse(raw);
+                                title = parsed.title || boardName;
+                              }
+                            } catch {}
+                            const isActive = currentBoardName === boardName;
+                            return (
+                              <button
+                                key={boardName}
+                                onClick={() => switchToBoard(boardName)}
+                                className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
+                                  isActive
+                                    ? 'bg-blue-900 text-white shadow'
+                                    : 'text-blue-900 hover:bg-blue-100'
+                                }`}
+                                title={title}
+                              >
+                              {getBoardIcon(title, 16)}
+                              {title}
+                            </button>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                  )}
+                </div>
               </div>
-              {/* Title */}
-              <div className="flex items-center gap-2 mb-4">
-                <Input
-                  value={board.title}
-                  onChange={(e) => updateCurrentBoardTitle(e.target.value)}
-                  className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
-                />
-                {columnMoveMode && (
-                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    Column Move Mode
-                  </span>
-                )}
-              </div>
+              {/* Title (hidden in Implementation view) */}
+              {activeView === 'board' && (
+                <div className="flex items-center gap-2 mb-4">
+                  <Input
+                    value={board.title}
+                    onChange={(e) => updateCurrentBoardTitle(e.target.value)}
+                    className="text-2xl font-bold border-none bg-transparent px-0 focus:ring-0 focus:border-b-2 focus:border-blue-500"
+                  />
+                  {columnMoveMode && (
+                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      Column Move Mode
+                    </span>
+                  )}
+                </div>
+              )}
 
               {activeView === 'board' ? (
                 <>
