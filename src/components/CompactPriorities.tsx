@@ -89,21 +89,21 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
 
   const getIconForPriority = (line: string, i: number) => {
     const l = line.toLowerCase();
-    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={20} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/food|urge/.test(l)) return <IconFlame size={20} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/185|pound|weight/.test(l)) return <IconScale size={18} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={20} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
-    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/food|urge/.test(l)) return <IconFlame size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/185|pound|weight/.test(l)) return <IconScale size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
     // fallback by index to keep variety
     const fallback = [
-      <IconTarget key="t" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconSparkles key="s" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconStar key="st" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconBolt key="b" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-      <IconActivity key="a" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconTarget key="t" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconSparkles key="s" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconStar key="st" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconBolt key="b" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconActivity key="a" size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />,
     ];
-    return fallback[i % fallback.length] || <IconPointFilled size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    return fallback[i % fallback.length] || <IconPointFilled size={24} className="mt-0.5 text-blue-700" aria-hidden="true" />;
   };
 
   if (hidden && items.length > 0) {
@@ -131,7 +131,7 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
       <div className="relative w-64 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
         <div className="flex-1 pr-8">
           <div className="flex items-center gap-2 mb-3">
-            <IconTarget size={18} className="text-red-600" />
+            <IconTarget size={20} className="text-red-600" />
             <h3 className="text-base font-semibold text-blue-900">Top Priorities</h3>
           </div>
           <div className="space-y-2">
