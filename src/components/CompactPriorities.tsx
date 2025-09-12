@@ -18,6 +18,21 @@ import {
 } from '@tabler/icons-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
+import {
+  DndContext,
+  closestCenter,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 function cleanLine(s: string) {
   const base = s
@@ -25,6 +40,59 @@ function cleanLine(s: string) {
     .replace(/^\s*(?:[\u25A9\u2022\u2023\u25E6\u2043\u2219\-\u2013\u2014\*]+|\d+[.)])\s+/, '')
     .replace(/^[-•\s]+/, '');
   return base.length ? base[0].toUpperCase() + base.slice(1) : base;
+}
+
+// Sortable Priority Item Component
+function SortablePriorityItem({ 
+  line, 
+  index, 
+  isLast, 
+  getIconForPriority 
+}: { 
+  line: string; 
+  index: number; 
+  isLast: boolean; 
+  getIconForPriority: (line: string, i: number) => React.ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: line });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative flex gap-3 cursor-move hover:bg-white/30 rounded-lg px-2 -mx-2 transition-colors"
+      title={line}
+      {...attributes}
+      {...listeners}
+    >
+      {/* Icon with timeline */}
+      <div className="relative flex flex-col items-center">
+        <div className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full bg-white border border-blue-900 p-1 z-10">
+          {getIconForPriority(line, index)}
+        </div>
+        {!isLast && (
+          <div className="w-px h-full bg-gray-300 absolute top-7" />
+        )}
+      </div>
+      {/* Text content */}
+      <div className="flex-1 pb-4">
+        <span className="text-base text-blue-900 leading-6">{line}</span>
+      </div>
+    </div>
+  );
 }
 
 interface Props {
@@ -41,6 +109,14 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     }
   });
   const [pinned, setPinned] = useState<string[]>([]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   useEffect(() => {
     try {
@@ -86,6 +162,27 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     if (pinnedClean.length > 0) return pinnedClean.slice(0, 6);
     return tagDerived.slice(0, 6);
   }, [pinned, tagDerived]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      const oldIndex = items.findIndex(item => item === active.id);
+      const newIndex = items.findIndex(item => item === over?.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // Update pinned priorities in localStorage
+        setPinned(newItems);
+        try {
+          localStorage.setItem('kanban-pinned-priorities', JSON.stringify(newItems));
+        } catch (error) {
+          console.error('Failed to save reordered priorities:', error);
+        }
+      }
+    }
+  };
 
   const getIconForPriority = (line: string, i: number) => {
     const l = line.toLowerCase();
@@ -134,32 +231,31 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
             <IconTarget size={20} className="text-red-600" />
             <h3 className="text-base font-semibold text-blue-900">Top Priorities</h3>
           </div>
-          <div className="space-y-0">
-            {items.map((line, i) => {
-              const isLast = i === items.length - 1;
-              return (
-                <div
-                  key={i}
-                  className="relative flex gap-3"
-                  title={line}
-                >
-                  {/* Icon with timeline */}
-                  <div className="relative flex flex-col items-center">
-                    <div className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full bg-white border border-blue-900 p-1 z-10">
-                      {getIconForPriority(line, i)}
-                    </div>
-                    {!isLast && (
-                      <div className="w-px h-full bg-gray-300 absolute top-7" />
-                    )}
-                  </div>
-                  {/* Text content */}
-                  <div className="flex-1 pb-4">
-                    <span className="text-base text-blue-900 leading-6">{line}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={items}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-0">
+                {items.map((line, i) => {
+                  const isLast = i === items.length - 1;
+                  return (
+                    <SortablePriorityItem
+                      key={line}
+                      line={line}
+                      index={i}
+                      isLast={isLast}
+                      getIconForPriority={getIconForPriority}
+                    />
+                  );
+                })}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
         {/* Tiny minimal symbols at the top-right */}
         <div className="absolute top-2 right-2 flex items-center gap-1.5">

@@ -1,3 +1,17 @@
+* 2025-09-12 — Sidebar UI Improvements
+
+** Top Priorities Panel
+- Redesigned with timeline-style layout featuring vertical connector lines between items
+- Icons now styled with navy color on white background with thin navy border (matching Astro timeline component)
+- Increased text size to text-base for better readability
+- Icons properly sized and consistent across all priority items
+
+** Sidebar Standardization  
+- Unified all sidebar panels to w-72 width (288px)
+- Affected panels: CompactPriorities, IntentionsPanel, BoardSelector, DataManagement
+- Fixed excessive spacing between sidebar and main kanban columns
+- Improved visual consistency across all sidebar components
+
 * 2025-09-11 — Updates & UX Improvements
 
 ** Priorities

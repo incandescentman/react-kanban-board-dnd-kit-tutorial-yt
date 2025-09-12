@@ -1,3 +1,8 @@
+# Project Documentation
+
+- [[file:README.org][README.org]] - Main project documentation and features list
+- [[file:change-log.org][change-log.org]] - Detailed changelog of updates and improvements
+
 # Immediate: Change storage format
 Below is one practical way to *round-trip* the outline back into JSON **while keeping the intermediate heading (“July items”) visible in the data model**.
 
