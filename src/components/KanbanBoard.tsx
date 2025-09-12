@@ -338,7 +338,7 @@ function KanbanBoard() {
         }`}
         onClick={() => setActiveView('implementation')}
       >
-        Implementation Intentions
+        Goals Over Urges
       </button>
     </div>
   );
