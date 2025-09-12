@@ -33,6 +33,7 @@ A powerful, local-first kanban board application for managing tasks, projects, a
 
 *** Views & Panels
 - *Board View*: The primary kanban interface.
+- *Implementation Intentions*: A dedicated page that renders "Goals over Urges" implementation intentions from =implementation-intentions.org=. Switch via the view tabs (left of the board picker).
 - *Priorities View*: A dedicated view to manage and import top priorities (currently hidden but component preserved - Board/Priorities toggle code commented out but intact).
 - *Values View*: A space to keep your personal or project values front and center.
 - *Intentions Panel*: A sidebar panel with timeline-style layout to list and manage your daily intentions or habits. Features drag-and-drop reordering and inline editing.
@@ -59,6 +60,26 @@ A powerful, local-first kanban board application for managing tasks, projects, a
    npm run dev
    #+END_SRC
 4. Open your browser to =http://localhost:5173=
+
+** UI Notes
+
+- View tabs and board picker share a unified selection style (white on navy). Inactive tabs are navy text with a soft blue hover.
+
+** Backup & Restore (JSON)
+
+- Export: Use the Data Management panel to download a single JSON file containing all boards, board order, notes, intentions, and pinned priorities.
+- Edit: You can hand‑edit the JSON (board titles, columns, tasks) if needed.
+- Import: Use the Data Management panel to import; the app overwrites existing board data and reloads.
+
+** Tests
+
+- Run tests:
+  #+BEGIN_SRC shell
+  npm run test
+  #+END_SRC
+- What’s covered:
+  - Export/Import data round‑trip via =src/lib/dataTransfer.ts= using a fake =localStorage=.
+  - Publish HTML generation for single and multi‑board exports.
 
 ** Troubleshooting
 

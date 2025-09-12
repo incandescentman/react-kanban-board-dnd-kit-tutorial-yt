@@ -63,3 +63,7 @@
 - Added a new "Implementation Intentions" tab and page with the same styling and icon vibe.
 - Content is sourced from implementation-intentions.org and rendered into tidy sections.
 - Quick switcher added under the board tabs: Board | Implementation Intentions.
+
+** UI Polish
+- Moved the Implementation Intentions view tabs to the same top row as the board picker (left side) for a cohesive layout.
+- Unified selection styling: both view tabs and the board picker use white‑on‑navy for the active state (bg-blue-900 text-white), and text-blue-900 with light hover for inactive.

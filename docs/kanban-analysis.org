@@ -22,9 +22,29 @@
   - =ColumnContainer=: per‑column UI, sortable direct tasks, group rendering.
   - =GroupContainer=: grouped task lists within a column.
   - =TaskCard=: task UI, edit/complete/delete, tag rendering.
+  - =ImplementationIntentions=: parses =implementation-intentions.org= at build time and renders sections; lazy‑loaded in =KanbanBoard=.
   - Utilities: =src/utils/tags.tsx= (tag parsing/colour), =src/utils/dataRecovery.ts= (migration/recovery).
 - Types: =src/types.ts= defines =Task=, =Group=, =Column=, =Board=.
 - Storage: localStorage with per‑board keys (default =~kanban-board-state~=) and =kanban-board-order= for ordering.
+
+* Views & Routing (UI‑level)
+- =KanbanBoard= manages a simple view state: 'board' | 'implementation' (and legacy 'priorities' placeholder).
+- A top row shows:
+  - Left: ViewTabs (Board | Implementation Intentions)
+  - Right: Board picker (multi‑board tabs)
+- Selected tabs share a unified style (white on navy: =bg-blue-900 text-white=) and inactive tabs use =text-blue-900 hover:bg-blue-100=.
+
+* Data Export / Import
+- Logic extracted to =src/lib/dataTransfer.ts= for testability:
+  - =exportAllDataFromStorage(store)= returns all boards, order, notes, intentions, pinned priorities, and flags.
+  - =importAllDataToStorage(store, data)= clears relevant keys and restores a full snapshot.
+- UI wires these functions in Data Management panel.
+
+* Testing
+- Test runner: Vitest.
+- Tests live in =tests/=: 
+  - =dataTransfer.test.ts= covers export/import round‑trip using a fake Storage implementation.
+  - =publish.test.ts= validates single and multi‑board HTML generation.
 
 * Strengths
 - Clean component structure and separation of concerns.
@@ -70,6 +90,8 @@
   - Change: use =extractTags(task.content)= for both column and group tasks; aggregate into =allTags=.
 - Switched IDs to random UUID strings.
   - Files: =src/types.ts= (set =Id= to =string=, add =tags?= to =Task=), =src/components/KanbanBoard.tsx= (default seed IDs to strings; =generateId()= uses =crypto.randomUUID()=).
+- Added Implementation Intentions page and view tabs on top row; lazy load the page and align selected tab styling with the Top Priorities navy.
+- Extracted export/import to =src/lib/dataTransfer.ts= and added Vitest tests for export/import and publish flows.
 
 * Suggested Next Steps
 - Implement tag aggregation from content and (optionally) persist tags onto tasks.
