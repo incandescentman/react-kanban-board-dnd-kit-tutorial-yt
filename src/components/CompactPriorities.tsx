@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
-import { 
-  IconPointFilled, 
+import {
+  IconPointFilled,
   IconTarget,
   IconRocket,
   IconSparkles,
@@ -10,8 +10,11 @@ import {
   IconTrendingUp,
   IconBolt,
   IconFlame,
-  IconCircleCheck,
-  IconActivity
+  IconActivity,
+  IconBriefcase,
+  IconHeart,
+  IconBook2,
+  IconScale
 } from '@tabler/icons-react';
 import { Board } from "../types";
 import { extractTags } from "../utils/tags";
@@ -84,6 +87,25 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     return tagDerived.slice(0, 6);
   }, [pinned, tagDerived]);
 
+  const getIconForPriority = (line: string, i: number) => {
+    const l = line.toLowerCase();
+    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/food|urge/.test(l)) return <IconFlame size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/185|pound|weight/.test(l)) return <IconScale size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+    // fallback by index to keep variety
+    const fallback = [
+      <IconTarget key="t" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconSparkles key="s" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconStar key="st" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconBolt key="b" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+      <IconActivity key="a" size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />,
+    ];
+    return fallback[i % fallback.length] || <IconPointFilled size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />;
+  };
+
   if (hidden && items.length > 0) {
     return (
       <div className="w-64">
@@ -114,24 +136,13 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
           </div>
           <div className="space-y-2">
             {items.map((line, i) => {
-              // Manually assign icons based on index/content
-              // You can customize these based on your actual priorities
-              const icons = [
-                <IconTarget size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-                <IconRocket size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-                <IconSparkles size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-                <IconFlag size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-                <IconStar size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />,
-                <IconBolt size={14} className="mt-0.5 text-blue-700" aria-hidden="true" />
-              ];
-              
               return (
                 <div
                   key={i}
                   className="bg-white/70 backdrop-blur-sm border border-blue-200 rounded-md p-2.5 hover:bg-white/90 transition-colors flex items-start gap-2 w-full"
                   title={line}
                 >
-                  {icons[i] || <IconPointFilled size={16} className="mt-0.5 text-blue-700" aria-hidden="true" />}
+                  {getIconForPriority(line, i)}
                   <span className="text-base text-blue-900 leading-6">{line}</span>
                 </div>
               );

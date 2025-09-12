@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IconPointFilled, IconTarget } from '@tabler/icons-react';
+import { IconPointFilled, IconTarget, IconRocket, IconHeart, IconBriefcase, IconFlame, IconBook2, IconScale, IconSparkles } from '@tabler/icons-react';
 import { Board, Id } from "../types";
 
 interface Props {
@@ -53,6 +53,22 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
   const cancelEdit = () => {
     setEditing(false);
     setDraft("");
+  };
+
+  const getIconForPriority = (line: string, i: number) => {
+    const l = line.toLowerCase();
+    if (/\bsrs\b|spaced review|review system/.test(l)) return <IconBook2 size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/food|urge/.test(l)) return <IconFlame size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/185|pound|weight/.test(l)) return <IconScale size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/substack|launch|publish|invite/.test(l)) return <IconRocket size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/job|work|hiring|career/.test(l)) return <IconBriefcase size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    if (/date|dating|relationship|partner|love/.test(l)) return <IconHeart size={16} className="mt-1 text-blue-700" aria-hidden="true" />;
+    const fallback = [
+      <IconTarget key="t" size={16} className="mt-1 text-blue-700" aria-hidden="true" />,
+      <IconSparkles key="s" size={16} className="mt-1 text-blue-700" aria-hidden="true" />,
+      <IconPointFilled key="p" size={16} className="mt-1 text-blue-700" aria-hidden="true" />,
+    ];
+    return fallback[i % fallback.length];
   };
 
   // Save when clicking outside the pinned card while editing
@@ -131,7 +147,7 @@ export default function TopPriorities({ board, onSelectTask, onImportPinnedToBoa
             <div className="space-y-2">
               {pinned.map((p, i) => (
                 <div key={i} className="flex items-start gap-2">
-                  <IconPointFilled size={16} className="mt-1 text-blue-700" aria-hidden="true" />
+                  {getIconForPriority(cleanLine(p), i)}
                   <div className="text-lg text-gray-900 leading-7">{cleanLine(p)}</div>
                 </div>
               ))}
