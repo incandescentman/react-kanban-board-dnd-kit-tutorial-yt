@@ -1531,7 +1531,7 @@ function KanbanBoard() {
             }
             
             return newCol;
-          }) || []
+          })
         };
       });
     }
@@ -1575,7 +1575,6 @@ function KanbanBoard() {
         >
         {/* (moved switcher into main content to keep sidebar aligned to top) */}
 
-        {activeView === 'board' && (
         <DndContext
           sensors={sensors}
           onDragStart={onDragStart}
@@ -1615,38 +1614,11 @@ function KanbanBoard() {
 
             {/* Main Content */}
             <div className="flex flex-col min-w-0 flex-1">
-              {/* Top Controls Row: View toggle + Board tabs */}
-              <div className="mt-8 mb-4 w-full flex items-center justify-between gap-4">
-                {/* Segmented view toggle */}
-                <div className="flex items-center bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm">
-                  <button
-                    className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
-                      activeView === 'board'
-                        ? 'bg-indigo-700 text-white shadow'
-                        : 'text-indigo-700 hover:bg-indigo-100'
-                    }`}
-                    onClick={() => setActiveView('board')}
-                  >
-                    <IconLayoutKanban size={16} />
-                    Board
-                  </button>
-                  <button
-                    className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-1.5 transition-colors ${
-                      activeView === 'priorities'
-                        ? 'bg-indigo-700 text-white shadow'
-                        : 'text-indigo-700 hover:bg-indigo-100'
-                    }`}
-                    onClick={() => setActiveView('priorities')}
-                  >
-                    <IconStarsTab size={16} />
-                    Priorities
-                  </button>
-                </div>
-
-                {/* Boards tabs */}
-                <div className="flex-1 overflow-x-auto">
-                  <div className="w-full flex items-center justify-end">
-                    <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+              {/* Top Controls Row: Board tabs */}
+              <div className="mt-8 mb-4 w-full">
+                {/* Boards tabs - moved to the left */}
+                <div className="overflow-x-auto">
+                  <div className="inline-flex items-center gap-1.5 bg-indigo-50/70 border border-indigo-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
                       {availableBoards.map((boardName) => {
                         let title = boardName;
                         try {
@@ -1676,7 +1648,6 @@ function KanbanBoard() {
                     </div>
                   </div>
                 </div>
-              </div>
               {/* Title */}
               <div className="flex items-center gap-2 mb-4">
                 <Input
@@ -1777,9 +1748,9 @@ function KanbanBoard() {
             document.body
           )}
         </DndContext>
-        )}
 
-        {activeView === 'priorities' && (
+        {/* Priority view - currently hidden but preserved */}
+        {false && activeView === 'priorities' && (
           <TopPriorities
             board={board}
             onSelectTask={(id) => {

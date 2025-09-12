@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { ArrowUpRight, Minus, Plus } from 'lucide-react';
 import {
   IconPointFilled,
@@ -47,12 +47,26 @@ function SortablePriorityItem({
   line, 
   index, 
   isLast, 
-  getIconForPriority 
+  getIconForPriority,
+  onEdit,
+  onDelete,
+  editingIndex,
+  editingText,
+  setEditingText,
+  handleSave,
+  setEditingIndex
 }: { 
   line: string; 
   index: number; 
   isLast: boolean; 
   getIconForPriority: (line: string, i: number) => React.ReactNode;
+  onEdit: (index: number) => void;
+  onDelete: (index: number) => void;
+  editingIndex: number | null;
+  editingText: string;
+  setEditingText: (text: string) => void;
+  handleSave: () => void;
+  setEditingIndex: (index: number | null) => void;
 }) {
   const {
     attributes,
@@ -73,14 +87,16 @@ function SortablePriorityItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative flex gap-3 cursor-move hover:bg-white/30 rounded-lg px-2 -mx-2 transition-colors"
+      className="relative flex gap-3 group"
       title={line}
-      {...attributes}
-      {...listeners}
     >
-      {/* Icon with timeline */}
+      {/* Icon with timeline - draggable */}
       <div className="relative flex flex-col items-center">
-        <div className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full bg-white border border-blue-900 p-1 z-10">
+        <div 
+          className="w-7 h-7 flex items-center justify-center shrink-0 rounded-full bg-white border border-blue-900 p-1 z-10 cursor-move"
+          {...attributes}
+          {...listeners}
+        >
           {getIconForPriority(line, index)}
         </div>
         {!isLast && (
@@ -89,7 +105,39 @@ function SortablePriorityItem({
       </div>
       {/* Text content */}
       <div className="flex-1 pb-4">
-        <span className="text-base text-blue-900 leading-6">{line}</span>
+        {editingIndex === index ? (
+          <input
+            type="text"
+            value={editingText}
+            onChange={(e) => setEditingText(e.target.value)}
+            className="w-full text-base text-blue-900 bg-white/70 border border-blue-300 rounded px-2 py-1 outline-none focus:border-blue-500"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSave();
+              } else if (e.key === 'Escape') {
+                setEditingIndex(null);
+                setEditingText("");
+              }
+            }}
+            onBlur={handleSave}
+            autoFocus
+          />
+        ) : (
+          <div className="flex items-center justify-between">
+            <span 
+              className="text-base text-blue-900 leading-6 cursor-pointer flex-1"
+              onDoubleClick={() => onEdit(index)}
+            >
+              {line}
+            </span>
+            <button
+              onClick={() => onDelete(index)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 text-sm ml-2"
+            >
+              ×
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -100,15 +148,18 @@ interface Props {
   onOpenPriorities?: () => void;
 }
 
+// Undo action type
+interface UndoAction {
+  type: 'DELETE_PRIORITY';
+  data: { priority: string; index: number };
+  timestamp: number;
+}
+
 export default function CompactPriorities({ board, onOpenPriorities }: Props) {
-  const [hidden, setHidden] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('kanban-compact-priorities-hidden') === '1';
-    } catch {
-      return false;
-    }
-  });
   const [pinned, setPinned] = useState<string[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingText, setEditingText] = useState("");
+  const [undoStack, setUndoStack] = useState<UndoAction[]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -122,17 +173,56 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     try {
       const raw = localStorage.getItem('kanban-pinned-priorities');
       const list = raw ? (JSON.parse(raw) as string[]) : [];
-      setPinned(list);
+      
+      // If no saved priorities, use defaults
+      if (list.length === 0) {
+        const defaultPriorities = [
+          "Begin an SRS system for actions and intentions",
+          "Finish food urges implementation intentions and triggers -> answers",
+          "185 pounds and fitness routine",
+          "Launch, invite people, and publish Socratic Substack",
+          "Job search and career development",
+          "Dating and relationships"
+        ];
+        setPinned(defaultPriorities);
+      } else {
+        setPinned(list);
+      }
     } catch {
-      setPinned([]);
+      // On error, use defaults
+      const defaultPriorities = [
+        "Begin an SRS system for actions and intentions",
+        "Finish food urges implementation intentions and triggers -> answers",
+        "185 pounds and fitness routine",
+        "Launch, invite people, and publish Socratic Substack",
+        "Job search and career development",
+        "Dating and relationships"
+      ];
+      setPinned(defaultPriorities);
     }
   }, []);
 
+  // Save pinned to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('kanban-compact-priorities-hidden', hidden ? '1' : '0');
-    } catch {}
-  }, [hidden]);
+      localStorage.setItem('kanban-pinned-priorities', JSON.stringify(pinned));
+    } catch (error) {
+      console.error('Failed to save priorities:', error);
+    }
+  }, [pinned]);
+
+  // Handle keyboard shortcuts for undo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undoStack]);
 
   const tagDerived = useMemo(() => {
     if (!board) return [] as string[];
@@ -172,15 +262,63 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
       
       if (oldIndex !== -1 && newIndex !== -1) {
         const newItems = arrayMove(items, oldIndex, newIndex);
-        
-        // Update pinned priorities in localStorage
         setPinned(newItems);
-        try {
-          localStorage.setItem('kanban-pinned-priorities', JSON.stringify(newItems));
-        } catch (error) {
-          console.error('Failed to save reordered priorities:', error);
-        }
       }
+    }
+  };
+
+  const handleEdit = (index: number) => {
+    setEditingIndex(index);
+    setEditingText(items[index]);
+  };
+
+  const handleSave = () => {
+    if (editingIndex !== null) {
+      const newPinned = [...items];
+      
+      if (editingText.trim() === "") {
+        // Remove if empty
+        newPinned.splice(editingIndex, 1);
+      } else {
+        newPinned[editingIndex] = editingText.trim();
+      }
+      
+      setPinned(newPinned);
+      setEditingIndex(null);
+      setEditingText("");
+    }
+  };
+
+  const handleDelete = (index: number) => {
+    const deletedPriority = items[index];
+    const newPinned = items.filter((_, i) => i !== index);
+    setPinned(newPinned);
+    
+    // Add to undo stack
+    setUndoStack([...undoStack, {
+      type: 'DELETE_PRIORITY',
+      data: { priority: deletedPriority, index },
+      timestamp: Date.now()
+    }]);
+  };
+
+  const handleAdd = () => {
+    const newPriority = "New priority";
+    setPinned([...items, newPriority]);
+    setEditingIndex(items.length);
+    setEditingText(newPriority);
+  };
+
+  const handleUndo = () => {
+    if (undoStack.length === 0) return;
+    
+    const lastAction = undoStack[undoStack.length - 1];
+    
+    if (lastAction.type === 'DELETE_PRIORITY') {
+      const newPinned = [...items];
+      newPinned.splice(lastAction.data.index, 0, lastAction.data.priority);
+      setPinned(newPinned);
+      setUndoStack(undoStack.slice(0, -1));
     }
   };
 
@@ -203,25 +341,6 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     return fallback[i % fallback.length] || <IconPointFilled size={16} className="text-blue-900" aria-hidden="true" />;
   };
 
-  if (hidden && items.length > 0) {
-    return (
-      <div className="w-72">
-        <div className="relative w-72 bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-2xl p-3 shadow-sm">
-          <div className="text-[12px] font-semibold text-blue-900/90">Top Priorities</div>
-          <button
-            className="absolute top-2 right-2 inline-flex items-center justify-center h-5 w-5 rounded hover:bg-blue-100/70"
-            onClick={() => setHidden(false)}
-            aria-label="Show priorities"
-            title="Show"
-          >
-            <Plus className="h-3 w-3 text-blue-700" />
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (hidden || items.length === 0) return null;
 
   return (
     <div className="w-72">
@@ -249,33 +368,29 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
                       index={i}
                       isLast={isLast}
                       getIconForPriority={getIconForPriority}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      editingIndex={editingIndex}
+                      editingText={editingText}
+                      setEditingText={setEditingText}
+                      handleSave={handleSave}
+                      setEditingIndex={setEditingIndex}
                     />
                   );
                 })}
               </div>
             </SortableContext>
           </DndContext>
-        </div>
-        {/* Tiny minimal symbols at the top-right */}
-        <div className="absolute top-2 right-2 flex items-center gap-1.5">
-          {onOpenPriorities && (
-            <button
-              onClick={onOpenPriorities}
-              className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-blue-100/70"
-              aria-label="Open priorities view"
-              title="Open"
-            >
-              <ArrowUpRight className="h-3.5 w-3.5 text-blue-700" />
-            </button>
-          )}
-          <button
-            onClick={() => setHidden(true)}
-            className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-blue-100/70"
-            aria-label="Hide priorities"
-            title="Hide"
+          
+          {/* Add Area */}
+          <div
+            onClick={handleAdd}
+            className="w-full py-3 cursor-pointer group flex items-center justify-center hover:bg-white/30 rounded-lg transition-colors mt-2"
           >
-            <Minus className="h-3.5 w-3.5 text-blue-700" />
-          </button>
+            <span className="text-blue-600 text-sm opacity-60 group-hover:opacity-100 transition-opacity duration-200">
+              + Add priority
+            </span>
+          </div>
         </div>
       </div>
     </div>
