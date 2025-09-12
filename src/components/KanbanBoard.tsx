@@ -1627,32 +1627,34 @@ function KanbanBoard() {
 
                 {/* Boards tabs */}
                 <div className="flex-1 overflow-x-auto">
-                  <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
-                    {availableBoards.map((boardName) => {
-                      let title = boardName;
-                      try {
-                        const raw = localStorage.getItem(boardName);
-                        if (raw) {
-                          const parsed = JSON.parse(raw);
-                          title = parsed.title || boardName;
-                        }
-                      } catch {}
-                      const isActive = currentBoardName === boardName;
-                      return (
-                        <button
-                          key={boardName}
-                          onClick={() => switchToBoard(boardName)}
-                        className={`px-3 py-1.5 rounded-md text-sm transition-colors border ${
-                            isActive
-                              ? 'bg-white text-gray-900 border-gray-300 shadow-sm'
-                              : 'bg-gray-100/70 text-gray-700 border-gray-200 hover:bg-gray-100'
-                          }`}
-                          title={title}
-                        >
-                          {title}
-                        </button>
-                      );
-                    })}
+                  <div className="w-full flex items-center justify-end">
+                    <div className="inline-flex items-center gap-1 bg-gray-100/70 border border-gray-200 rounded-md p-1.5 shadow-sm whitespace-nowrap">
+                      {availableBoards.map((boardName) => {
+                        let title = boardName;
+                        try {
+                          const raw = localStorage.getItem(boardName);
+                          if (raw) {
+                            const parsed = JSON.parse(raw);
+                            title = parsed.title || boardName;
+                          }
+                        } catch {}
+                        const isActive = currentBoardName === boardName;
+                        return (
+                          <button
+                            key={boardName}
+                            onClick={() => switchToBoard(boardName)}
+                            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                              isActive
+                                ? 'bg-white text-gray-900 shadow'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                            title={title}
+                          >
+                            {title}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
