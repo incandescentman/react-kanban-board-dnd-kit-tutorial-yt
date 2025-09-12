@@ -224,34 +224,10 @@ export default function CompactPriorities({ board, onOpenPriorities }: Props) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undoStack]);
 
-  const tagDerived = useMemo(() => {
-    if (!board) return [] as string[];
-    const tops = new Set(["#top", "#priority", "#prio", "#p1"]);
-    const lines: string[] = [];
-    for (const col of board.columns || []) {
-      for (const t of col.tasks || []) {
-        const tags = new Set(extractTags(t.content));
-        if ([...tags].some(tg => tops.has(tg))) {
-          lines.push(t.content.replace(/#[a-zA-Z0-9_]+/g, '').trim());
-        }
-      }
-      for (const g of col.groups || []) {
-        for (const t of g.tasks || []) {
-          const tags = new Set(extractTags(t.content));
-          if ([...tags].some(tg => tops.has(tg))) {
-            lines.push(t.content.replace(/#[a-zA-Z0-9_]+/g, '').trim());
-          }
-        }
-      }
-    }
-    return lines.filter(Boolean);
-  }, [board]);
-
+  // Canonical priorities: use only the pinned list (no tag-derived fallback)
   const items = useMemo(() => {
-    const pinnedClean = pinned.map(cleanLine).filter(Boolean);
-    if (pinnedClean.length > 0) return pinnedClean.slice(0, 6);
-    return tagDerived.slice(0, 6);
-  }, [pinned, tagDerived]);
+    return pinned.map(cleanLine).filter(Boolean).slice(0, 6);
+  }, [pinned]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

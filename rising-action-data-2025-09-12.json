@@ -1,0 +1,299 @@
+{
+  "version": 1,
+  "exportedAt": "2025-09-12T18:08:41.431Z",
+  "boards": {
+    "kanban-board-state-Creative": {
+      "title": "Substack",
+      "columns": [
+        {
+          "id": "ideas",
+          "title": "Ideas",
+          "groups": [],
+          "tasks": [
+            {
+              "id": "964554a1-6af8-4590-834e-7bc81606622d",
+              "content": "test",
+              "completed": false,
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "todo",
+          "title": "To Do",
+          "groups": [],
+          "tasks": [
+            {
+              "id": "f11eabea-1dca-45db-871c-36c07bb55262",
+              "content": "tet",
+              "completed": false,
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "doing",
+          "title": "In Progress",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "done",
+          "title": "Done",
+          "groups": [],
+          "tasks": []
+        }
+      ]
+    },
+    "kanban-board-state-Writing Projects": {
+      "title": "Socratic",
+      "columns": [
+        {
+          "id": "ideas",
+          "title": "Ideas",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "todo",
+          "title": "To Do",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "doing",
+          "title": "In Progress",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "done",
+          "title": "Done",
+          "groups": [],
+          "tasks": []
+        }
+      ]
+    },
+    "kanban-board-state-Rising Action Board": {
+      "title": "Creative",
+      "columns": [
+        {
+          "id": "ideas",
+          "title": "Ideas",
+          "groups": [],
+          "tasks": [
+            {
+              "id": 6538,
+              "content": "new task here #letsgo",
+              "status": "TODO"
+            },
+            {
+              "id": "idea1",
+              "content": "Write job descriptions",
+              "status": "TODO"
+            }
+          ]
+        },
+        {
+          "id": "todo",
+          "title": "To Do",
+          "groups": [
+            {
+              "id": "8463",
+              "title": "Heading",
+              "tasks": [
+                {
+                  "id": "2",
+                  "content": "Develop user registration functionality #letsgo",
+                  "status": "TODO"
+                },
+                {
+                  "id": "1",
+                  "content": "List admin APIs for dashboard",
+                  "status": "TODO"
+                }
+              ]
+            }
+          ],
+          "tasks": []
+        },
+        {
+          "id": "doing",
+          "title": "In Progress",
+          "groups": [],
+          "tasks": [
+            {
+              "id": "3",
+              "content": "Conduct security testing",
+              "status": "STARTED"
+            }
+          ]
+        },
+        {
+          "id": "done",
+          "title": "Done",
+          "groups": [],
+          "tasks": [
+            {
+              "id": "5",
+              "content": "Create UI kit documentation",
+              "status": "DONE"
+            }
+          ]
+        }
+      ],
+      "archived": true,
+      "archivedDate": "2025-07-12T02:29:37.704Z"
+    },
+    "kanban-board-state": {
+      "title": "Post-OpenAI Action Plan",
+      "columns": [
+        {
+          "id": 7746,
+          "title": "Ideas",
+          "tasks": [
+            {
+              "id": 9439,
+              "content": "Write job descriptions",
+              "completed": false,
+              "tags": []
+            }
+          ],
+          "groups": []
+        },
+        {
+          "id": "todo",
+          "title": "To Do",
+          "tasks": [],
+          "groups": [
+            {
+              "id": "july-items",
+              "title": "July items",
+              "tasks": [
+                {
+                  "id": 6263,
+                  "content": "Do project",
+                  "completed": false,
+                  "tags": []
+                },
+                {
+                  "id": 7350,
+                  "content": "Pick up laundry",
+                  "completed": false,
+                  "tags": []
+                }
+              ]
+            }
+          ],
+          "color": "bg-blue-50"
+        },
+        {
+          "id": "doing",
+          "title": "In Progress",
+          "tasks": [
+            {
+              "id": 5374,
+              "content": "Write chapter",
+              "completed": false,
+              "tags": []
+            }
+          ],
+          "groups": []
+        },
+        {
+          "id": "done",
+          "title": "Done",
+          "tasks": [
+            {
+              "id": 5056,
+              "content": "Publish blog post",
+              "completed": true,
+              "tags": []
+            }
+          ],
+          "groups": []
+        }
+      ],
+      "dataVersion": 2
+    },
+    "kanban-board-state-Finances": {
+      "title": "Finances",
+      "columns": [
+        {
+          "id": "ideas",
+          "title": "Ideas",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "todo",
+          "title": "To Do",
+          "groups": [],
+          "tasks": [
+            {
+              "id": "6df02061-fb74-4472-aaf1-fcba857b559d",
+              "content": "Task 1b0b81e5-98bf-44c1-b457-5a986e9f3c58",
+              "completed": false,
+              "tags": []
+            },
+            {
+              "id": "a6416f2e-a463-4793-b565-732cc72a5ad4",
+              "content": "Task a53b20f1-ef0e-4e5d-aa3e-4360ee58611e",
+              "completed": false,
+              "tags": []
+            },
+            {
+              "id": "ee8070c4-8198-4951-812f-4ae73f26b490",
+              "content": "Task a360923d-5987-450a-9d76-bff86c03841d",
+              "completed": false,
+              "tags": []
+            }
+          ]
+        },
+        {
+          "id": "doing",
+          "title": "In Progress",
+          "groups": [],
+          "tasks": []
+        },
+        {
+          "id": "done",
+          "title": "Done",
+          "groups": [],
+          "tasks": [
+            {
+              "id": 9316,
+              "content": "Check COBRA",
+              "status": "Done",
+              "completed": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "boardOrder": [
+    "kanban-board-state",
+    "kanban-board-state-Creative",
+    "kanban-board-state-Writing Projects",
+    "kanban-board-state-Rising Action Board",
+    "kanban-board-state-Finances"
+  ],
+  "notes": "",
+  "intentions": [
+    "Honor my bedtime and wake time (2am / 10am)",
+    "Beware the clever mind",
+    "Track calories",
+    "Work every day 10am - 4pm",
+    "Gym every day"
+  ],
+  "pinnedPriorities": [
+    "Begin an SRS system for actions and intentions",
+    "Finish food urges implementation intentions and triggers -> answers",
+    "185 pounds and fitness routine",
+    "Launch, invite people, and publish Socratic Substack",
+    "Job search and career development",
+    "Start dating"
+  ],
+  "compactPrioritiesHidden": false
+}
