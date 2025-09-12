@@ -376,6 +376,7 @@ function KanbanBoard() {
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<Id>>(new Set());
   const [importOpen, setImportOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<any | null>(null);
+  const [importPreview, setImportPreview] = useState<{ boards: number; top: number; intentions: number; errors?: { path: string; message: string }[] } | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const [titleEditing, setTitleEditing] = useState(false);
 
@@ -1365,14 +1366,22 @@ function KanbanBoard() {
           return;
         }
         const data = JSON.parse(text);
-
-        // Basic validation
-        if (!data.version || !data.boards || !data.boardOrder) {
-          alert('Invalid data file.');
-          return;
+        // Validate with Zod for a richer preview
+        try {
+          const parsed = AppSnapshotSchema.safeParse(data);
+          if (!parsed.success) {
+            const issues = parsed.error.issues.slice(0, 5).map(i => ({ path: i.path.join('.'), message: i.message }));
+            setImportPreview({ boards: 0, top: 0, intentions: 0, errors: issues });
+          } else {
+            const snap = parsed.data;
+            const boards = Object.keys(snap.boards || {}).length;
+            const top = (snap.topPriorities?.length ?? (snap as any).pinnedPriorities?.length ?? 0) as number;
+            const intentions = snap.intentions?.length ?? 0;
+            setImportPreview({ boards, top, intentions });
+          }
+        } catch {
+          setImportPreview({ boards: 0, top: 0, intentions: 0, errors: [{ path: '(root)', message: 'Invalid JSON schema' }] });
         }
-
-        // Stage data and open confirm modal
         setPendingImport(data);
         setImportOpen(true);
       } catch (error) {
@@ -2062,10 +2071,11 @@ function KanbanBoard() {
         <ConfirmModal
           open={importOpen}
           title="Import data from JSON?"
-          description={"This will overwrite all existing boards, notes, and intentions.\nMake sure you have an export/backup before proceeding."}
+          description={"This will overwrite all existing boards, notes, intentions, and top priorities. Make sure you have a backup before proceeding."}
           confirmText="Import"
           cancelText="Cancel"
           onCancel={() => { setImportOpen(false); setPendingImport(null); }}
+          confirmDisabled={!!importPreview?.errors?.length}
           onConfirm={() => {
             try {
               const raw = pendingImport;
@@ -2083,10 +2093,7 @@ function KanbanBoard() {
               refreshBoardsFromStorage();
               setImportOpen(false);
               setPendingImport(null);
-              const nBoards = Object.keys(snap.boards || {}).length;
-              const nTops = (snap.topPriorities?.length ?? (snap as any).pinnedPriorities?.length ?? 0) as number;
-              const nInt = snap.intentions?.length ?? 0;
-              alert(`Import complete: ${nBoards} boards • ${nTops} priorities • ${nInt} intentions`);
+              setImportPreview(null);
             } catch (e) {
               console.error('Failed to import data:', e);
               alert('Failed to import data.');
@@ -2094,7 +2101,42 @@ function KanbanBoard() {
               setPendingImport(null);
             }
           }}
-        />
+        >
+          {importPreview?.errors?.length ? (
+            <div className="text-red-700">
+              <div className="font-medium mb-1">Cannot import — please fix these issues:</div>
+              <ul className="list-disc ml-5">
+                {importPreview.errors.map((e, i) => (
+                  <li key={i}><span className="text-gray-700">{e.path}:</span> {e.message}</li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div>
+              <div className="font-medium mb-1">Preview (dry‑run):</div>
+              <ul className="list-disc ml-5 text-gray-700">
+                <li>Boards: <span className="font-medium">{importPreview?.boards ?? 0}</span></li>
+                <li>Top priorities: <span className="font-medium">{importPreview?.top ?? 0}</span></li>
+                <li>Intentions: <span className="font-medium">{importPreview?.intentions ?? 0}</span></li>
+              </ul>
+              <div className="mt-2 text-xs text-gray-500">This is a dry‑run summary. Click Import to apply.</div>
+            </div>
+          )}
+        </ConfirmModal>
+
+        {/* Diagnostics Modal */}
+        {diagOpen && (
+          <ConfirmModal
+            open={diagOpen}
+            title="Diagnostics"
+            confirmText="Close"
+            cancelText="Close"
+            onCancel={() => setDiagOpen(false)}
+            onConfirm={() => setDiagOpen(false)}
+          >
+            <pre className="text-xs whitespace-pre-wrap text-gray-800">{diagText}</pre>
+          </ConfirmModal>
+        )}
 
           {/* Bottom Right Corner Icons */}
           <div className="fixed bottom-4 right-4 flex gap-2 z-10">

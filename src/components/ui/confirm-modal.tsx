@@ -8,9 +8,11 @@ interface ConfirmModalProps {
   cancelText?: string
   onConfirm: () => void
   onCancel: () => void
+  children?: React.ReactNode
+  confirmDisabled?: boolean
 }
 
-export function ConfirmModal({ open, title, description, confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel }: ConfirmModalProps) {
+export function ConfirmModal({ open, title, description, confirmText = 'Confirm', cancelText = 'Cancel', onConfirm, onCancel, children, confirmDisabled }: ConfirmModalProps) {
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50">
@@ -19,6 +21,11 @@ export function ConfirmModal({ open, title, description, confirmText = 'Confirm'
         <div className="mb-3">
           <h2 className="text-lg font-semibold">{title}</h2>
           {description && <p className="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{description}</p>}
+          {children && (
+            <div className="mt-2 text-sm text-gray-800 max-h-60 overflow-auto">
+              {children}
+            </div>
+          )}
         </div>
         <div className="flex justify-end gap-2">
           <button
@@ -28,8 +35,8 @@ export function ConfirmModal({ open, title, description, confirmText = 'Confirm'
             {cancelText}
           </button>
           <button
-            className="px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
-            onClick={onConfirm}
+            className={`px-3 py-1.5 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 ${confirmDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={!confirmDisabled ? onConfirm : undefined}
           >
             {confirmText}
           </button>
@@ -38,4 +45,3 @@ export function ConfirmModal({ open, title, description, confirmText = 'Confirm'
     </div>
   )
 }
-

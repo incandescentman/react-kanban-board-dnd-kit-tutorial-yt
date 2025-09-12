@@ -11,9 +11,10 @@ interface Props {
   onPublishAll?: () => void;
   onPreviewAll?: () => void;
   onSyncFromStorage?: () => void;
+  onShowDiagnostics?: () => void;
 }
 
-function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll, onPreviewAll, onSyncFromStorage }: Props) {
+function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll, onPreviewAll, onSyncFromStorage, onShowDiagnostics }: Props) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleImportClick = () => {
@@ -91,9 +92,9 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group relative inline-block">
-              <Button onClick={onPublishAll} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
-                <Globe className="h-4 w-4" />
-              </Button>
+                <Button onClick={onPublishAll} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                  <Globe className="h-4 w-4" />
+                </Button>
                 <TooltipContent side="top">Publish All</TooltipContent>
               </div>
             </TooltipTrigger>
@@ -108,6 +109,20 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
                   <Layers className="h-4 w-4" />
                 </Button>
                 <TooltipContent side="top">Preview All</TooltipContent>
+              </div>
+            </TooltipTrigger>
+          </Tooltip>
+        )}
+
+        {onShowDiagnostics && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="group relative inline-block">
+                <Button onClick={onShowDiagnostics} variant="outline" size="icon" className="h-8 w-8 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
+                  {/* info icon */}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </Button>
+                <TooltipContent side="top">Show diagnostics</TooltipContent>
               </div>
             </TooltipTrigger>
           </Tooltip>
