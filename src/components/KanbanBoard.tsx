@@ -1557,22 +1557,7 @@ function KanbanBoard() {
             WebkitScrollbar: { display: 'none' }
           }}
         >
-        {/* Top nav: view switcher */}
-        <div className="w-full max-w-5xl mx-auto mt-16 mb-6 flex items-center justify-center gap-3">
-          <button
-            className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-            onClick={() => setActiveView('board')}
-          >
-            Board
-          </button>
-          <button
-            className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'priorities' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
-            onClick={() => setActiveView('priorities')}
-          >
-            Priorities
-          </button>
-        </div>
-        <div className="w-full max-w-5xl mx-auto border-t border-gray-200 mb-10" />
+        {/* (moved switcher into main content to keep sidebar aligned to top) */}
 
         {activeView === 'board' && (
         <DndContext
@@ -1645,6 +1630,21 @@ function KanbanBoard() {
 
             {/* Main Content */}
             <div className="flex flex-col min-w-0">
+              {/* Top nav: view switcher (main content only) */}
+              <div className="mb-4 flex items-center gap-2">
+                <button
+                  className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'board' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  onClick={() => setActiveView('board')}
+                >
+                  Board
+                </button>
+                <button
+                  className={`px-3 py-1.5 rounded-md border text-sm ${activeView === 'priorities' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                  onClick={() => setActiveView('priorities')}
+                >
+                  Priorities
+                </button>
+              </div>
               {/* Title */}
               <div className="flex items-center gap-2 mb-4">
                 <Input
