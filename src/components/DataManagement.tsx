@@ -25,7 +25,7 @@ function DataManagement({ onExport, onImport, onPublish, onPreview, onPublishAll
       <div className="mb-3 pb-2 border-b border-blue-200">
         <h3 className="text-lg font-bold text-blue-900 text-center">Data Management</h3>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button onClick={onExport} variant="outline" size="icon" className="h-9 w-9 rounded-full border-blue-200 bg-white text-blue-700 hover:bg-blue-50">
