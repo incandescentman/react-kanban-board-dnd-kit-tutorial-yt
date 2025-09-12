@@ -1674,11 +1674,6 @@ function KanbanBoard() {
                     </div>
                   </div>
               </div>
-              {/* View Tabs */}
-              <div className="mb-2">
-                <ViewTabs />
-              </div>
-
               {/* Title */}
               <div className="flex items-center gap-2 mb-4">
                 <Input
